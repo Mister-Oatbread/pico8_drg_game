@@ -56,6 +56,16 @@ function initialize_map()
     end
 end
 
+-- slides the floor one frame to the bottom, and realigns the floor if needed
+function update_map()
+    for i=1,#terrain do
+        terrain[i].y_coord = terrain[i].y_coord+1;
+        if (terrain[i].y_coord >= 227) then
+            terrain[i] = _produce_map_entity(terrain[i].x_coord,91);
+        end
+    end
+end
+
 -- paint all terrain tiles at their current location
 function draw_map()
     local sprite;

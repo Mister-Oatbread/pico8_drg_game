@@ -4,7 +4,8 @@ function _init()
     initialize_map()
 end
 
-function _update60()
+function _update()
+    update_map();
 end
 
 function _draw()
