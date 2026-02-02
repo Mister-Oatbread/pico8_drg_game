@@ -6,9 +6,8 @@
 function initialize_player()
     player_sprites = {
         standing = 49,
-        moving = {
-            up = 51,
-        },
+        moving = 51,
+        drilling = 54,
     };
     player = {
         is_moving = false,
@@ -16,11 +15,18 @@ function initialize_player()
         is_drilling = false,
         playing_drill = {empty=false,full=false},
         is_moving = {up, down, left, right};
+
         ammo = 50,
         fuel = 50,
+        max_ammo = 50,
+        max_fuel = 50,
+
+        points = 0,
         health = 3,
+        max_health = 3,
         x_pos = 150,
         y_pos = 200,
+
         collision_points = {left={},right={},top={}},
         has_collision = {
             left=false,
@@ -73,12 +79,28 @@ function drill()
         };
         add(obstacles, drilled_ground);
         player.fuel -= 1;
+        update_mined_resources();
     end
 
 end
 
 -- takes care of shooting in front of the player
 function shoot()
+end
+
+-- give ammo based on max capacity and cap it
+function give_ammo(percentage)
+    player.ammo += player.max_ammo*percentage;
+    player.fuel += player.max_fuel*percentage;
+
+    if player.ammo > player.max_ammo then player.ammo = player.max_ammo end;
+    if player.fuel > player.max_fuel then player.fuel = player.max_fuel end;
+end
+
+-- give player amount of health and cap it
+function give_health(amount)
+    player.health += amount;
+    if player.health>player.max_health then player.health=player.max_health end;
 end
 
 -- handles moving the player around
@@ -137,7 +159,7 @@ function draw_player()
         end
     else
         sfx(-1,1);
-        player.playing_drill.empty = false;
+        player.playing_drill.full= false;
         player.playing_drill.empty = false;
     end
 end

@@ -52,23 +52,19 @@ function update_obstacles()
         obstacles[i].y_coord+=1;
         if obstacles[i].y_coord>=235 then
             deli(obstacles,i);
+        else
+            i+=1;
         end
-        i+=1;
     end
     if (rnd(1) < obstacle_spawn_chance) then
-        x_coord = flr(rnd(120))+101;
+        local x_coord = flr(rnd(120))+101;
         add(obstacles, _produce_obstacle_entity(x_coord,81));
     end
 end
 
 -- paint all obstacles
 function draw_obstacles()
-    local sprite;
-    local x_coord;
-    local y_coord;
-    local size;
-    local x_flip;
-    local y_flip;
+    local sprite, x_coord, y_coord, size, x_flip, y_flip;
     if #obstacles > 0 then
         for i=1,#obstacles do
             sprite = obstacles[i].sprite;

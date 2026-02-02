@@ -45,7 +45,7 @@ function initialize_map()
     -- catalogue all sprites and infrastructure
     map_entity = {sprite, x_coord, y_coord};
     wall_entity = {sprite,x_coord, y_coord};
-    map_sprites_base = {128,144,160,176};
+    map_sprites_base = {128,128,128,128,128,144,160,176};
     map_sprites_special = {
         130,146,162,178,
         131,147,163,179,
@@ -105,11 +105,7 @@ end
 
 -- paint all terrain tiles at their current location
 function draw_map()
-    local sprite;
-    local x_coord;
-    local y_coord;
-    local x_flip;
-    local y_flip;
+    local sprite, x_coord, y_coord, x_flip, y_flip;
     for i=1,#terrain do
         sprite = terrain[i].sprite;
         x_coord = terrain[i].x_coord;
