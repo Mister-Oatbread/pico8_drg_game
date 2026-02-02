@@ -9,7 +9,9 @@ end
 function _update()
     update_map();
     update_obstacles();
+    update_inputs();
     move_player();
+    handle_player_abilities();
 end
 
 function _draw()

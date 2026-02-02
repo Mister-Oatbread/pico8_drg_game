@@ -6,7 +6,7 @@
 -- or special sprite else
 function _produce_map_entity(x_coord, y_coord)
     local sprite_list;
-    if (rnd(1) < .75) then
+    if (rnd(1) < .90) then
         sprite_list = map_sprites_base;
     else
         sprite_list = map_sprites_special;

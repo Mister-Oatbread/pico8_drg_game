@@ -25,7 +25,6 @@ function _produce_obstacle_entity(x_coord,y_coord)
         sprite=sprite,
         x_coord=x_coord,
         y_coord=y_coord,
-        health=health,
         size=size,
         x_flip=x_flip,
         y_flip=y_flip,
@@ -42,6 +41,7 @@ function initialize_obstacles()
     obstacle_health = {small=30,big=90,chonker=4000};
     obstacle_size = {small=1,big=2,chonker=2};
     obstacle_spawn_chance = .2;
+    drilled_ground_sprite = 183;
 end
 
 -- updates all obstacles and constructs/destructs new ones
