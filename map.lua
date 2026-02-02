@@ -5,6 +5,7 @@
 -- takes x,y coord and creates a random base sprite with a 70% chance,
 -- or special sprite else
 function _produce_map_entity(x_coord, y_coord)
+    local sprite_list;
     if (rnd(1) < .75) then
         sprite_list = map_sprites_base;
     else

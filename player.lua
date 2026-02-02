@@ -23,13 +23,22 @@ function initialize_player()
         },
         x_pos = 150,
         y_pos = 200,
-        collision_points = {},
+        collision_points = {left={},right={},top={}},
         has_collision = {
             left=false,
             right=false,
             top=false,
         };
+        at = {
+            top_border = false,
+            bottom_border = false,
+        },
     };
+    for i=1,8 do
+        add(player.collision_points.left, {x=0,y=0});
+        add(player.collision_points.right, {x=0,y=0});
+        add(player.collision_points.top, {x=0,y=0});
+    end
 end
 
 -- checks inputs and writes them to the state of the player
@@ -73,7 +82,6 @@ function _find_terrain_collision()
             break;
         end
     end
-    flip();
 end
 
 -- handles moving the player around
@@ -81,34 +89,57 @@ function move_player()
     _get_input();
     _update_player_collision_points();
     _find_terrain_collision();
+    _check_map_bounds();
     if player.is_moving.up and not player.has_collision.top then
-        player.y_pos -= 1 end;
+        if not(player.at.top_border) then
+            player.y_pos -= 1;
+        end
+    end;
     if player.is_moving.down then
-        player.y_pos += 1 end;
+        player.y_pos += 1;
+    end;
     if player.is_moving.left and not player.has_collision.left then
-        player.x_pos -= 1 end;
+        player.x_pos -= 1;
+    end;
     if player.is_moving.right and not player.has_collision.right then
-        player.x_pos += 1 end;
+        player.x_pos += 1;
+    end;
     if player.has_collision.top then
-        player.y_pos += 1 end;
+        player.y_pos += 1;
+    end;
 end
 
--- this function calculates the player collision points
-function _update_player_collision_points();
-    player.collision_points = {left={},right={},top={}};
-
+-- this function calculates the player collision points based on the current
+-- player position
+function _update_player_collision_points()
     -- left flank
+    local i;
+    i=1;
     for y=player.y_pos,player.y_pos+7 do
-        add(player.collision_points.left, {x=player.x_pos-1,y=y});
+        player.collision_points.left[i].x=player.x_pos-1;
+        player.collision_points.left[i].y=y;
+        i+=1;
     end
     -- right flank
+    i=1;
     for y=player.y_pos,player.y_pos+7 do
-        add(player.collision_points.right, {x=player.x_pos+8,y=y});
+        player.collision_points.right[i].x=player.x_pos+8;
+        player.collision_points.right[i].y=y;
+        i+=1;
     end
     -- top flank
+    i=1;
     for x=player.x_pos,player.x_pos+7 do
-        add(player.collision_points.top, {x=x,y=player.y_pos-1});
+        player.collision_points.top[i].x=x;
+        player.collision_points.top[i].y=player.y_pos-1;
+        i+=1;
     end
+end
+
+-- this function updates if the player would be leaving the map
+function _check_map_bounds()
+    player.at.top_border = player.y_pos <= 102;
+    player.at.bottom_border = player.y_pos >= 220;
 end
 
 -- draws player based on current state
