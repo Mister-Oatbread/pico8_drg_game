@@ -21,6 +21,10 @@ function initialize_player()
         max_ammo = 50,
         max_fuel = 50,
 
+        shots_fired = false,
+        shot_delay_counter = 0,
+        shot_delay = 3,
+
         points = 0,
         health = 3,
         max_health = 3,
@@ -57,8 +61,15 @@ end
 
 -- takes care of using the special abilities  the player has
 function handle_player_abilities()
-    if player.is_drilling then drill() end;
-    if player.is_shooting then shoot() end;
+    if player.is_drilling and not player.is_shooting then drill() end;
+
+    -- shot was recently fired, don't fire again
+    if player.shots_fired and player.shot_delay_counter<player.shot_delay then
+        player.shot_delay_counter+=1;
+    else
+        -- didn't shoot recently, check if player is firing
+        if player.is_shooting and not player.is_drilling then shoot() end;
+    end
 end
 
 -- takes care of drilling in front of the player
@@ -81,11 +92,21 @@ function drill()
         player.fuel -= 1;
         update_mined_resources();
     end
-
 end
 
 -- takes care of shooting in front of the player
 function shoot()
+    if player.ammo > 0 then
+        fire_bullet();
+        player.ammo -= 1;
+        sfx(-1,2);
+        sfx(34,2);
+    else
+        sfx(-1,2);
+        sfx(35,2);
+    end
+    player.shots_fired = true;
+    player.shot_delay_counter = 0;
 end
 
 -- give ammo based on max capacity and cap it

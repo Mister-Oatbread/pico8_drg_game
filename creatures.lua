@@ -50,6 +50,7 @@ function loot_bug(x,y)
         spr(sprite,x_coord,y_coord,1,1,x_flip,false);
     end
     return {
+        x_coord=x_coord,
         y_coord=y_coord,
         animate=animate,
         damage=damage,
@@ -108,6 +109,7 @@ function cave_angel(x,y)
         spr(sprite,x_coord,y_coord,1,1,x_flip,false);
     end
     return {
+        x_coord=x_coord,
         y_coord=y_coord,
         animate=animate,
         damage=damage,

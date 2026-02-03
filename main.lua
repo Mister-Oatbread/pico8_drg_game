@@ -7,6 +7,7 @@ function _init()
     initialize_resources();
     initialize_creatures();
     initialize_player();
+    initialize_bullets();
 end
 
 function _update()
@@ -18,6 +19,8 @@ function _update()
     update_creatures();
     move_player();
     handle_player_abilities();
+    update_bullets();
+    check_bullet_collision();
 end
 
 function _draw()
@@ -29,6 +32,8 @@ function _draw()
     draw_resources();
     draw_creatures();
     draw_player();
+    draw_hud();
+    draw_bullets();
 end
 
 
