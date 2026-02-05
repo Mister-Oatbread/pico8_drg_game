@@ -22,6 +22,7 @@ function loot_bug(x,y)
     local health = 30;
     local alive = true;
     local creature_damage;
+    local hitbox={x={2,7},y={1,7}};
     function animate()
         y += 1;
         if frame%27==0 then y += 1 end;
@@ -60,6 +61,7 @@ function loot_bug(x,y)
         damage=damage,
         creature_damage=creature_damage,
         draw=draw,
+        hitbox=hitbox,
         is_alive=is_alive,
     };
 end
@@ -75,6 +77,7 @@ function cave_angel(x,y)
     local health = 20;
     local alive = true;
     local creature_damage = 0;
+    local hitbox={x={2,7},y={1,7}};
     function animate()
         y += 1;
 
@@ -117,6 +120,7 @@ function cave_angel(x,y)
         damage=damage,
         creature_damage=creature_damage,
         draw=draw,
+        hitbox=hitbox,
         is_alive=is_alive,
     };
 end
@@ -131,6 +135,7 @@ function grunt(x,y)
     local health = 40;
     local alive = true;
     local creature_damage = 1;
+    local hitbox={x={1,8},y={1,8}};
     function animate()
         y += 1;
         if frame%5==0 then y+=1 end;
@@ -168,6 +173,7 @@ function grunt(x,y)
         damage=damage,
         creature_damage=creature_damage,
         draw=draw,
+        hitbox=hitbox,
         is_alive=is_alive,
     };
 end

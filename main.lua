@@ -2,6 +2,7 @@
 
 function _init()
     initialize_game();
+    initialize_hud();
     initialize_map();
     initialize_obstacles();
     initialize_resources();
@@ -12,6 +13,8 @@ end
 
 function _update()
     update_inputs();
+
+    update_game();
 
     update_map();
     update_obstacles();

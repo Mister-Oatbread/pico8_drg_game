@@ -16,10 +16,10 @@ function initialize_player()
         playing_drill = {empty=false,full=false},
         is_moving = {up, down, left, right};
 
-        ammo = 50,
-        fuel = 50,
-        max_ammo = 50,
-        max_fuel = 50,
+        ammo = 25,
+        fuel = 150,
+        max_ammo = 25,
+        max_fuel = 150,
 
         shots_fired = false,
         shot_delay_counter = 0,
