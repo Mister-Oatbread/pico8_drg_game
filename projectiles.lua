@@ -38,12 +38,15 @@ function check_bullet_collision()
     if #creatures>0 and #bullets>0 then
         local i=1;
         local j=1;
+        local x_pos_good, y_pos_good;
         while (#creatures>=i) do
             while (#bullets>=j) do
-                x_pos_good = abs(bullets[j].x_coord-creatures[i].x_coord-3)<2;
-                y_pos_good = abs(bullets[j].y_coord-creatures[i].y_coord-4)<4;
+                x_pos_good = abs(bullets[j].x_coord-creatures[i].x_coord()+3)<5;
+                y_pos_good = abs(bullets[j].y_coord-creatures[i].y_coord()+4)<5;
                 if x_pos_good and y_pos_good then
                     deli(bullets,j);
+                    creatures[i].damage(10)
+                    break;
                 else
                     j+=1;
                 end

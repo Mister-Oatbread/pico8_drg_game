@@ -111,8 +111,8 @@ end
 
 -- give ammo based on max capacity and cap it
 function give_ammo(percentage)
-    player.ammo += player.max_ammo*percentage;
-    player.fuel += player.max_fuel*percentage;
+    player.ammo += ceil(player.max_ammo*percentage);
+    player.fuel += ceil(player.max_fuel*percentage);
 
     if player.ammo > player.max_ammo then player.ammo = player.max_ammo end;
     if player.fuel > player.max_fuel then player.fuel = player.max_fuel end;

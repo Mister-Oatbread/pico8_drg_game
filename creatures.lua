@@ -11,19 +11,20 @@ function handle_creature_being_damaged(was_damaged, damaged_since)
     end
     return was_damaged, damaged_since;
 end
-
 function loot_bug(x,y)
     local sprite = creature_sprites.loot_bug.default;
     local frame = 0;
-    local x_coord = x;
-    local y_coord = y;
+    local x = x;
+    local y = y;
     local damaged_since = 0;
     local was_damaged = false;
     local x_flip = false;
     local health = 30;
-    local is_alive = true;
+    local alive = true;
+    local creature_damage;
     function animate()
-        y_coord += 1;
+        y += 1;
+        if frame%27==0 then y += 1 end;
         if (frame > 15) then
             x_flip = false;
         else
@@ -38,22 +39,26 @@ function loot_bug(x,y)
             was_damaged, damaged_since);
         frame = (frame+1)%30;
     end
-    function damage(damage)
+    function damage(damage_received)
         was_damaged = true;
-        health -= damage;
+        health -= damage_received;
         if (health <= 0) then
-            is_alive = false;
+            alive = false;
             give_ammo(.2);
         end
     end
     function draw()
-        spr(sprite,x_coord,y_coord,1,1,x_flip,false);
+        spr(sprite,x,y,1,1,x_flip,false);
     end
+    function x_coord() return x end;
+    function y_coord() return y end;
+    function is_alive() return alive end;
     return {
         x_coord=x_coord,
         y_coord=y_coord,
         animate=animate,
         damage=damage,
+        creature_damage=creature_damage,
         draw=draw,
         is_alive=is_alive,
     };
@@ -62,25 +67,19 @@ end
 function cave_angel(x,y)
     local sprite = creature_sprites.cave_angel.default;
     local frame = 0;
-    local x_coord = x;
-    local y_coord = y;
+    local x = x;
+    local y = y;
     local damaged_since = 0;
     local was_damaged = false;
     local x_flip = false;
-    local health = 30;
-    local is_alive = true;
+    local health = 20;
+    local alive = true;
+    local creature_damage = 0;
     function animate()
-        y_coord += 1;
+        y += 1;
 
-        if frame%10==0 then
-            y_coord+=1;
-        end
-
-        if (frame > 30) then
-            wings_open = false
-        else
-            wings_open = true;
-        end
+        if frame%10==0 then y+=1 end;
+        wings_open = frame>30;
         if was_damaged then
             if wings_open then
                 sprite = creature_sprites.cave_angel.damaged;
@@ -98,27 +97,79 @@ function cave_angel(x,y)
             was_damaged, damaged_since);
         frame = (frame+1)%60;
     end
-    function damage(damage)
+    function damage(damage_received)
         was_damaged = true;
-        health -= damage;
+        health -= damage_received;
         if (health <= 0) then
-            is_alive = false;
+            alive = false;
         end
     end
     function draw()
-        spr(sprite,x_coord,y_coord,1,1,x_flip,false);
+        spr(sprite,x,y,1,1,x_flip,false);
     end
+    function x_coord() return x end;
+    function y_coord() return y end;
+    function is_alive() return alive end;
     return {
         x_coord=x_coord,
         y_coord=y_coord,
         animate=animate,
         damage=damage,
+        creature_damage=creature_damage,
         draw=draw,
         is_alive=is_alive,
     };
 end
 
-function grunt()
+function grunt(x,y)
+    local frame = 0;
+    local x = x;
+    local y = y;
+    local damaged_since = 0;
+    local display_alt = false;
+    local was_damaged = false;
+    local health = 40;
+    local alive = true;
+    local creature_damage = 1;
+    function animate()
+        y += 1;
+        if frame%5==0 then y+=1 end;
+
+        display_alt = frame > 15;
+        was_damaged, damaged_since = handle_creature_being_damaged(
+            was_damaged, damaged_since);
+        frame = (frame+1)%30;
+    end
+    function damage(damage_received)
+        was_damaged = true;
+        health -= damage_received;
+        if (health <= 0) then
+            alive = false;
+        end
+    end
+    function draw()
+        local sprite;
+        if was_damaged then
+            sprite=creature_sprites.grunt.damaged;
+            x_flip = display_alt;
+        else
+            sprite=creature_sprites.grunt.default;
+            x_flip = display_alt;
+        end
+        spr(sprite,x,y,1,1,x_flip,false);
+    end
+    function x_coord() return x end;
+    function y_coord() return y end;
+    function is_alive() return alive end;
+    return {
+        x_coord=x_coord,
+        y_coord=y_coord,
+        animate=animate,
+        damage=damage,
+        creature_damage=creature_damage,
+        draw=draw,
+        is_alive=is_alive,
+    };
 end
 
 function slasher()
@@ -135,7 +186,10 @@ end
 function spawn_creature()
     local x_coord = flr(rnd(120))+101;
     local y_coord = 81;
-    if rnd() < .7 then
+    local decision = rnd();
+    if decision < .7 then
+        creature = grunt(x_coord, y_coord);
+    elseif decision < .9 then
         creature = loot_bug(x_coord, y_coord);
     else
         creature = cave_angel(x_coord, y_coord);
@@ -161,8 +215,20 @@ function update_creatures()
         for creature in all(creatures) do
             creature.animate();
         end
+
+        local i=1;
+        while #creatures>=i do
+            if creatures[i].y_coord() >= 240 then
+                deli(creatures, i);
+            elseif not creatures[i].is_alive() then
+                deli(creatures, i);
+            else
+                i+=1;
+            end
+        end
     end
-    if rnd()<.1 then
+
+    if rnd()<.06 then
         spawn_creature();
     end
 end
