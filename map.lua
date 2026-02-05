@@ -114,6 +114,11 @@ function draw_map()
         y_flip = terrain[i].y_flip;
         spr(sprite,x_coord,y_coord,1,1,x_flip,y_flip);
     end
+end
+
+
+function draw_wall()
+    local sprite, x_coord, y_coord, x_flip, y_flip;
     for i=1,#walls do
         sprite = walls[i].sprite;
         x_coord = walls[i].x_coord;

@@ -5,9 +5,9 @@
 -- initialize player
 function initialize_player()
     player_sprites = {
-        standing = 49,
-        moving = 51,
-        drilling = 54,
+        idle={standing=49,moving=50},
+        drilling={standing=54,moving=55},
+        shooting={standing=51,moving=52,moving_alt=53},
     };
     player = {
         is_moving = false,
@@ -15,6 +15,9 @@ function initialize_player()
         is_drilling = false,
         playing_drill = {empty=false,full=false},
         is_moving = {up, down, left, right};
+        moving_frame = 0,
+        x_flip = false,
+        current_sprite = player_sprites.standing,
 
         ammo = 25,
         fuel = 150,
@@ -28,6 +31,11 @@ function initialize_player()
         points = 0,
         health = 3,
         max_health = 3,
+        is_hit = false,
+        hit_since = 0,
+        has_invuln = false,
+        invuln_duration = 30,
+
         x_pos = 150,
         y_pos = 200,
 
@@ -138,37 +146,111 @@ function move_player()
         player.y_pos += 1;
     end;
     if player.is_moving.left and not player.has_collision.left then
-        player.x_pos -= 1;
+        if player.x_pos >= 102 then
+            player.x_pos -= 1;
+        end
     end;
     if player.is_moving.right and not player.has_collision.right then
-        player.x_pos += 1;
+        if player.x_pos <= 220 then
+            player.x_pos += 1;
+        end
     end;
     if player.has_collision.top then
         player.y_pos += 1;
     end;
+    check_if_hit_by_creature();
+    handle_being_hit();
+end
+
+-- checks if any hostile creature is currently touching the player
+function check_if_hit_by_creature()
+    local player_box = get_player_hitbox(player);
+    local creature_box;
+    if #creatures>0 then
+        for creature in all(creatures) do
+            creature_box = get_creature_hitbox(creature);
+            if are_colliding(player_box, creature_box) then
+                if creature.creature_damage>0 and not player.has_invuln then
+                    player.health -= creature.creature_damage;
+                    player.is_hit = true;
+                    player.hit_since = 0;
+                    player.has_invuln = true;
+                end
+            end
+        end
+    end
+end
+
+function handle_being_hit()
+    if player.is_hit and player.hit_since>player.invuln_duration then
+        player.hit_since = 0;
+        player.is_hit = false;
+        player.has_invuln = false;
+    elseif player.is_hit and player.hit_since<=player.invuln_duration then
+        player.hit_since+=1;
+    end
+end
+
+-- chooses the current sprite for the player
+function update_player_animation()
+    player.moving_frame = (player.moving_frame+1)%10;
+    local moving = (not player.is_moving.down
+    or player.is_moving.left or player.is_moving.right);
+
+    local use_alt_sprite = player.moving_frame>=5;
+
+    if player.is_shooting then
+        if not moving then
+            player.current_sprite = player_sprites.shooting.standing;
+            player.moving_frame=0;
+        else
+            if use_alt_sprite then
+                player.current_sprite = player_sprites.shooting.moving_alt;
+            else
+                player.current_sprite = player_sprites.shooting.moving;
+            end
+        end
+        player.x_flip = false;
+
+    elseif player.is_drilling then
+        if not moving then
+            player.current_sprite = player_sprites.drilling.standing;
+            player.x_flip = false;
+            player.moving_frame=0;
+        else
+            player.current_sprite = player_sprites.drilling.moving;
+            player.x_flip = use_alt_sprite;
+        end
+
+    else
+        if not moving then
+            player.current_sprite = player_sprites.idle.standing;
+            player.x_flip = false;
+            player.moving_frame=0;
+        else
+            player.current_sprite = player_sprites.idle.moving;
+            player.x_flip = use_alt_sprite;
+        end
+    end
+    if player.is_hit then
+        player.current_sprite -=16;
+    end
 end
 
 -- draws player based on current state
 function draw_player()
-    if player.is_shooting then
-        sprite=51;
-    elseif player.is_drilling then
-        sprite=54;
-    else
-        sprite=49;
-    end
+    update_player_animation();
     spr(
-        sprite,
+        player.current_sprite,
         player.x_pos,
         player.y_pos,
         1,1,
-        false,
+        player.x_flip,
         false
     );
 
     -- handle drilling sound
     if player.is_drilling then
-
         if player.fuel>0 and not player.playing_drill.full then
             sfx(-1,1);
             sfx(30,1);

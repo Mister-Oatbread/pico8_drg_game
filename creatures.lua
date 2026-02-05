@@ -21,7 +21,7 @@ function loot_bug(x,y)
     local x_flip = false;
     local health = 30;
     local alive = true;
-    local creature_damage;
+    local creature_damage = 0;
     local hitbox={x={2,7},y={1,7}};
     function animate()
         y += 1;
@@ -82,6 +82,7 @@ function cave_angel(x,y)
         y += 1;
 
         if frame%10==0 then y+=1 end;
+        if frame%45==0 then x+=sgn(x-player.x_pos) end;
         wings_open = frame>30;
         if was_damaged then
             if wings_open then

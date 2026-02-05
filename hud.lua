@@ -11,10 +11,10 @@ function draw_hud()
     spr(hud_sprites.fuel,105,210);
     spr(hud_sprites.points,105,220);
 
-    print(player.health, 115,191);
-    print(player.ammo, 115,201);
-    print(flr(player.fuel/10), 115,211);
-    print(player.points, 115,221);
+    print(player.health, 115,191,7);
+    print(player.ammo, 115,201,7);
+    print(flr(player.fuel/10), 115,211,7);
+    print(player.points, 115,221,7);
 end
 
 

@@ -33,10 +33,11 @@ function _draw()
     draw_map();
     draw_obstacles();
     draw_resources();
+    draw_wall();
     draw_creatures();
+    draw_bullets();
     draw_player();
     draw_hud();
-    draw_bullets();
 end
 
 
