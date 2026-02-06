@@ -49,6 +49,7 @@ function initialize_resources()
     nitra_hitbox = {x={1,8},y={1,8}};
     gold_hitbox = {x={1,8},y={1,8}};
     driller_resource_hitbox = {x={2,7},y={2,7}};
+    mining_sound = 38;
 end
 
 -- spawn random objects
@@ -101,7 +102,9 @@ function update_mined_resources()
                 end
 
                 deli(resources,i);
-                if #resources == 0 then break end
+                sfx(-1,3);
+                sfx(mining_sound,3);
+                if #resources == 0 then break end;
             else
                 i+=1;
             end
