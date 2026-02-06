@@ -9,7 +9,7 @@ function initialize_game()
     no_cave_angels_killed = true;
     no_driller_drilled = true;
 
-    difficulty = 2;
+    difficulty = 1;
     if difficulty == 1 then
         obstacle_spawn_rate = .04;
         resource_spawn_rate = .05;
