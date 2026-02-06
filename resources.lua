@@ -5,19 +5,19 @@
 -- produce one of the three entities randomly
 function _produce_resource_entity(x_coord,y_coord)
     local sprite_list;
-    local decision = rnd(3);
+    local decision = rnd(1);
     local sprite,  x_flip, y_flip, hitbox;
-    if (decision <.00001) then
+    if (decision <.0001) then
         -- yes, this is an easter egg ;D
         sprite=player_sprites.idle.standing;
         hitbox=driller_resource_hitbox;
         x_flip=false;
         y_flip=true;
     else
-        if (decision<1) then
+        if (decision<resource_spawn_probs[1]) then
             sprite_list=red_sugar_sprites;
             hitbox=red_sugar_hitbox;
-        elseif(decision<2) then
+        elseif(decision<resource_spawn_probs[2]) then
             sprite_list=nitra_sprites;
             hitbox=nitra_hitbox;
         else
@@ -45,7 +45,6 @@ function initialize_resources()
     red_sugar_sprites = {64,80,96,112};
     nitra_sprites = {65,81,97,113};
     gold_sprites = {66,82,98,114};
-    resource_spawn_chance = .01;
     red_sugar_hitbox = {x={3,6},y={3,6}};
     nitra_hitbox = {x={1,8},y={1,8}};
     gold_hitbox = {x={1,8},y={1,8}};
@@ -63,7 +62,7 @@ function update_resources()
             i+=1;
         end
     end
-    if (rnd(1) < resource_spawn_chance) then
+    if (rnd(1) < resource_spawn_rate) then
         local x_coord = flr(rnd(120))+101;
         add(resources, _produce_resource_entity(x_coord,81));
     end
@@ -97,6 +96,7 @@ function update_mined_resources()
                 end
                 if resources[i].sprite == player_sprites.idle.standing then
                     give_ammo(1);
+                    no_driller_drilled = false;
                 end
 
                 deli(resources,i);

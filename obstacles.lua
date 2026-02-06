@@ -7,7 +7,7 @@ function _produce_obstacle_entity(x_coord,y_coord)
     local sprite_list;
     local health;
     local size;
-    if (rnd(1) < .95) then
+    if (rnd(1) < obstacle_spawn_probs[1]) then
         sprite_list = obstacle_sprites_small;
         health = obstacle_health.small;
         size = obstacle_size.small;
@@ -40,7 +40,6 @@ function initialize_obstacles()
     obstacle_sprites_chonker = {77};
     obstacle_health = {small=30,big=90,chonker=4000};
     obstacle_size = {small=1,big=2,chonker=2};
-    obstacle_spawn_chance = .2;
     drilled_ground_sprite = 183;
 end
 
@@ -56,7 +55,7 @@ function update_obstacles()
             i+=1;
         end
     end
-    if (rnd(1) < obstacle_spawn_chance) then
+    if (rnd(1) < obstacle_spawn_rate) then
         local x_coord = flr(rnd(120))+101;
         add(obstacles, _produce_obstacle_entity(x_coord,81));
     end

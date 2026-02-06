@@ -46,6 +46,7 @@ function loot_bug(x,y)
         if (health <= 0) then
             alive = false;
             give_ammo(.2);
+            no_lootbugs_killed = false;
         end
     end
     function draw()
@@ -106,6 +107,7 @@ function cave_angel(x,y)
         health -= damage_received;
         if (health <= 0) then
             alive = false;
+            no_cave_angels_killed = false;
         end
     end
     function draw()
@@ -194,12 +196,12 @@ function spawn_creature()
     local x_coord = flr(rnd(120))+101;
     local y_coord = 81;
     local decision = rnd();
-    if decision < .7 then
-        creature = grunt(x_coord, y_coord);
-    elseif decision < .9 then
+    if decision < creature_spawn_probs[1] then
         creature = loot_bug(x_coord, y_coord);
-    else
+    elseif decision < creature_spawn_probs[2] then
         creature = cave_angel(x_coord, y_coord);
+    else
+        creature = grunt(x_coord, y_coord);
     end
     add(creatures, creature);
 end
@@ -235,7 +237,7 @@ function update_creatures()
         end
     end
 
-    if rnd()<.06 then
+    if rnd() < creature_spawn_rate then
         spawn_creature();
     end
 end
