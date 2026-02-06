@@ -6,24 +6,37 @@
 function _produce_resource_entity(x_coord,y_coord)
     local sprite_list;
     local decision = rnd(3);
-    if (decision<1) then
-        sprite_list=red_sugar_sprites;
-    elseif(decision<2) then
-        sprite_list=nitra_sprites;
+    local sprite,  x_flip, y_flip, hitbox;
+    if (decision <.00001) then
+        -- yes, this is an easter egg ;D
+        sprite=player_sprites.idle.standing;
+        hitbox=driller_resource_hitbox;
+        x_flip=false;
+        y_flip=true;
     else
-        sprite_list=gold_sprites;
+        if (decision<1) then
+            sprite_list=red_sugar_sprites;
+            hitbox=red_sugar_hitbox;
+        elseif(decision<2) then
+            sprite_list=nitra_sprites;
+            hitbox=nitra_hitbox;
+        else
+            sprite_list=gold_sprites;
+            hitbox=gold_hitbox;
+        end
+        x_flip = rnd(2) < 1;
+        y_flip = rnd(2) < 1;
+
+        sprite = sprite_list[flr(rnd(#sprite_list))+1];
     end
 
-    local x_flip = rnd(2) < 1;
-    local y_flip = rnd(2) < 1;
-
-    local sprite = sprite_list[flr(rnd(#sprite_list))+1];
     return {
         sprite=sprite,
         x_coord=x_coord,
         y_coord=y_coord,
         x_flip=x_flip,
         y_flip=y_flip,
+        hitbox=hitbox,
     };
 end
 
@@ -33,6 +46,10 @@ function initialize_resources()
     nitra_sprites = {65,81,97,113};
     gold_sprites = {66,82,98,114};
     resource_spawn_chance = .01;
+    red_sugar_hitbox = {x={3,6},y={3,6}};
+    nitra_hitbox = {x={1,8},y={1,8}};
+    gold_hitbox = {x={1,8},y={1,8}};
+    driller_resource_hitbox = {x={2,7},y={2,7}};
 end
 
 -- spawn random objects
@@ -56,12 +73,12 @@ end
 -- successfully, which means that the resource will be mined in 1 hit
 function update_mined_resources()
     local i=1;
-    if (#resources > 0) do
+    local resource_box;
+    if (#resources > 0) and player.is_drilling then
+        drills_box = get_drills_hitbox(player)
         while #resources >= i do
-            local x_pos_good = abs(player.x_pos-resources[i].x_coord)<8;
-            local y_pos_good = abs(player.y_pos-resources[i].y_coord-4)<4;
-            if (x_pos_good and y_pos_good) then
-
+            resource_box = get_resource_hitbox(resources[i]);
+            if are_colliding(drills_box, resource_box) then
                 -- resource is being updated, check type
                 for sprite in all(nitra_sprites) do
                     if resources[i].sprite == sprite then
@@ -77,6 +94,9 @@ function update_mined_resources()
                     if resources[i].sprite == sprite then
                         give_health(1);
                     end
+                end
+                if resources[i].sprite == player_sprites.idle.standing then
+                    give_ammo(1);
                 end
 
                 deli(resources,i);

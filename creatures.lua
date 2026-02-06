@@ -25,7 +25,7 @@ function loot_bug(x,y)
     local hitbox={x={2,7},y={1,7}};
     function animate()
         y += 1;
-        if frame%27==0 then y += 1 end;
+        if frame%27==26 then y += 1 end;
         if (frame > 15) then
             x_flip = false;
         else

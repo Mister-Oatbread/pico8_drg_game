@@ -9,6 +9,14 @@ function are_colliding(a, b)
     return not(x_good or y_good);
 end
 
+-- takes in player and returns hitbox ready to be processed by are_colliding()
+function get_player_hitbox(player)
+    return {
+        x={player.x_pos+1, player.x_pos+6},
+        y={player.y_pos, player.y_pos+7},
+    };
+end
+
 -- takes in bullet and returns hitbox ready to be processed by are_colliding()
 function get_bullet_hitbox(bullet)
     return {
@@ -18,10 +26,11 @@ function get_bullet_hitbox(bullet)
 end
 
 -- takes in player and returns hitbox ready to be processed by are_colliding()
-function get_player_hitbox(player)
+-- but for the drills instead of the player
+function get_drills_hitbox(player)
     return {
-        x={player.x_pos+1, player.x_pos+6},
-        y={player.y_pos, player.y_pos+7},
+        x={player.x_pos, player.x_pos+7},
+        y={player.y_pos-1, player.y_pos-1},
     };
 end
 
@@ -31,6 +40,15 @@ function get_creature_hitbox(creature)
     local x2 = creature.hitbox.x[2]+creature.x_coord()-1;
     local y1 = creature.hitbox.y[1]+creature.y_coord()-1;
     local y2 = creature.hitbox.y[2]+creature.y_coord()-1;
+    return {x={x1,x2}, y={y1,y2}};
+end
+
+-- takes in resource and retursn hitbox ready to be processed by are_colliding()
+function get_resource_hitbox(resource)
+    local x1 = resource.x_coord+resource.hitbox.x[1]-1;
+    local x2 = resource.x_coord+resource.hitbox.x[2]-1;
+    local y1 = resource.y_coord+resource.hitbox.y[1]-1;
+    local y2 = resource.y_coord+resource.hitbox.y[2]-1;
     return {x={x1,x2}, y={y1,y2}};
 end
 
