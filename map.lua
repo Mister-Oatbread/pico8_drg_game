@@ -116,7 +116,6 @@ function draw_map()
     end
 end
 
-
 function draw_wall()
     local sprite, x_coord, y_coord, x_flip, y_flip;
     for i=1,#walls do

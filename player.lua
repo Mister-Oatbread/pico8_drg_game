@@ -158,6 +158,9 @@ function move_player()
     if player.has_collision.top then
         player.y_pos += 1;
     end;
+
+    if player.y_pos <= 101 then player.y_pos = 101 end;
+    if player.y_pos >= 221 then player.y_pos = 221 end;
     check_if_hit_by_creature();
     handle_being_hit();
 end

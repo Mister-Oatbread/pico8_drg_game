@@ -181,6 +181,48 @@ function grunt(x,y)
     };
 end
 
+-- reduced grunt that provides collision at the bottom
+function bottom_grunt(x,y)
+    local frame = rnd(20);
+    local up_down_frame = rnd(20);
+    local up_down_cap = rnd(20)+40;
+    local x=x;
+    local y=y;
+    local y0=y;
+    local display_alt = false;
+    local alive = true;
+    local creature_damage = 1;
+    local hitbox={x={1,8},y={1,8}};
+
+    function animate()
+        display_alt = frame > 15;
+
+        -- animate grunts moving up and down
+        y = y0 + sgn(up_down_frame - up_down_cap/2);
+
+        frame = (frame+1)%30;
+        up_down_frame = (up_down_frame+1)%up_down_cap;
+    end
+    function damage(damage_received)
+    end
+    function draw()
+        spr(creature_sprites.grunt.default,x,y,1,1,display_alt,true);
+    end
+    function x_coord() return x end;
+    function y_coord() return y end;
+    function is_alive() return alive end;
+    return{
+        x_coord=x_coord,
+        y_coord=y_coord,
+        animate=animate,
+        damage=damage,
+        creature_damage=creature_damage,
+        draw=draw,
+        hitbox=hitbox,
+        is_alive=is_alive,
+    };
+end
+
 function slasher()
 end
 
@@ -217,6 +259,11 @@ function initialize_creatures()
         praetorian = {default=3,damaged=5,cloud=5,spit=9},
         mactera = {default=27,alt=28,damaged=29,damaged_alt=30},
     };
+
+    -- add bottom grunts to the creatures.
+    for x_coord=106,220,9 do
+        add(creatures, bottom_grunt(x_coord, 222));
+    end
 end
 
 function update_creatures()
