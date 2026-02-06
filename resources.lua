@@ -96,6 +96,7 @@ function update_mined_resources()
                 end
                 if resources[i].sprite == player_sprites.idle.standing then
                     give_ammo(1);
+                    player.points+=100;
                     no_driller_drilled = false;
                 end
 

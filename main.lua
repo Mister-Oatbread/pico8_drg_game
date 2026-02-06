@@ -31,9 +31,10 @@ function _draw()
     camera(101,101);
 
     draw_map();
-    draw_obstacles();
-    draw_resources();
     draw_wall();
+    draw_obstacles();
+    draw_super_wall();
+    draw_resources();
     draw_creatures();
     draw_bullets();
     draw_player();

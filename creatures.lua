@@ -74,11 +74,10 @@ function cave_angel(x,y)
     local y = y;
     local damaged_since = 0;
     local was_damaged = false;
-    local x_flip = false;
+    local x_flip = rnd(2) < 1;
     local health = 20;
     local alive = true;
-    local creature_damage = 0;
-    local hitbox={x={2,7},y={1,7}};
+    local creature_damage = 0; local hitbox={x={2,7},y={1,7}};
     function animate()
         y += 1;
 
@@ -141,7 +140,7 @@ function grunt(x,y)
     local hitbox={x={1,8},y={1,8}};
     function animate()
         y += 1;
-        if frame%5==0 then y+=1 end;
+        if frame%6==0 then y+=1 end;
 
         display_alt = frame > 15;
         was_damaged, damaged_since = handle_creature_being_damaged(
@@ -223,13 +222,207 @@ function bottom_grunt(x,y)
     };
 end
 
-function slasher()
+function slasher(x,y)
+    local frame = 0;
+    local x = x;
+    local y = y;
+    local damaged_since = 0;
+    local display_alt = false;
+    local was_damaged = false;
+    local health = 50;
+    local alive = true;
+    local creature_damage = 2;
+    local hitbox={x={1,8},y={1,8}};
+    function animate()
+        y += 1;
+        if frame%5==0 then y+=1 end;
+
+        display_alt = frame > 15;
+        was_damaged, damaged_since = handle_creature_being_damaged(
+            was_damaged, damaged_since);
+        frame = (frame+1)%30;
+    end
+    function damage(damage_received)
+        was_damaged = true;
+        health -= damage_received;
+        if (health <= 0) then
+            alive = false;
+        end
+    end
+    function draw()
+        local sprite;
+        if was_damaged then
+            sprite=creature_sprites.slasher.damaged;
+            x_flip = display_alt;
+        else
+            sprite=creature_sprites.slasher.default;
+            x_flip = display_alt;
+        end
+        spr(sprite,x,y,1,1,x_flip,false);
+    end
+    function x_coord() return x end;
+    function y_coord() return y end;
+    function is_alive() return alive end;
+    return {
+        x_coord=x_coord,
+        y_coord=y_coord,
+        animate=animate,
+        damage=damage,
+        creature_damage=creature_damage,
+        draw=draw,
+        hitbox=hitbox,
+        is_alive=is_alive,
+    };
 end
 
-function mactera()
+function mactera(x,y)
+    local sprite = creature_sprites.mactera.default;
+    local frame = 0;
+    local x = x;
+    local y = y;
+    local damaged_since = 0;
+    local was_damaged = false;
+    local x_flip = false;
+    local health = 20;
+    local alive = true;
+    local creature_damage = 0;
+    local hitbox={x={2,7},y={1,7}};
+    function animate()
+        y += 1;
+        if frame%2==0 then y+=1 end;
+        if frame%3==0 then x-=sgn(x-player.x_pos) end;
+        wings_open = frame>15;
+        if was_damaged then
+            if wings_open then
+                sprite = creature_sprites.mactera.damaged;
+            else
+                sprite = creature_sprites.mactera.damaged_alt;
+            end
+        else
+            if wings_open then
+                sprite = creature_sprites.mactera.default;
+            else
+                sprite = creature_sprites.mactera.alt;
+            end
+        end
+        was_damaged, damaged_since = handle_creature_being_damaged(
+            was_damaged, damaged_since);
+        frame = (frame+1)%30;
+    end
+    function damage(damage_received)
+        was_damaged = true;
+        health -= damage_received;
+        if (health <= 0) then
+            alive = false;
+            no_cave_angels_killed = false;
+        end
+    end
+    function draw()
+        spr(sprite,x,y,1,1,x_flip,false);
+    end
+    function x_coord() return x end;
+    function y_coord() return y end;
+    function is_alive() return alive end;
+    return {
+        x_coord=x_coord,
+        y_coord=y_coord,
+        animate=animate,
+        damage=damage,
+        creature_damage=creature_damage,
+        draw=draw,
+        hitbox=hitbox,
+        is_alive=is_alive,
+    };
 end
 
-function praetorian()
+function praetorian(x,y)
+    local frame = 0;
+    local x = x;
+    local y = y;
+    local damaged_since = 0;
+    local display_alt = false;
+    local was_damaged = false;
+    local health = 80;
+    local alive = true;
+    local creature_damage = 1;
+    local hitbox={x={4,12},y={2,14}};
+    function animate()
+        y += 1;
+        if frame%20==0 then y+=1 end;
+
+        display_alt = frame > 20;
+        was_damaged, damaged_since = handle_creature_being_damaged(
+            was_damaged, damaged_since);
+        frame = (frame+1)%40;
+    end
+    function damage(damage_received)
+        was_damaged = true;
+        health -= damage_received;
+        if (health <= 0) then
+            alive = false;
+            add(creatures, praetorian_cloud(x,y));
+        end
+    end
+    function draw()
+        local sprite;
+        if was_damaged then
+            sprite=creature_sprites.praetorian.damaged;
+            x_flip = display_alt;
+        else
+            sprite=creature_sprites.praetorian.default;
+            x_flip = display_alt;
+        end
+        spr(sprite,x,y,2,2,x_flip,false);
+    end
+    function x_coord() return x end;
+    function y_coord() return y end;
+    function is_alive() return alive end;
+    return {
+        x_coord=x_coord,
+        y_coord=y_coord,
+        animate=animate,
+        damage=damage,
+        creature_damage=creature_damage,
+        draw=draw,
+        hitbox=hitbox,
+        is_alive=is_alive,
+    };
+end
+
+-- praetorian cloud that should spawn after death of praetorian
+function praetorian_cloud(x,y)
+    local frame = 0;
+    local x = x;
+    local y = y;
+    local x_flip = false;
+    local y_flip = false;
+    local alive = true;
+    local creature_damage = 1;
+    local hitbox={x={1,16},y={1,16}};
+    function animate()
+        y += 1;
+        x_flip = (frame%15+30)==0;
+        y_flip = frame%30==0;
+        frame = (frame+1)%60;
+    end
+    function damage(damage_received)
+    end
+    function draw()
+        spr(creature_sprites.praetorian.cloud,x,y,2,2,x_flip,y_flip);
+    end
+    function x_coord() return x end;
+    function y_coord() return y end;
+    function is_alive() return alive end;
+    return {
+        x_coord=x_coord,
+        y_coord=y_coord,
+        animate=animate,
+        damage=damage,
+        creature_damage=creature_damage,
+        draw=draw,
+        hitbox=hitbox,
+        is_alive=is_alive,
+    };
 end
 
 -- handles spawning a creature with correspondig percentages, and
@@ -242,8 +435,14 @@ function spawn_creature()
         creature = loot_bug(x_coord, y_coord);
     elseif decision < creature_spawn_probs[2] then
         creature = cave_angel(x_coord, y_coord);
-    else
+    elseif decision < creature_spawn_probs[3] then
         creature = grunt(x_coord, y_coord);
+    elseif decision < creature_spawn_probs[4] then
+        creature = slasher(x_coord, y_coord);
+    elseif decision < creature_spawn_probs[5] then
+        creature = mactera(x_coord, y_coord);
+    else
+        creature = praetorian(x_coord, y_coord);
     end
     add(creatures, creature);
 end
@@ -256,7 +455,7 @@ function initialize_creatures()
         cave_angel = {default=11,alt=12,damaged=13,damaged_alt=14},
         grunt = {default=1,damaged=2},
         slasher = {default=17,damaged=18},
-        praetorian = {default=3,damaged=5,cloud=5,spit=9},
+        praetorian = {default=3,damaged=5,cloud=7,spit=9},
         mactera = {default=27,alt=28,damaged=29,damaged_alt=30},
     };
 

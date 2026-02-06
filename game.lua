@@ -16,9 +16,12 @@ function initialize_game()
 
         creature_spawn_rate = .06;
         creature_spawn_ratios = {
-            1, -- loot bug
+            8, -- loot bug
             0, -- cave angel
-            1, -- grunt
+            8, -- grunt
+            0, -- slasher
+            0, -- mactera
+            1, -- praetorian
         };
         resource_spawn_ratios = {
             1, -- red_sugar
@@ -31,9 +34,12 @@ function initialize_game()
 
         creature_spawn_rate = .06;
         creature_spawn_ratios = {
-            2, -- loot bug
+            3, -- loot bug
             1, -- cave angel
             10, -- grunt
+            2, -- slasher
+            2, -- mactera
+            1, -- praetorian
         };
         resource_spawn_ratios = {
             1, -- red_sugar

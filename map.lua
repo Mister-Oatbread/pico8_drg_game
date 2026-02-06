@@ -56,8 +56,10 @@ function initialize_map()
         136,138,152,154,168,170,184,186,
         137,139,153,155,169,171,185,187,
     };
+    super_wall_sprite = 167;
     terrain = {};
     walls = {};
+    super_walls = {};
 
     camera_position = {x_coord=101, y_coord = 101};
 
@@ -75,14 +77,25 @@ function initialize_map()
     end
 
     -- initialize walls with random sprite
-    x_coord = 101;
+    x_coord = 102;
     y_coord = 91;
     while (x_coord < 228) do
         while (y_coord < 228) do
             add(walls, _produce_wall_entity(x_coord, y_coord));
-            y_coord += 8
+            y_coord += 8;
         end
-        x_coord += 120;
+        x_coord += 118;
+        y_coord = 91;
+    end
+
+    x_coord = 101;
+    y_coord = 91;
+    while (x_coord < 238) do
+        while (y_coord < 238) do
+            add(super_walls, {x=x_coord, y=y_coord});
+            y_coord += 8;
+        end
+        x_coord += 127;
         y_coord = 91;
     end
 end
@@ -127,5 +140,12 @@ function draw_wall()
         spr(sprite,x_coord,y_coord,1,1,x_flip,y_flip);
     end
 end
+
+function draw_super_wall()
+    for wall in all(super_walls) do
+        spr(super_wall_sprite,wall.x,wall.y,1,1,false,false);
+    end
+end
+
 
 
