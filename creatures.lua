@@ -285,13 +285,29 @@ function mactera(x,y)
     local x_flip = false;
     local health = 20;
     local alive = true;
+    local did_spit = false;
+    local perform_spit = false;
     local creature_damage = 0;
     local hitbox={x={2,7},y={1,7}};
     function animate()
-        y += 1;
-        if frame%2==0 then y+=1 end;
-        if frame%3==0 then x-=sgn(x-player.x_pos) end;
-        wings_open = frame>15;
+        if (player.y_pos - y) < 30 and not did_spit then
+            perform_spit = true;
+        end
+        if perform_spit then
+            if frame==0 then
+                did_spit = true;
+                add(creatures, mactera_spit(x,y));
+            end
+            if did_spit and frame==0 then
+                perform_spit = false;
+            end
+        else
+            y += 1;
+            if frame%2==0 then y+=1 end;
+        end
+        if frame%2==0 and not did_spit then x-=sgn(x-player.x_pos) end;
+
+        wings_open = frame>8;
         if was_damaged then
             if wings_open then
                 sprite = creature_sprites.mactera.damaged;
@@ -305,9 +321,10 @@ function mactera(x,y)
                 sprite = creature_sprites.mactera.alt;
             end
         end
+
         was_damaged, damaged_since = handle_creature_being_damaged(
             was_damaged, damaged_since);
-        frame = (frame+1)%30;
+        frame = (frame+1)%16;
     end
     function damage(damage_received)
         was_damaged = true;
@@ -319,6 +336,35 @@ function mactera(x,y)
     end
     function draw()
         spr(sprite,x,y,1,1,x_flip,false);
+    end
+    function x_coord() return x end;
+    function y_coord() return y end;
+    function is_alive() return alive end;
+    return {
+        x_coord=x_coord,
+        y_coord=y_coord,
+        animate=animate,
+        damage=damage,
+        creature_damage=creature_damage,
+        draw=draw,
+        hitbox=hitbox,
+        is_alive=is_alive,
+    };
+end
+
+function mactera_spit(x,y)
+    local x = x;
+    local y = y;
+    local alive = true;
+    local creature_damage = 1;
+    local hitbox={x={4,4},y={3,7}};
+    function animate()
+        y+=2;
+    end
+    function damage(damage_received)
+    end
+    function draw()
+        spr(creature_sprites.mactera.spit,x,y,1,1,false,false);
     end
     function x_coord() return x end;
     function y_coord() return y end;
@@ -455,8 +501,8 @@ function initialize_creatures()
         cave_angel = {default=11,alt=12,damaged=13,damaged_alt=14},
         grunt = {default=1,damaged=2},
         slasher = {default=17,damaged=18},
+        mactera = {default=27,alt=28,damaged=29,damaged_alt=30,spit=31},
         praetorian = {default=3,damaged=5,cloud=7,spit=9},
-        mactera = {default=27,alt=28,damaged=29,damaged_alt=30},
     };
 
     -- add bottom grunts to the creatures.

@@ -38,7 +38,7 @@ function initialize_game()
             1, -- cave angel
             10, -- grunt
             2, -- slasher
-            2, -- mactera
+            1, -- mactera
             1, -- praetorian
         };
         resource_spawn_ratios = {
