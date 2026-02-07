@@ -102,16 +102,18 @@ end
 
 -- slides the floor one frame to the bottom, and realigns the floor if needed
 function update_map()
-    for i=1,#terrain do
-        terrain[i].y_coord += 1;
-        if (terrain[i].y_coord >= 235) then
-            terrain[i] = _produce_map_entity(terrain[i].x_coord,91);
+    if game_status == "playing" then
+        for i=1,#terrain do
+            terrain[i].y_coord += 1;
+            if (terrain[i].y_coord >= 235) then
+                terrain[i] = _produce_map_entity(terrain[i].x_coord,91);
+            end
         end
-    end
-    for i=1,#walls do
-        walls[i].y_coord += 1;
-        if (walls[i].y_coord >= 235) then
-            walls[i] = _produce_wall_entity(walls[i].x_coord,91);
+        for i=1,#walls do
+            walls[i].y_coord += 1;
+            if (walls[i].y_coord >= 235) then
+                walls[i] = _produce_wall_entity(walls[i].x_coord,91);
+            end
         end
     end
 end

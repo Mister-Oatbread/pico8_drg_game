@@ -54,18 +54,20 @@ end
 
 -- spawn random objects
 function update_resources()
-    local i=1;
-    while (#resources>=i) do
-        resources[i].y_coord+=1;
-        if resources[i].y_coord>=235 then
-            deli(resources,i);
-        else
-            i+=1;
+    if game_status == "playing" then
+        local i=1;
+        while (#resources>=i) do
+            resources[i].y_coord+=1;
+            if resources[i].y_coord>=235 then
+                deli(resources,i);
+            else
+                i+=1;
+            end
         end
-    end
-    if (rnd(1) < resource_spawn_rate) then
-        local x_coord = flr(rnd(120))+101;
-        add(resources, _produce_resource_entity(x_coord,81));
+        if (rnd(1) < resource_spawn_rate) then
+            local x_coord = flr(rnd(120))+101;
+            add(resources, _produce_resource_entity(x_coord,81));
+        end
     end
 end
 

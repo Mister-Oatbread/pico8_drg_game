@@ -11,6 +11,7 @@ function handle_creature_being_damaged(was_damaged, damaged_since)
     end
     return was_damaged, damaged_since;
 end
+
 function loot_bug(x,y)
     local sprite = creature_sprites.loot_bug.default;
     local frame = 0;
@@ -24,8 +25,11 @@ function loot_bug(x,y)
     local creature_damage = 0;
     local hitbox={x={2,7},y={1,7}};
     function animate()
-        y += 1;
-        if frame%27==26 then y += 1 end;
+        if game_status == "playing" then
+            y += 1;
+            if frame%27==26 then y += 1 end;
+        end
+
         if (frame > 15) then
             x_flip = false;
         else
@@ -80,10 +84,12 @@ function cave_angel(x,y)
     local alive = true;
     local creature_damage = 0; local hitbox={x={2,7},y={1,7}};
     function animate()
-        y += 1;
+        if game_status == "playing" then
+            y += 1;
+            if frame%45==0 then x+=sgn(x-player.x_pos) end;
+            if frame%10==0 then y+=1 end;
+        end
 
-        if frame%10==0 then y+=1 end;
-        if frame%45==0 then x+=sgn(x-player.x_pos) end;
         wings_open = frame>30;
         if was_damaged then
             if wings_open then
@@ -140,8 +146,10 @@ function grunt(x,y)
     local creature_damage = 1;
     local hitbox={x={1,8},y={1,8}};
     function animate()
-        y += 1;
-        if frame%6==0 then y+=1 end;
+        if game_status == "playing" then
+            y += 1;
+            if frame%6==0 then y+=1 end;
+        end
 
         display_alt = frame > 15;
         was_damaged, damaged_since = handle_creature_being_damaged(
@@ -235,13 +243,15 @@ function slasher(x,y)
     local creature_damage = 2;
     local hitbox={x={1,8},y={1,8}};
     function animate()
-        y += 1;
-        if frame%5==0 then y+=1 end;
+        if game_status == "playing" then
+            y += 1;
+            if frame%6==0 then y+=1 end;
+        end
 
-        display_alt = frame > 15;
+        display_alt = frame > 12;
         was_damaged, damaged_since = handle_creature_being_damaged(
             was_damaged, damaged_since);
-        frame = (frame+1)%30;
+        frame = (frame+1)%24;
     end
     function damage(damage_received)
         was_damaged = true;
@@ -291,22 +301,24 @@ function mactera(x,y)
     local creature_damage = 0;
     local hitbox={x={2,7},y={1,7}};
     function animate()
-        if (player.y_pos - y) < 30 and not did_spit then
-            perform_spit = true;
-        end
-        if perform_spit then
-            if frame==0 then
-                did_spit = true;
-                add(creatures, mactera_spit(x,y));
+        if game_status == "playing" then
+            if (player.y_pos - y) < 30 and not did_spit then
+                perform_spit = true;
             end
-            if did_spit and frame==0 then
-                perform_spit = false;
+            if perform_spit then
+                if frame==0 then
+                    did_spit = true;
+                    add(creatures, mactera_spit(x,y));
+                end
+                if did_spit and frame==0 then
+                    perform_spit = false;
+                end
+            else
+                y += 1;
+                if frame%2==0 then y+=1 end;
             end
-        else
-            y += 1;
-            if frame%2==0 then y+=1 end;
+            if frame%2==0 and not did_spit then x-=sgn(x-player.x_pos) end;
         end
-        if frame%2==0 and not did_spit then x-=sgn(x-player.x_pos) end;
 
         wings_open = frame>8;
         if was_damaged then
@@ -394,8 +406,11 @@ function praetorian(x,y)
     local creature_damage = 1;
     local hitbox={x={4,12},y={2,14}};
     function animate()
-        y += 1;
-        if frame%20==0 then y+=1 end;
+
+        if game_status == "playing" then
+            y += 1;
+            if frame%20==0 then y+=1 end;
+        end
 
         display_alt = frame > 20;
         was_damaged, damaged_since = handle_creature_being_damaged(
@@ -447,7 +462,9 @@ function praetorian_cloud(x,y)
     local creature_damage = 1;
     local hitbox={x={1,16},y={1,16}};
     function animate()
-        y += 1;
+        if game_status == "playing" then
+            y += 1;
+        end
         x_flip = (frame%15+30)==0;
         y_flip = frame%30==0;
         frame = (frame+1)%60;
@@ -456,6 +473,51 @@ function praetorian_cloud(x,y)
     end
     function draw()
         spr(creature_sprites.praetorian.cloud,x,y,2,2,x_flip,y_flip);
+    end
+    function x_coord() return x end;
+    function y_coord() return y end;
+    function is_alive() return alive end;
+    return {
+        x_coord=x_coord,
+        y_coord=y_coord,
+        animate=animate,
+        damage=damage,
+        creature_damage=creature_damage,
+        draw=draw,
+        hitbox=hitbox,
+        is_alive=is_alive,
+    };
+end
+
+function number(x,y,value)
+    local value = value;
+    local sprite = number_sprites[value];
+    local default_sprite = sprite;
+    local x = x;
+    local y = y;
+    local health = 1;
+    local alive = true;
+    local creature_damage = 0;
+    local hitbox={x={3,7},y={1,8}};
+    function animate()
+        if game_status == "playing" then y+=1 end;
+        local b = {x={x+hitbox.x[1]-1, x+hitbox.x[2]-1}};
+        local a = {x={player.x_pos+6,player.x_pos+6}};
+        local x_good = a.x[1] > b.x[2] or a.x[2] < b.x[1];
+
+        if x_good then sprite=default_sprite else sprite=default_sprite+16 end;
+    end
+    function damage(damage_received)
+        health -= damage_received;
+        if (health <= 0) then
+            difficulty = value;
+            set_hazard_level();
+            game_status = "playing";
+            alive = false;
+        end
+    end
+    function draw()
+        spr(sprite,x,y,1,1,false,false);
     end
     function x_coord() return x end;
     function y_coord() return y end;
@@ -528,10 +590,10 @@ function update_creatures()
                 i+=1;
             end
         end
-    end
 
-    if rnd() < creature_spawn_rate then
-        spawn_creature();
+        if rnd() < creature_spawn_rate then
+            spawn_creature();
+        end
     end
 end
 function draw_creatures()

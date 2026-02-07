@@ -4,13 +4,20 @@
 function initialize_game()
     damaged_sprite_duration = 4;
     game_time = 0;
-    game_status = "haz_screen";
+    game_status = "title_screen";
 
     no_lootbugs_killed = true;
     no_cave_angels_killed = true;
     no_driller_drilled = true;
 
-    difficulty = 2;
+    difficulty = 3;
+    creature_spawn_rate = 0;
+    obstacle_spawn_rate = 0;
+    resource_spawn_rage = 0;
+end
+
+-- takes care of setting all relevant spawn rates
+function set_hazard_level()
     if difficulty == 1 then
         obstacle_spawn_rate = .04;
         resource_spawn_rate = .05;

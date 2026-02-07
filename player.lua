@@ -36,7 +36,7 @@ function initialize_player()
         has_invuln = false,
         invuln_duration = 30,
 
-        x_pos = 150,
+        x_pos = 148,
         y_pos = 200,
 
         collision_points = {left={},right={},top={}},
@@ -91,7 +91,7 @@ function drill()
         local drilled_ground = {
             sprite=drilled_ground_sprite,
             x_coord=player.x_pos,
-            y_coord=player.y_pos-7,
+            y_coord=player.y_pos-1,
             size=1,
             x_flip=false,
             y_flip=false,
@@ -192,20 +192,28 @@ function handle_being_hit()
     elseif player.is_hit and player.hit_since<=player.invuln_duration then
         player.hit_since+=1;
     end
+
+    if player.health <= 0 then game_status = "end_screen" end;
 end
 
 -- chooses the current sprite for the player
 function update_player_animation()
     player.moving_frame = (player.moving_frame+1)%10;
-    local moving = (not player.is_moving.down
-    or player.is_moving.left or player.is_moving.right);
+    local moving;
+    if game_status == "playing" then
+        moving = (not player.is_moving.down
+            or player.is_moving.left or player.is_moving.right);
+    -- only run if in playing mode, otherwise just default
+    else
+        moving = (player.is_moving.down or player.is_moving.up
+            or player.is_moving.left or player.is_moving.right);
+    end
 
     local use_alt_sprite = player.moving_frame>=5;
 
     if player.is_shooting then
         if not moving then
             player.current_sprite = player_sprites.shooting.standing;
-            player.moving_frame=0;
         else
             if use_alt_sprite then
                 player.current_sprite = player_sprites.shooting.moving_alt;
@@ -219,7 +227,6 @@ function update_player_animation()
         if not moving then
             player.current_sprite = player_sprites.drilling.standing;
             player.x_flip = false;
-            player.moving_frame=0;
         else
             player.current_sprite = player_sprites.drilling.moving;
             player.x_flip = use_alt_sprite;
@@ -229,12 +236,12 @@ function update_player_animation()
         if not moving then
             player.current_sprite = player_sprites.idle.standing;
             player.x_flip = false;
-            player.moving_frame=0;
         else
             player.current_sprite = player_sprites.idle.moving;
             player.x_flip = use_alt_sprite;
         end
     end
+
     if player.is_hit then
         player.current_sprite -=16;
     end

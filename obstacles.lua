@@ -9,11 +9,9 @@ function _produce_obstacle_entity(x_coord,y_coord)
     local size;
     if (rnd(1) < obstacle_spawn_probs[1]) then
         sprite_list = obstacle_sprites_small;
-        health = obstacle_health.small;
         size = obstacle_size.small;
     else
         sprite_list = obstacle_sprites_big;
-        health = obstacle_health.big;
         size = obstacle_size.big;
     end
 
@@ -38,7 +36,6 @@ function initialize_obstacles()
     obstacle_sprites_small = {67,68,83,84,99,100,115,116};
     obstacle_sprites_big = {69,71,101,103};
     obstacle_sprites_chonker = {77};
-    obstacle_health = {small=30,big=90,chonker=4000};
     obstacle_size = {small=1,big=2,chonker=2};
     drilled_ground_sprite = 183;
 end
@@ -46,18 +43,20 @@ end
 -- updates all obstacles and constructs/destructs new ones
 function update_obstacles()
     -- shift all down
-    local i = 1;
-    while (#obstacles>=i) do
-        obstacles[i].y_coord+=1;
-        if obstacles[i].y_coord>=235 then
-            deli(obstacles,i);
-        else
-            i+=1;
+    if game_status == "playing" then
+        local i = 1;
+        while (#obstacles>=i) do
+            obstacles[i].y_coord+=1;
+            if obstacles[i].y_coord>=235 then
+                deli(obstacles,i);
+            else
+                i+=1;
+            end
         end
-    end
-    if (rnd(1) < obstacle_spawn_rate) then
-        local x_coord = flr(rnd(120))+101;
-        add(obstacles, _produce_obstacle_entity(x_coord,81));
+        if (rnd(1) < obstacle_spawn_rate) then
+            local x_coord = flr(rnd(120))+101;
+            add(obstacles, _produce_obstacle_entity(x_coord,81));
+        end
     end
 end
 

@@ -7,14 +7,14 @@
 function _update_player_collision_points()
     -- left flank
     local i=1;
-    for y=player.y_pos,player.y_pos+7 do
+    for y=player.y_pos,player.y_pos+6 do
         player.collision_points.left[i].x=player.x_pos;
         player.collision_points.left[i].y=y;
         i+=1;
     end
     -- right flank
     i=1;
-    for y=player.y_pos,player.y_pos+7 do
+    for y=player.y_pos,player.y_pos+6 do
         player.collision_points.right[i].x=player.x_pos+7;
         player.collision_points.right[i].y=y;
         i+=1;
