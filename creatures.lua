@@ -47,6 +47,7 @@ function loot_bug(x,y)
             alive = false;
             give_ammo(.2);
             no_lootbugs_killed = false;
+            add_killed_lootbug_name();
         end
     end
     function draw()

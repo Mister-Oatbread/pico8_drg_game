@@ -4,12 +4,13 @@
 function initialize_game()
     damaged_sprite_duration = 4;
     game_time = 0;
+    game_status = "haz_screen";
 
     no_lootbugs_killed = true;
     no_cave_angels_killed = true;
     no_driller_drilled = true;
 
-    difficulty = 1;
+    difficulty = 2;
     if difficulty == 1 then
         obstacle_spawn_rate = .04;
         resource_spawn_rate = .05;
@@ -81,25 +82,6 @@ function update_game()
     end
 end
 
--- post game summary
-function display_death_screen()
-    rectfill(120,120,208,208,1);
-    print("game over!", 150, 125, 7);
-    print("score: "..player.points);
-    print("awards:", 121,140,7);
-    print("",126,140,7);
-    if no_lootbugs_killed then
-        print("no lootbugs killed");
-    end
-    if no_cave_angels_killed then
-        print("no cave angels killed");
-    end
-    if no_driller_drilled then
-        print("you spared");
-        print("the drillers");
-    end
-    stop("", 150, 150, 8);
-end
 
 -- this function takes a table of ratios for spawns and calculates
 -- the corresponding cumulative probabilities for them.
