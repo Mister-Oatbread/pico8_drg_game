@@ -9,6 +9,9 @@ function initialize_hud()
         "steeve",
         "jimini",
         "jebediah",
+        "david",
+        "eva",
+
         "emilia",
         "olliver",
         "matilda",
@@ -29,6 +32,7 @@ function initialize_hud()
         "samuel",
         "august",
         "finnley",
+
         "steevie",
     };
     killed_loot_bugs = {};
@@ -103,11 +107,13 @@ function initialize_hud()
         size=1,x_flip=false,y_flip=true});
 
     -- add numbers for haz level selection
-    add(creatures, number(128,156,1));
-    add(creatures, number(138,156,2));
-    add(creatures, number(148,156,3));
-    add(creatures, number(158,156,4));
-    add(creatures, number(168,156,5));
+    x0 = 128;
+    y0 = 160;
+    add(creatures, number(x0,y0,1));
+    add(creatures, number(x0+10,y0,2));
+    add(creatures, number(x0+20,y0,3));
+    add(creatures, number(x0+30,y0,4));
+    add(creatures, number(x0+40,y0,5));
 end
 
 function draw_hud()
@@ -217,6 +223,7 @@ function display_chefs_kiss_banner()
     spr(199, x0, y0, 4, 4);
     spr(203, x0+32, y0, 4, 4);
     spr(207, x0+64, y0, 4, 4);
+    print("shoot haz level:",105,152,9);
 end
 
 
