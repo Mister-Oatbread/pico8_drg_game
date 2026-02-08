@@ -44,6 +44,24 @@ function set_hazard_level()
         creature_spawn_ratios = {
             3, -- loot bug
             1, -- cave angel
+            12, -- grunt
+            1, -- slasher
+            1, -- mactera
+            1, -- praetorian
+        };
+        resource_spawn_ratios = {
+            1, -- red_sugar
+            1, -- nitra
+            1, -- gold
+        };
+    elseif difficulty == 3 then
+        obstacle_spawn_rate = .2;
+        resource_spawn_rate = .01;
+
+        creature_spawn_rate = .06;
+        creature_spawn_ratios = {
+            3, -- loot bug
+            1, -- cave angel
             10, -- grunt
             2, -- slasher
             1, -- mactera
@@ -54,8 +72,43 @@ function set_hazard_level()
             1, -- nitra
             1, -- gold
         };
-    end
+    elseif difficulty == 4 then
+        obstacle_spawn_rate = .2;
+        resource_spawn_rate = .01;
 
+        creature_spawn_rate = .06;
+        creature_spawn_ratios = {
+            3, -- loot bug
+            .3, -- cave angel
+            10, -- grunt
+            2, -- slasher
+            1, -- mactera
+            1, -- praetorian
+        };
+        resource_spawn_ratios = {
+            1, -- red_sugar
+            1, -- nitra
+            1, -- gold
+        }
+    elseif difficulty == 5 then
+        obstacle_spawn_rate = .2;
+        resource_spawn_rate = .01;
+
+        creature_spawn_rate = .06;
+        creature_spawn_ratios = {
+            .5, -- loot bug
+            .3, -- cave angel
+            10, -- grunt
+            3, -- slasher
+            3, -- mactera
+            2, -- praetorian
+        };
+        resource_spawn_ratios = {
+            0, -- red_sugar
+            1, -- nitra
+            0, -- gold
+        };
+    end
     obstacle_spawn_ratios = {
         15, -- small
         1, -- big
@@ -73,16 +126,22 @@ function update_game()
         if game_time%850==849 then obstacle_spawn_rate+=.01 end;
         player.fuel = player.max_fuel;
         player.ammo = player.max_ammo;
-
     elseif difficulty == 2 then
         if game_time%200==199 then creature_spawn_rate+=.01 end;
+        if game_time%450==449 then obstacle_spawn_rate+=.01 end;
+        if game_time%800==799 then resource_spawn_rate+=.01 end;
+    elseif difficulty == 3 then
+        if game_time%200==199 then creature_spawn_rate+=.01 end;
         if game_time%250==249 then obstacle_spawn_rate+=.01 end;
-
-        -- increase grunt spawn rate
-        if game_time%600==599 then
-            creature_spawn_ratios[3]+=1;
-            creature_spawn_probs = get_cum_probs(creature_spawn_ratios);
-        end
+        if game_time%800==799 then resource_spawn_rate+=.01 end;
+    elseif difficulty == 4 then
+        if game_time%200==199 then creature_spawn_rate+=.01 end;
+        if game_time%250==249 then obstacle_spawn_rate+=.01 end;
+    elseif difficulty == 5 then
+        if game_time%100==99 then creature_spawn_rate+=.01 end;
+        if game_time%150==149 then obstacle_spawn_rate+=.01 end;
+        if game_time%600==599 then resource_spawn_rate-=.01 end;
+        if resource_spawn_rate<0 then resource_spawn_rate=0 end;
     end
     if player.health <= 0 then
         display_death_screen();

@@ -52,7 +52,6 @@ function loot_bug(x,y)
             give_ammo(.2);
             no_lootbugs_killed = false;
             add_killed_lootbug_name();
-            player.points-=50;
         end
     end
     function draw()
