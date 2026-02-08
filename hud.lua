@@ -11,6 +11,9 @@ function initialize_hud()
         "jebediah",
         "david",
         "eva",
+        "lloyd",
+        "molly",
+        "randy",
 
         "emilia",
         "olliver",
