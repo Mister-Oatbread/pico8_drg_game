@@ -66,6 +66,24 @@ function initialize_hud()
         false,
         false});
 
+    -- controls guide
+    x0 = 160;
+    y0 = 200;
+    add(obstacles, {
+        sprite=227,
+        x_coord=x0,
+        y_coord=y0,
+        size=2,
+        x_flip=false,
+        y_flip=false});
+    add(obstacles, {
+        sprite=229,
+        x_coord=x0+16,
+        y_coord=y0,
+        size=2,
+        x_flip=false,
+        y_flip=false});
+
     -- tutorial sprites
     add(resources, {sprite=65, x_coord=151, y_coord=170,
         x_flip=rnd(2)<1, y_flip=rnd(2)<1, hitbox=nitra_hitbox});
@@ -74,11 +92,15 @@ function initialize_hud()
     add(resources, {sprite=64, x_coord=164, y_coord=185,
         x_flip=rnd(2)<1, y_flip=rnd(2)<1, hitbox=red_sugar_hitbox});
     add(creatures, loot_bug(190, 180));
-    add(creatures, cave_angel(182, 195));
+    add(creatures, cave_angel(182, 165));
     add(creatures, grunt(180, 120));
     add(creatures, slasher(190, 120));
     add(creatures, praetorian(200, 120));
     add(creatures, mactera(218, 120));
+    add(obstacles, {sprite=101,x_coord=200,y_coord=160,
+        size=2,x_flip=false,y_flip=false});
+    add(obstacles, {sprite=84,x_coord=200,y_coord=155,
+        size=1,x_flip=false,y_flip=true});
 
     -- add numbers for haz level selection
     add(creatures, number(128,156,1));
@@ -150,29 +172,33 @@ function display_death_screen()
     player.is_moving.left = false;
     player.is_moving.right = false;
     player.is_drilling = false;
-    player.is_moving = false;
     player.is_hit = false;
-    player.x_pos = 160;
-    player.y_pos = 160;
+    player.x_pos = 130;
+    player.y_pos = 182;
 
-    print("game over!", 150, 105, 7);
+    print("game over!", 120, 105, 7);
     print("score: "..player.points);
-    print("awards:", 111,120,7);
-    print("",113,120,7);
+    print("distance travelled: "..game_time);
+    print("awards:", 111,126,7);
+    print("",113,126,7);
     if no_lootbugs_killed then
-        print("no lootbugs");
-        print("killed");
+        print("-no lootbugs");
+        print(" killed");
     end
     if no_cave_angels_killed then
-        print("no cave");
-        print("angels killed");
+        print("-no cave");
+        print(" angels killed");
     end
     if no_driller_drilled then
-        print("you spared");
-        print("the drillers");
+        print("-you spared");
+        print(" the drillers");
+    end
+    if player.points==0 then
+        print("-died during");
+        print(" the tutorial");
     end
     -- if not no_lootbugs_killed then
-    if true then
+    if not no_lootbugs_killed then
         print("names of",180,120,7);
         print("killed");
         print("loot bugs:");
@@ -184,21 +210,6 @@ function display_death_screen()
     end
 end
 
--- -- lets you select hazard level
--- function update_haz_selector();
---     if btnp(2) then haz_level_selection -= 1 end;
---     if btnp(3) then haz_level_selection += 1 end;
---     if haz_level_selection > 5 then haz_level_selection=1 end;
---     if haz_level_selection < 1 then haz_level_selection=5 end;
---
---     -- log in
---     if btnp(4) then
---         difficulty = haz_level_selection;
---         set_hazard_level();
---         game_status = "playing";
---     end
--- end
-
 function display_chefs_kiss_banner()
     local x0 = 105;
     local y0 = 120;
@@ -207,55 +218,5 @@ function display_chefs_kiss_banner()
     spr(203, x0+32, y0, 4, 4);
     spr(207, x0+64, y0, 4, 4);
 end
-
--- function display_quick_guide();
---     local x0 = 133;
---     local y0 = 183;
---     rectfill(x0-1,y0-1,x0+67,y0+29,5);
---     rectfill(x0+49,y0+19,x0+85,y0+43,5);
---
---     print("",x0,y0-6,7);
---     print("       up");
---     print("       ⬆️");
---     print("left⬅️    ➡️right");
---     print("       ⬇️");
---     print("      down");
---
---     print("",x0,y0-6,14);
---     print("");
---     print("       ⬆️");
---     print("    ⬅️    ➡️");
---     print("       ⬇️");
---
---     x0 += 50;
---     y0 += 20;
---     print("",x0,y0-6,7);
---     print("    shoot");
---     print("     🅾️");
---     print("  ❎");
---     print("drill");
---
---     print("",x0,y0-6,14);
---     print("     🅾️");
---     print("  ❎");
--- end
-
--- function display_haz_selector();
---     local x0 = 180;
---     local y0 = 130;
---     rectfill(x0-1,y0-1,x0+50,y0+43,5);
---     print("choose a",x0,y0,7);
---     print("hazard level:");
---     if haz_level_selection==1 then color = 12 else color = 7 end;
---     print("hazard 1",x0+2,y0+14,color);
---     if haz_level_selection==2 then color = 11 else color = 7 end;
---     print("hazard 2",x0+2,y0+20,color);
---     if haz_level_selection==3 then color = 10 else color = 7 end;
---     print("hazard 3",x0+2,y0+26,color);
---     if haz_level_selection==4 then color = 9 else color = 7 end;
---     print("hazard 4",x0+2,y0+32,color);
---     if haz_level_selection==5 then color = 8 else color = 7 end;
---     print("hazard 5",x0+2,y0+38,color);
--- end
 
 

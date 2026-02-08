@@ -10,7 +10,6 @@ function initialize_player()
         shooting={standing=51,moving=52,moving_alt=53},
     };
     player = {
-        is_moving = false,
         is_shooting = false,
         is_drilling = false,
         playing_drill = {empty=false,full=false},
@@ -204,7 +203,7 @@ function update_player_animation()
         moving = (not player.is_moving.down
             or player.is_moving.left or player.is_moving.right);
     -- only run if in playing mode, otherwise just default
-    else
+    elseif game_status == "title_screen" then
         moving = (player.is_moving.down or player.is_moving.up
             or player.is_moving.left or player.is_moving.right);
     end

@@ -34,7 +34,7 @@ function _update()
         update_bullets();
         check_bullet_collision();
     elseif game_status == "end_screen" then
-        if btnp(4) then reboot() end;
+        if btn(4) and btn(5) then reboot() end;
     end
 end
 

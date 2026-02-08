@@ -52,6 +52,7 @@ function loot_bug(x,y)
             give_ammo(.2);
             no_lootbugs_killed = false;
             add_killed_lootbug_name();
+            player.points-=50;
         end
     end
     function draw()
@@ -161,6 +162,7 @@ function grunt(x,y)
         health -= damage_received;
         if (health <= 0) then
             alive = false;
+            player.points += 10;
         end
     end
     function draw()
@@ -258,6 +260,7 @@ function slasher(x,y)
         health -= damage_received;
         if (health <= 0) then
             alive = false;
+            player.points+=30;
         end
     end
     function draw()
@@ -345,6 +348,7 @@ function mactera(x,y)
         if (health <= 0) then
             alive = false;
             no_cave_angels_killed = false;
+            player.points+=30;
         end
     end
     function draw()
@@ -423,6 +427,7 @@ function praetorian(x,y)
         if (health <= 0) then
             alive = false;
             add(creatures, praetorian_cloud(x,y));
+            player.points+=100;
         end
     end
     function draw()
