@@ -7,28 +7,20 @@ function _produce_resource_entity(x_coord,y_coord)
     local sprite_list;
     local decision = rnd(1);
     local sprite,  x_flip, y_flip, hitbox;
-    if (decision <.0001) then
-        -- yes, this is an easter egg ;D
-        sprite=player_sprites.idle.standing;
-        hitbox=driller_resource_hitbox;
-        x_flip=false;
-        y_flip=true;
+    if (decision<resource_spawn_probs[1]) then
+        sprite_list=red_sugar_sprites;
+        hitbox=red_sugar_hitbox;
+    elseif(decision<resource_spawn_probs[2]) then
+        sprite_list=nitra_sprites;
+        hitbox=nitra_hitbox;
     else
-        if (decision<resource_spawn_probs[1]) then
-            sprite_list=red_sugar_sprites;
-            hitbox=red_sugar_hitbox;
-        elseif(decision<resource_spawn_probs[2]) then
-            sprite_list=nitra_sprites;
-            hitbox=nitra_hitbox;
-        else
-            sprite_list=gold_sprites;
-            hitbox=gold_hitbox;
-        end
-        x_flip = rnd(2) < 1;
-        y_flip = rnd(2) < 1;
-
-        sprite = sprite_list[flr(rnd(#sprite_list))+1];
+        sprite_list=gold_sprites;
+        hitbox=gold_hitbox;
     end
+    x_flip = rnd(2) < 1;
+    y_flip = rnd(2) < 1;
+
+    sprite = sprite_list[flr(rnd(#sprite_list))+1];
 
     return {
         sprite=sprite,
@@ -48,7 +40,6 @@ function initialize_resources()
     red_sugar_hitbox = {x={3,6},y={3,6}};
     nitra_hitbox = {x={1,8},y={1,8}};
     gold_hitbox = {x={1,8},y={1,8}};
-    driller_resource_hitbox = {x={2,7},y={2,7}};
     mining_sound = 38;
 end
 
@@ -96,11 +87,6 @@ function update_mined_resources()
                     if resources[i].sprite == sprite then
                         give_health(1);
                     end
-                end
-                if resources[i].sprite == player_sprites.idle.standing then
-                    give_ammo(1);
-                    player.points+=100;
-                    no_driller_drilled = false;
                 end
 
                 deli(resources,i);

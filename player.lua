@@ -62,8 +62,8 @@ function update_inputs()
     player.is_moving.down = btn(3);
     player.is_moving.left = btn(0);
     player.is_moving.right = btn(1);
-    player.is_shooting = btn(4);
-    player.is_drilling = btn(5);
+    player.is_shooting = btn(5);
+    player.is_drilling = btn(4);
 end
 
 -- takes care of using the special abilities  the player has
@@ -88,14 +88,10 @@ function drill()
     if (player.fuel > 0) then
         -- get sprites in front of player
         local drilled_ground = {
-            sprite=drilled_ground_sprite,
             x_coord=player.x_pos,
             y_coord=player.y_pos-1,
-            size=1,
-            x_flip=false,
-            y_flip=false,
         };
-        add(obstacles, drilled_ground);
+        add(drilled_ground_obstacles, drilled_ground);
         player.fuel -= 1;
         update_mined_resources();
     end

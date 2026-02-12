@@ -8,7 +8,9 @@ function initialize_game()
 
     no_lootbugs_killed = true;
     no_cave_angels_killed = true;
-    no_driller_drilled = true;
+    in_tutorial = true;
+    no_scout_killed = true;
+    calculate_extra_credits = true;
 
     difficulty = 3;
     creature_spawn_rate = 0;

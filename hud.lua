@@ -185,38 +185,38 @@ function display_death_screen()
     player.x_pos = 130;
     player.y_pos = 182;
 
-    print("game over!", 120, 105, 7);
-    print("score: "..player.points);
-    print("distance travelled: "..game_time);
     print("awards:", 111,126,7);
     print("",113,126,7);
     if no_lootbugs_killed then
         print("-no lootbugs");
-        print(" killed");
+        print(" killed (+100)");
     end
     if no_cave_angels_killed then
-        print("-no cave");
-        print(" angels killed");
+        print("-no cave angels");
+        print(" killed (+100)");
     end
-    if no_driller_drilled then
+    if no_scout_killed then
         print("-you spared");
-        print(" the drillers");
+        print(" the scouts (+100)");
     end
-    if player.points==0 then
-        print("-died during");
-        print(" the tutorial");
+    if in_tutorial then
+        print("-died during the");
+        print(" tutorial (+500)");
     end
     -- if not no_lootbugs_killed then
     if not no_lootbugs_killed then
-        print("names of",180,120,7);
+        print("names of",190,130,7);
         print("killed");
         print("loot bugs:");
-        local y = 138;
+        local y = 148;
         for name in all(killed_loot_bugs) do
-            print(name,182,y);
+            print(name,192,y);
             y+=6;
         end
     end
+    print("game over!", 120, 105, 7);
+    print("score: "..player.points);
+    print("distance travelled: "..game_time);
 end
 
 function display_chefs_kiss_banner()

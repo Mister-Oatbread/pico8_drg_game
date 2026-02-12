@@ -30,7 +30,7 @@ end
 function get_drills_hitbox(player)
     return {
         x={player.x_pos, player.x_pos+7},
-        y={player.y_pos-1, player.y_pos-1},
+        y={player.y_pos-1, player.y_pos+3},
     };
 end
 

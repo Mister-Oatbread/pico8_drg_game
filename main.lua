@@ -9,6 +9,7 @@ function _init()
     initialize_hud();
     initialize_player();
     initialize_bullets();
+    initialize_props();
 end
 
 function _update()
@@ -33,7 +34,15 @@ function _update()
         handle_player_abilities();
         update_bullets();
         check_bullet_collision();
+        update_props();
     elseif game_status == "end_screen" then
+        if calculate_extra_credits then
+            if in_tutorial then player.points+=500 end;
+            if no_lootbugs_killed then player.points+=100 end;
+            if no_cave_angels_killed then player.points+=100 end;
+            if no_scout_killed then player.points+=100 end;
+            calculate_extra_credits = false;
+        end
         if btn(4) and btn(5) then reboot() end;
     end
 end
@@ -42,11 +51,12 @@ function _draw()
     cls();
     camera(101,101);
     if game_status == "title_screen" then
-        draw_map();
+        rectfill(100,100,230,230,1);
         draw_wall();
         display_chefs_kiss_banner();
         -- display_tutorial();
         draw_obstacles();
+        draw_drilled_ground_obstacles();
         draw_resources();
         draw_super_wall();
         draw_bullets();
@@ -61,6 +71,8 @@ function _draw()
         draw_map();
         draw_wall();
         draw_obstacles();
+        draw_props();
+        draw_drilled_ground_obstacles();
         draw_super_wall();
         draw_resources();
         draw_creatures();

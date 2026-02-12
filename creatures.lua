@@ -516,7 +516,62 @@ function number(x,y,value)
         if (health <= 0) then
             difficulty = value;
             set_hazard_level();
+            in_tutorial = false;
             game_status = "playing";
+            music(1);
+            alive = false;
+        end
+    end
+    function draw()
+        spr(sprite,x,y,1,1,false,false);
+    end
+    function x_coord() return x end;
+    function y_coord() return y end;
+    function is_alive() return alive end;
+    return {
+        x_coord=x_coord,
+        y_coord=y_coord,
+        animate=animate,
+        damage=damage,
+        creature_damage=creature_damage,
+        draw=draw,
+        hitbox=hitbox,
+        is_alive=is_alive,
+    };
+end
+
+function egg(x,y)
+    local frame=0;
+    local sprite = 59;
+    local damaged_since = 0;
+    local x = x;
+    local y = y;
+    local health = 30;
+    local alive = true;
+    local creature_damage = 0;
+    local hitbox={x={2,7},y={1,8}};
+    function animate()
+        y+=1;
+        if frame%5==0 then y-=1 end;
+        if frame>10 then
+            sprite = 59;
+            if was_damaged then sprite-=2 end;
+        else
+            if was_damaged then sprite-=2 end;
+            sprite = 60;
+        end
+        was_damaged, damaged_since = handle_creature_being_damaged(
+            was_damaged, damaged_since);
+        frame = (frame+1)%20;
+    end
+    function damage(damage_received)
+        was_damaged = true;
+        health -= damage_received;
+        if (health <= 0) then
+            give_ammo(.5);
+            give_health(1);
+            player.points+=50;
+            no_scout_killed = false;
             alive = false;
         end
     end
@@ -545,7 +600,11 @@ function spawn_creature()
     local y_coord = 81;
     local decision = rnd();
     if decision < creature_spawn_probs[1] then
-        creature = loot_bug(x_coord, y_coord);
+        if rnd(2) < 1 then
+            creature = loot_bug(x_coord, y_coord);
+        else
+            creature = egg(x_coord, y_coord);
+        end
     elseif decision < creature_spawn_probs[2] then
         creature = cave_angel(x_coord, y_coord);
     elseif decision < creature_spawn_probs[3] then

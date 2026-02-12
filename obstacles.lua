@@ -33,6 +33,7 @@ end
 -- chonkers can't be destroyed
 function initialize_obstacles()
     obstacles = {};
+    drilled_ground_obstacles = {};
     obstacle_sprites_small = {67,68,83,84,99,100,115,116};
     obstacle_sprites_big = {69,71,101,103};
     obstacle_sprites_chonker = {77};
@@ -53,6 +54,17 @@ function update_obstacles()
                 i+=1;
             end
         end
+
+        i = 1;
+        while (#drilled_ground_obstacles>=i) do
+            drilled_ground_obstacles[i].y_coord+=1;
+            if drilled_ground_obstacles[i].y_coord>=235 then
+                deli(drilled_ground_obstacles,i);
+            else
+                i+=1;
+            end
+        end
+
         if (rnd(1) < obstacle_spawn_rate) then
             local x_coord = flr(rnd(120))+101;
             add(obstacles, _produce_obstacle_entity(x_coord,81));
@@ -76,4 +88,14 @@ function draw_obstacles()
     end
 end
 
+function draw_drilled_ground_obstacles()
+    local x_coord, y_coord;
+    if #drilled_ground_obstacles > 0 then
+        for ground in all(drilled_ground_obstacles) do
+            x_coord = ground.x_coord;
+            y_coord = ground.y_coord;
+            spr(drilled_ground_sprite, x_coord, y_coord, 1, 1, false, false);
+        end
+    end
+end
 
