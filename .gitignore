@@ -2,5 +2,7 @@
 
 *.png
 *.bin
+*.html
+*.js
 
 
