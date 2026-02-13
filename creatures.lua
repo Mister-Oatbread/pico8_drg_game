@@ -45,6 +45,7 @@ function loot_bug(x,y)
         frame = (frame+1)%30;
     end
     function damage(damage_received)
+        sfx(33);
         was_damaged = true;
         health -= damage_received;
         if (health <= 0) then
@@ -109,6 +110,7 @@ function cave_angel(x,y)
         frame = (frame+1)%60;
     end
     function damage(damage_received)
+        sfx(33);
         was_damaged = true;
         health -= damage_received;
         if (health <= 0) then
@@ -157,6 +159,7 @@ function grunt(x,y)
         frame = (frame+1)%30;
     end
     function damage(damage_received)
+        sfx(33);
         was_damaged = true;
         health -= damage_received;
         if (health <= 0) then
@@ -255,6 +258,7 @@ function slasher(x,y)
         frame = (frame+1)%24;
     end
     function damage(damage_received)
+        sfx(33);
         was_damaged = true;
         health -= damage_received;
         if (health <= 0) then
@@ -342,6 +346,7 @@ function mactera(x,y)
         frame = (frame+1)%16;
     end
     function damage(damage_received)
+        sfx(33);
         was_damaged = true;
         health -= damage_received;
         if (health <= 0) then
@@ -421,6 +426,7 @@ function praetorian(x,y)
         frame = (frame+1)%40;
     end
     function damage(damage_received)
+        sfx(33);
         was_damaged = true;
         health -= damage_received;
         if (health <= 0) then
@@ -512,6 +518,7 @@ function number(x,y,value)
         if x_good then sprite=default_sprite else sprite=default_sprite+16 end;
     end
     function damage(damage_received)
+        sfx(33);
         health -= damage_received;
         if (health <= 0) then
             difficulty = value;
@@ -567,6 +574,7 @@ function egg(x,y)
         frame = (frame+1)%20;
     end
     function damage(damage_received)
+        sfx(32);
         was_damaged = true;
         health -= damage_received;
         if (health <= 0) then

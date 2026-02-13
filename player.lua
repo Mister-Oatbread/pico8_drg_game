@@ -188,6 +188,10 @@ function handle_being_hit()
         player.hit_since+=1;
     end
 
+    if player.is_hit and player.hit_since == 1 then
+        sfx(32);
+    end
+
     if player.health <= 0 then game_status = "end_screen" end;
 end
 
