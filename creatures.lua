@@ -518,6 +518,8 @@ function number(x,y,value)
             set_hazard_level();
             in_tutorial = false;
             game_status = "playing";
+            -- cut music and start playing new music
+            music(-1);
             music(1);
             alive = false;
         end
@@ -600,10 +602,10 @@ function spawn_creature()
     local y_coord = 81;
     local decision = rnd();
     if decision < creature_spawn_probs[1] then
-        if rnd(2) < 1 then
-            creature = loot_bug(x_coord, y_coord);
-        else
+        if rnd(1000) < 1 then
             creature = egg(x_coord, y_coord);
+        else
+            creature = loot_bug(x_coord, y_coord);
         end
     elseif decision < creature_spawn_probs[2] then
         creature = cave_angel(x_coord, y_coord);

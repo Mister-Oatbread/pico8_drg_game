@@ -2,6 +2,7 @@
 
 -- contains all sorts of miscellaneous things related to the game itself
 function initialize_game()
+    music(56);
     damaged_sprite_duration = 4;
     game_time = 0;
     game_status = "title_screen";
@@ -38,17 +39,18 @@ function set_hazard_level()
             0, -- nitra
             1, -- gold
         };
+
     elseif difficulty == 2 then
         obstacle_spawn_rate = .2;
         resource_spawn_rate = .01;
 
-        creature_spawn_rate = .06;
+        creature_spawn_rate = .04;
         creature_spawn_ratios = {
             3, -- loot bug
             1, -- cave angel
             12, -- grunt
             1, -- slasher
-            1, -- mactera
+            0, -- mactera
             1, -- praetorian
         };
         resource_spawn_ratios = {
@@ -56,6 +58,7 @@ function set_hazard_level()
             1, -- nitra
             1, -- gold
         };
+
     elseif difficulty == 3 then
         obstacle_spawn_rate = .2;
         resource_spawn_rate = .01;
@@ -74,6 +77,7 @@ function set_hazard_level()
             1, -- nitra
             1, -- gold
         };
+
     elseif difficulty == 4 then
         obstacle_spawn_rate = .2;
         resource_spawn_rate = .01;
@@ -92,6 +96,7 @@ function set_hazard_level()
             1, -- nitra
             1, -- gold
         }
+
     elseif difficulty == 5 then
         obstacle_spawn_rate = .2;
         resource_spawn_rate = .01;

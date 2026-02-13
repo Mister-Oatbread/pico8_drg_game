@@ -205,9 +205,9 @@ function display_death_screen()
     end
     -- if not no_lootbugs_killed then
     if not no_lootbugs_killed then
-        print("names of",190,130,7);
-        print("killed");
-        print("loot bugs:");
+        print("killed",190,130,7);
+        print("loot");
+        print("bugs:");
         local y = 148;
         for name in all(killed_loot_bugs) do
             print(name,192,y);

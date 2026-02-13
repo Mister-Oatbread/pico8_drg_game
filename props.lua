@@ -58,7 +58,7 @@ function update_props()
             end
         end
     end
-    if rnd() < .04 then
+    if rnd() < .02 then
         spawn_prop();
     end
 end
