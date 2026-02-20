@@ -10,6 +10,7 @@ function _init()
     initialize_player();
     initialize_bullets();
     initialize_props();
+    cpu_cost = 0;
 end
 
 function _update()
@@ -35,16 +36,12 @@ function _update()
         update_bullets();
         check_bullet_collision();
         update_props();
+        performance = stat(1);
     elseif game_status == "end_screen" then
-        if calculate_extra_credits then
-            if in_tutorial then player.points+=500 end;
-            if no_lootbugs_killed then player.points+=100 end;
-            if no_cave_angels_killed then player.points+=100 end;
-            if no_scout_killed then player.points+=100 end;
-            calculate_extra_credits = false;
-        end
+        snapshot_achievements();
         if btn(4) and btn(5) then reboot() end;
     end
+    cpu_cost = stat(1);
 end
 
 function _draw()
@@ -65,8 +62,6 @@ function _draw()
         -- drop pod
         spr(224,140,213,3,3);
         draw_hud();
-        -- display_haz_selector();
-        -- display_quick_guide();
     elseif game_status == "playing" then
         draw_map();
         draw_wall();
@@ -87,6 +82,9 @@ function _draw()
         draw_hud();
         display_death_screen();
     end
+    cpu_cost += stat(1);
+    print(stat(7), 218, 103, 11);
+    print(cpu_cost, 192, 103, 11);
 end
 
 

@@ -45,23 +45,24 @@ end
 function update_obstacles()
     -- shift all down
     if game_status == "playing" then
-        local i = 1;
-        while (#obstacles>=i) do
-            obstacles[i].y_coord+=1;
-            if obstacles[i].y_coord>=235 then
-                deli(obstacles,i);
-            else
-                i+=1;
+
+        local no_obstacles = #obstacles;
+        if no_obstacles > 0 then
+            for i=no_obstacles,1,-1 do
+                obstacles[i].y_coord+=1;
+                if obstacles[i].y_coord>=235 then
+                    deli(obstacles,i);
+                end
             end
         end
 
-        i = 1;
-        while (#drilled_ground_obstacles>=i) do
-            drilled_ground_obstacles[i].y_coord+=1;
-            if drilled_ground_obstacles[i].y_coord>=235 then
-                deli(drilled_ground_obstacles,i);
-            else
-                i+=1;
+        local no_drilled_ground_obstacles = #drilled_ground_obstacles;
+        if no_drilled_ground_obstacles > 0 then
+            for i=no_drilled_ground_obstacles,1,-1 do
+                drilled_ground_obstacles[i].y_coord+=1;
+                if drilled_ground_obstacles[i].y_coord>=235 then
+                    deli(drilled_ground_obstacles,i);
+                end
             end
         end
 
@@ -75,8 +76,10 @@ end
 -- paint all obstacles
 function draw_obstacles()
     local sprite, x_coord, y_coord, size, x_flip, y_flip;
-    if #obstacles > 0 then
-        for i=1,#obstacles do
+    local no_obstacles = #obstacles;
+
+    if no_obstacles > 0 then
+        for i=1,no_obstacles do
             sprite = obstacles[i].sprite;
             x_coord = obstacles[i].x_coord;
             y_coord = obstacles[i].y_coord;
@@ -90,10 +93,12 @@ end
 
 function draw_drilled_ground_obstacles()
     local x_coord, y_coord;
-    if #drilled_ground_obstacles > 0 then
-        for ground in all(drilled_ground_obstacles) do
-            x_coord = ground.x_coord;
-            y_coord = ground.y_coord;
+    local no_drilled_ground_obstacles = #drilled_ground_obstacles;
+
+    if no_drilled_ground_obstacles > 0 then
+        for i=1,no_drilled_ground_obstacles do
+            x_coord = drilled_ground_obstacles[i].x_coord;
+            y_coord = drilled_ground_obstacles[i].y_coord;
             spr(drilled_ground_sprite, x_coord, y_coord, 1, 1, false, false);
         end
     end

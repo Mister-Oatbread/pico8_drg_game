@@ -249,13 +249,13 @@ function slasher(x,y)
     function animate()
         if game_status == "playing" then
             y += 1;
-            if frame%6==0 then y+=1 end;
+            if frame%5==0 then y+=1 end;
         end
 
         display_alt = frame > 12;
         was_damaged, damaged_since = handle_creature_being_damaged(
             was_damaged, damaged_since);
-        frame = (frame+1)%24;
+        frame = (frame+1)%30;
     end
     function damage(damage_received)
         sfx(33);
@@ -413,17 +413,27 @@ function praetorian(x,y)
     local alive = true;
     local creature_damage = 1;
     local hitbox={x={4,12},y={2,14}};
+    local spitting = false;
+    local spit;
     function animate()
 
         if game_status == "playing" then
             y += 1;
-            if frame%20==0 then y+=1 end;
+            if not spitting and frame%20==0 then y+=1 end;
         end
 
-        display_alt = frame > 20;
+        if not spitting then display_alt = frame > 20 end;
         was_damaged, damaged_since = handle_creature_being_damaged(
             was_damaged, damaged_since);
         frame = (frame+1)%40;
+
+        if abs(x-player.x_pos-4) < 20 and player.y_pos - y < 20 then
+            if not spitting then
+                spit = praetorian_spit(x,y+16);
+                add(creatures, spit);
+                spitting = true;
+            end
+        end
     end
     function damage(damage_received)
         sfx(33);
@@ -432,6 +442,7 @@ function praetorian(x,y)
         if (health <= 0) then
             alive = false;
             add(creatures, praetorian_cloud(x,y));
+            del(creatures, spit);
             player.points+=100;
         end
     end
@@ -445,6 +456,42 @@ function praetorian(x,y)
             x_flip = display_alt;
         end
         spr(sprite,x,y,2,2,x_flip,false);
+    end
+    function x_coord() return x end;
+    function y_coord() return y end;
+    function is_alive() return alive end;
+    return {
+        x_coord=x_coord,
+        y_coord=y_coord,
+        animate=animate,
+        damage=damage,
+        creature_damage=creature_damage,
+        draw=draw,
+        hitbox=hitbox,
+        is_alive=is_alive,
+    };
+end
+
+function praetorian_spit(x,y)
+    local frame = 0;
+    local frame = 0;
+    local x = x;
+    local y = y;
+    local x_flip = false;
+    local alive = true;
+    local creature_damage = 1;
+    local hitbox={x={4,12},y={1,16}};
+    function animate()
+        if game_status == "playing" then
+            y += 1;
+        end
+        x_flip = frame>=10;
+        frame = (frame+1)%20;
+    end
+    function damage(damage_received)
+    end
+    function draw()
+        spr(creature_sprites.praetorian.spit,x,y,2,2,x_flip,false);
     end
     function x_coord() return x end;
     function y_coord() return y end;
@@ -475,8 +522,8 @@ function praetorian_cloud(x,y)
         if game_status == "playing" then
             y += 1;
         end
-        x_flip = (frame%15+30)==0;
-        y_flip = frame%30==0;
+        x_flip = frame>30;
+        y_flip = frame%30>15;
         frame = (frame+1)%60;
     end
     function damage(damage_received)
@@ -648,19 +695,17 @@ function initialize_creatures()
 end
 
 function update_creatures()
-    if #creatures>0 then
-        for creature in all(creatures) do
-            creature.animate();
+    local no_creatures = #creatures;
+    if no_creatures>0 then
+        for i=1,no_creatures do
+            creatures[i].animate();
         end
 
-        local i=1;
-        while #creatures>=i do
+        for i = no_creatures,1,-1 do
             if creatures[i].y_coord() >= 240 then
                 deli(creatures, i);
             elseif not creatures[i].is_alive() then
                 deli(creatures, i);
-            else
-                i+=1;
             end
         end
 
@@ -670,9 +715,10 @@ function update_creatures()
     end
 end
 function draw_creatures()
-    if #creatures>0 then
-        for creature in all(creatures) do
-            creature.draw();
+    local no_creatures = #creatures;
+    if no_creatures>0 then
+        for i=1,no_creatures do
+            creatures[i].draw();
         end
     end
 end

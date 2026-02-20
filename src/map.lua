@@ -103,13 +103,15 @@ end
 -- slides the floor one frame to the bottom, and realigns the floor if needed
 function update_map()
     if game_status == "playing" then
-        for i=1,#terrain do
+        local no_terrain = #terrain;
+        local no_walls = #walls;
+        for i=1,no_terrain do
             terrain[i].y_coord += 1;
             if (terrain[i].y_coord >= 235) then
                 terrain[i] = _produce_map_entity(terrain[i].x_coord,91);
             end
         end
-        for i=1,#walls do
+        for i=1,no_walls do
             walls[i].y_coord += 1;
             if (walls[i].y_coord >= 235) then
                 walls[i] = _produce_wall_entity(walls[i].x_coord,91);
@@ -121,7 +123,8 @@ end
 -- paint all terrain tiles at their current location
 function draw_map()
     local sprite, x_coord, y_coord, x_flip, y_flip;
-    for i=1,#terrain do
+    local no_terrain = #terrain;
+    for i=1,no_terrain do
         sprite = terrain[i].sprite;
         x_coord = terrain[i].x_coord;
         y_coord = terrain[i].y_coord;
@@ -133,7 +136,8 @@ end
 
 function draw_wall()
     local sprite, x_coord, y_coord, x_flip, y_flip;
-    for i=1,#walls do
+    local no_walls = #walls;
+    for i=1,no_walls do
         sprite = walls[i].sprite;
         x_coord = walls[i].x_coord;
         y_coord = walls[i].y_coord;
@@ -144,8 +148,14 @@ function draw_wall()
 end
 
 function draw_super_wall()
-    for wall in all(super_walls) do
-        spr(super_wall_sprite,wall.x,wall.y,1,1,false,false);
+    local no_super_walls = #super_walls
+    for i=1,no_super_walls do
+        spr(
+            super_wall_sprite,
+            super_walls[i].x,
+            super_walls[i].y,
+            1,1,false,false
+        );
     end
 end
 

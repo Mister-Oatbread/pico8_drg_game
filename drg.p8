@@ -1,18 +1,18 @@
 pico-8 cartridge // http://www.pico-8.com
 version 43
 __lua__
-#include main.lua
-#include game.lua
-#include map.lua
-#include obstacles.lua
-#include creatures.lua
-#include player.lua
-#include projectiles.lua
-#include collisions.lua
-#include resources.lua
-#include hud.lua
-#include hitscanner.lua
-#include props.lua
+#include src/main.lua
+#include src/game.lua
+#include src/map.lua
+#include src/obstacles.lua
+#include src/creatures.lua
+#include src/player.lua
+#include src/projectiles.lua
+#include src/collisions.lua
+#include src/resources.lua
+#include src/hud.lua
+#include src/hitscanner.lua
+#include src/props.lua
 __gfx__
 0000000090044000900220000000000000000000000000000000000000bb000b000b00000000000bb000000000c00c00000cc000002002000002200000000000
 0000000009444499092222990000000bb00000000000000ee00000000bb0000bbb0bbb00000000b0bb00000000c00c00000cc000002002000002200000000000

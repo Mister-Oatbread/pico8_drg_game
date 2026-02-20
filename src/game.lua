@@ -155,6 +155,17 @@ function update_game()
     end
 end
 
+-- can be called at the end of the game to check which achievements have
+-- been satisfied
+function snapshot_achievements()
+        if calculate_extra_credits then
+            if in_tutorial then player.points+=500 end;
+            if no_lootbugs_killed then player.points+=100 end;
+            if no_cave_angels_killed then player.points+=100 end;
+            if no_scout_killed then player.points+=100 end;
+            calculate_extra_credits = false;
+        end
+end
 
 -- this function takes a table of ratios for spawns and calculates
 -- the corresponding cumulative probabilities for them.

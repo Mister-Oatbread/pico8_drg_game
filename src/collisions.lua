@@ -7,21 +7,21 @@
 function _update_player_collision_points()
     -- left flank
     local i=1;
-    for y=player.y_pos,player.y_pos+6 do
+    for y = player.y_pos,player.y_pos+6 do
         player.collision_points.left[i].x=player.x_pos;
         player.collision_points.left[i].y=y;
         i+=1;
     end
     -- right flank
     i=1;
-    for y=player.y_pos,player.y_pos+6 do
+    for y = player.y_pos,player.y_pos+6 do
         player.collision_points.right[i].x=player.x_pos+7;
         player.collision_points.right[i].y=y;
         i+=1;
     end
     -- top flank
     i=1;
-    for x=player.x_pos+1,player.x_pos+6 do
+    for x = player.x_pos+1,player.x_pos+6 do
         player.collision_points.top[i].x=x;
         player.collision_points.top[i].y=player.y_pos-1;
         i+=1;
@@ -41,7 +41,12 @@ function _find_terrain_collision()
     player.has_collision.left = false;
     player.has_collision.right = false;
     player.has_collision.top = false;
-    for i=1,#player.collision_points.left do
+
+    local no_collision_points_left = #player.collision_points.left;
+    local no_collision_points_right = #player.collision_points.right;
+    local no_collision_points_top = #player.collision_points.top;
+
+    for i = 1,no_collision_points_left do
         point = player.collision_points.left[i];
         color = pget(point.x,point.y);
         if (color==5 or color==13) then
@@ -49,7 +54,7 @@ function _find_terrain_collision()
             break;
         end
     end
-    for i=1,#player.collision_points.right do
+    for i=1,no_collision_points_right do
         point = player.collision_points.right[i];
         color = pget(point.x,point.y);
         if (color==5 or color==13) then
@@ -57,7 +62,7 @@ function _find_terrain_collision()
             break;
         end
     end
-    for i=1,#player.collision_points.top do
+    for i=1,no_collision_points_top do
         point = player.collision_points.top[i];
         color = pget(point.x,point.y);
         if (color==5 or color==13) then

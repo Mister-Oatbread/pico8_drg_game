@@ -164,12 +164,14 @@ end
 function check_if_hit_by_creature()
     local player_box = get_player_hitbox(player);
     local creature_box;
-    if #creatures>0 then
-        for creature in all(creatures) do
-            creature_box = get_creature_hitbox(creature);
+    local no_creatures = #creatures;
+
+    if no_creatures>0 then
+        for i=1,no_creatures do
+            creature_box = get_creature_hitbox(creatures[i]);
             if are_colliding(player_box, creature_box) then
-                if creature.creature_damage>0 and not player.has_invuln then
-                    player.health -= creature.creature_damage;
+                if creatures[i].creature_damage>0 and not player.has_invuln then
+                    player.health -= creatures[i].creature_damage;
                     player.is_hit = true;
                     player.hit_since = 0;
                     player.has_invuln = true;
