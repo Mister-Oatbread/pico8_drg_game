@@ -22,8 +22,9 @@ function _update()
         move_player();
         handle_player_abilities();
         update_map();
-        update_bullets();
+        update_projectiles();
         check_bullet_collision();
+        check_spit_collision();
     elseif game_status == "playing" then
         update_inputs();
         update_game();
@@ -33,8 +34,9 @@ function _update()
         update_creatures();
         move_player();
         handle_player_abilities();
-        update_bullets();
+        update_projectiles();
         check_bullet_collision();
+        check_spit_collision();
         update_props();
         performance = stat(1);
     elseif game_status == "end_screen" then
@@ -56,7 +58,7 @@ function _draw()
         draw_drilled_ground_obstacles();
         draw_resources();
         draw_super_wall();
-        draw_bullets();
+        draw_projectiles();
         draw_creatures();
         draw_player();
         -- drop pod
@@ -71,7 +73,7 @@ function _draw()
         draw_super_wall();
         draw_resources();
         draw_creatures();
-        draw_bullets();
+        draw_projectiles();
         draw_player();
         draw_hud();
     elseif game_status == "end_screen" then

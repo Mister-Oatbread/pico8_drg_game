@@ -314,7 +314,8 @@ function mactera(x,y)
             if perform_spit then
                 if frame==0 then
                     did_spit = true;
-                    add(creatures, mactera_spit(x,y));
+                    add_spit("mactera_spit", x, y);
+                    -- add(creatures, mactera_spit(x,y));
                 end
                 if did_spit and frame==0 then
                     perform_spit = false;
@@ -373,35 +374,6 @@ function mactera(x,y)
     };
 end
 
-function mactera_spit(x,y)
-    local x = x;
-    local y = y;
-    local alive = true;
-    local creature_damage = 1;
-    local hitbox={x={4,4},y={3,7}};
-    function animate()
-        y+=2;
-    end
-    function damage(damage_received)
-    end
-    function draw()
-        spr(creature_sprites.mactera.spit,x,y,1,1,false,false);
-    end
-    function x_coord() return x end;
-    function y_coord() return y end;
-    function is_alive() return alive end;
-    return {
-        x_coord=x_coord,
-        y_coord=y_coord,
-        animate=animate,
-        damage=damage,
-        creature_damage=creature_damage,
-        draw=draw,
-        hitbox=hitbox,
-        is_alive=is_alive,
-    };
-end
-
 function praetorian(x,y)
     local frame = 0;
     local x = x;
@@ -429,8 +401,7 @@ function praetorian(x,y)
 
         if abs(x-player.x_pos-4) < 20 and player.y_pos - y < 20 then
             if not spitting then
-                spit = praetorian_spit(x,y+16);
-                add(creatures, spit);
+                add_spit("praet_spit", x, y+16);
                 spitting = true;
             end
         end
@@ -441,8 +412,8 @@ function praetorian(x,y)
         health -= damage_received;
         if (health <= 0) then
             alive = false;
-            add(creatures, praetorian_cloud(x,y));
-            del(creatures, spit);
+            add_spit("praet_cloud", x, y);
+            del(spits, spit);
             player.points+=100;
         end
     end
@@ -456,80 +427,6 @@ function praetorian(x,y)
             x_flip = display_alt;
         end
         spr(sprite,x,y,2,2,x_flip,false);
-    end
-    function x_coord() return x end;
-    function y_coord() return y end;
-    function is_alive() return alive end;
-    return {
-        x_coord=x_coord,
-        y_coord=y_coord,
-        animate=animate,
-        damage=damage,
-        creature_damage=creature_damage,
-        draw=draw,
-        hitbox=hitbox,
-        is_alive=is_alive,
-    };
-end
-
-function praetorian_spit(x,y)
-    local frame = 0;
-    local frame = 0;
-    local x = x;
-    local y = y;
-    local x_flip = false;
-    local alive = true;
-    local creature_damage = 1;
-    local hitbox={x={4,12},y={1,16}};
-    function animate()
-        if game_status == "playing" then
-            y += 1;
-        end
-        x_flip = frame>=10;
-        frame = (frame+1)%20;
-    end
-    function damage(damage_received)
-    end
-    function draw()
-        spr(creature_sprites.praetorian.spit,x,y,2,2,x_flip,false);
-    end
-    function x_coord() return x end;
-    function y_coord() return y end;
-    function is_alive() return alive end;
-    return {
-        x_coord=x_coord,
-        y_coord=y_coord,
-        animate=animate,
-        damage=damage,
-        creature_damage=creature_damage,
-        draw=draw,
-        hitbox=hitbox,
-        is_alive=is_alive,
-    };
-end
-
--- praetorian cloud that should spawn after death of praetorian
-function praetorian_cloud(x,y)
-    local frame = 0;
-    local x = x;
-    local y = y;
-    local x_flip = false;
-    local y_flip = false;
-    local alive = true;
-    local creature_damage = 1;
-    local hitbox={x={1,16},y={1,16}};
-    function animate()
-        if game_status == "playing" then
-            y += 1;
-        end
-        x_flip = frame>30;
-        y_flip = frame%30>15;
-        frame = (frame+1)%60;
-    end
-    function damage(damage_received)
-    end
-    function draw()
-        spr(creature_sprites.praetorian.cloud,x,y,2,2,x_flip,y_flip);
     end
     function x_coord() return x end;
     function y_coord() return y end;

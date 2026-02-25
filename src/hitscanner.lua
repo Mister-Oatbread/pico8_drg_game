@@ -25,6 +25,15 @@ function get_bullet_hitbox(bullet)
     };
 end
 
+-- takes spit and returns the corresponding hitbox
+function get_spit_hitbox(spit)
+    local x1 = spit.hitbox.x[1]+spit.x_coord()-1;
+    local x2 = spit.hitbox.x[2]+spit.x_coord()-1;
+    local y1 = spit.hitbox.y[1]+spit.y_coord()-1;
+    local y2 = spit.hitbox.y[2]+spit.y_coord()-1;
+    return {x={x1,x2}, y={y1,y2}};
+end
+
 -- takes in player and returns hitbox ready to be processed by are_colliding()
 -- but for the drills instead of the player
 function get_drills_hitbox(player)
