@@ -10,7 +10,7 @@ function _init()
     initialize_player();
     initialize_bullets();
     initialize_props();
-    cpu_cost = 0;
+    performance_monitor = performance_monitor();
 end
 
 function _update()
@@ -38,12 +38,11 @@ function _update()
         check_bullet_collision();
         check_spit_collision();
         update_props();
-        performance = stat(1);
     elseif game_status == "end_screen" then
         snapshot_achievements();
         if btn(4) and btn(5) then reboot() end;
     end
-    cpu_cost = stat(1);
+    performance_monitor.register_load();
 end
 
 function _draw()
@@ -83,10 +82,10 @@ function _draw()
         draw_player();
         draw_hud();
         display_death_screen();
+        performance_monitor.print_summary();
     end
-    cpu_cost += stat(1);
-    print(stat(7), 218, 103, 11);
-    print(cpu_cost, 192, 103, 11);
+    performance_monitor.register_load();
+    performance_monitor.print_current();
 end
 
 

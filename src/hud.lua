@@ -227,6 +227,13 @@ function display_chefs_kiss_banner()
     spr(203, x0+32, y0, 4, 4);
     spr(207, x0+64, y0, 4, 4);
     print("shoot haz level:",105,152,9);
+
+    -- display oatbread banner
+    x0 = 105;
+    y0 = 103;
+    for i=0,4 do
+        spr(123+i,x0+8*i, y0);
+    end
 end
 
 
