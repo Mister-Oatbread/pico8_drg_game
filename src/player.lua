@@ -62,20 +62,20 @@ function update_inputs()
     player.is_moving.down = btn(3);
     player.is_moving.left = btn(0);
     player.is_moving.right = btn(1);
-    player.is_shooting = btn(5);
-    player.is_drilling = btn(4);
+    player.is_shooting = btn(5) and not btn(4);
+    player.is_drilling = btn(4) and not btn(5);
 end
 
 -- takes care of using the special abilities  the player has
 function handle_player_abilities()
-    if player.is_drilling and not player.is_shooting then drill() end;
+    if player.is_drilling then drill() end;
 
     -- shot was recently fired, don't fire again
     if player.shots_fired and player.shot_delay_counter<player.shot_delay then
         player.shot_delay_counter+=1;
     else
         -- didn't shoot recently, check if player is firing
-        if player.is_shooting and not player.is_drilling then shoot() end;
+        if player.is_shooting then shoot() end;
     end
 end
 
@@ -94,6 +94,19 @@ function drill()
         add(drilled_ground_obstacles, drilled_ground);
         player.fuel -= 1;
         update_mined_resources();
+
+        local no_creatures = #creatures;
+        local drill_box = get_damaging_drills_hitbox(player);
+        local creature_box,creature;
+
+        -- drill creatures
+        for i=no_creatures,1,-1 do
+            creature = creatures[i];
+            creature_box = get_creature_hitbox(creature);
+            if are_colliding(creature_box,drill_box) then
+                creature.damage(4);
+            end
+        end
     end
 end
 
@@ -166,7 +179,7 @@ function check_if_hit_by_creature()
     local creature_box;
     local no_creatures = #creatures;
 
-    if no_creatures>0 then
+    if no_creatures>0 and not player.is_drilling then
         for i=1,no_creatures do
             creature_box = get_creature_hitbox(creatures[i]);
             if are_colliding(player_box, creature_box) then

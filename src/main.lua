@@ -14,6 +14,7 @@ function _init()
 end
 
 function _update()
+    performance_monitor.reset_cpu_load();
     if game_status == "title_screen" then
         update_inputs();
         update_obstacles();

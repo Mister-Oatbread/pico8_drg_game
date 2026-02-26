@@ -43,6 +43,14 @@ function get_drills_hitbox(player)
     };
 end
 
+-- hitbox for hitting creatures
+function get_damaging_drills_hitbox(player)
+    return {
+        x={player.x_pos, player.x_pos+7},
+        y={player.y_pos-3, player.y_pos+3},
+    };
+end
+
 -- takes in creature and returns hitbox ready to be processed by are_colliding()
 function get_creature_hitbox(creature)
     local x1 = creature.hitbox.x[1]+creature.x_coord()-1;
