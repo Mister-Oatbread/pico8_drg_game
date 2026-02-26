@@ -5,12 +5,21 @@
 function spawn_prop()
     local x_coord = flr(rnd(120))+101;
     local y_coord = 81;
-    prop = nectar_rind(x_coord, y_coord);
+    local decision = rnd(100);
+    local prop;
+
+    if decision < 50 then
+        prop = nectar_rind(x_coord, y_coord);
+    elseif decision < 80 then
+        prop = orchey_shy(x_coord, y_coord);
+    else
+        prop = p0q(x_coord, y_coord);
+    end
     add(props, prop);
 end
 
 function nectar_rind(x,y)
-    local sprite = prop_sprites.nectar_rind.open;
+    local sprite;
     local x = x;
     local y = y;
     local x_flip = rnd(2)<1;
@@ -19,9 +28,9 @@ function nectar_rind(x,y)
         y+=1;
         local distance = (player.x_pos-x)^2 + (player.y_pos-y)^2;
         if distance < 30^2 then
-            sprite = prop_sprites.nectar_rind.closed;
+            sprite = 173;
         else
-            sprite = prop_sprites.nectar_rind.open;
+            sprite = 172;
         end
     end
     function draw()
@@ -37,11 +46,77 @@ function nectar_rind(x,y)
     };
 end
 
+function orchey_shy(x, y)
+    local sprite;
+    local x = x;
+    local y = y;
+    local x_flip = rnd(2)<1;
+    local y_flip = rnd(2)<1;
+    function animate()
+        y+=1;
+        local distance = (player.x_pos-x)^2 + (player.y_pos-y)^2;
+        if distance < 225 then
+            sprite = 190;
+        elseif distance < 900 then
+            sprite = 189;
+        else
+            sprite = 188;
+        end
+    end
+    function draw()
+        spr(sprite, x, y, 1, 1, x_flip, y_flip);
+    end
+    function x_coord() return x end;
+    function y_coord() return y end;
+    return {
+        x_coord=x_coord,
+        y_coord=y_coord,
+        animate=animate,
+        draw=draw,
+    };
+end
+
+function p0q(x, y)
+    local sprite = 140;
+    local x = x;
+    local y = y;
+    local x_flip = rnd(2)<1;
+    local y_flip = rnd(2)<1;
+    local angle = 0;
+    local parts = {};
+    local n = 30
+    local initial_angle;
+    local r2d = 3.14/180;
+    for i=1,n do
+        initial_angle = 360*i/n;
+        radius = ceil(rnd(12));
+        add(parts,{radius=radius, angle=initial_angle});
+    end
+    function animate()
+        y+=1;
+        angle = (angle+.25)%360;
+    end
+    function draw()
+        spr(sprite, x, y, 2, 2, x_flip, y_flip);
+        local x_pos, y_pos;
+        for i=1,n do
+            x_pos = ceil(parts[i].radius*cos((angle+parts[i].angle)*r2d));
+            y_pos = ceil(parts[i].radius*sin((angle+parts[i].angle)*r2d));
+            pset(x_pos+x+8, y_pos+y+8, 12);
+        end
+    end
+    function x_coord() return x end;
+    function y_coord() return y end;
+    return {
+        x_coord=x_coord,
+        y_coord=y_coord,
+        animate=animate,
+        draw=draw,
+    };
+end
+
 function initialize_props()
     props = {};
-    prop_sprites = {
-        nectar_rind = {open=172, closed=158},
-    };
 end
 
 function update_props()

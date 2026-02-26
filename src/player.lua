@@ -12,6 +12,7 @@ function initialize_player()
     player = {
         is_shooting = false,
         is_drilling = false,
+        is_rns = false,
         playing_drill = {empty=false,full=false},
         is_moving = {up, down, left, right};
         moving_frame = 0,
@@ -64,6 +65,7 @@ function update_inputs()
     player.is_moving.right = btn(1);
     player.is_shooting = btn(5) and not btn(4);
     player.is_drilling = btn(4) and not btn(5);
+    player.is_rns = btn(3) and btn(4) and btn(5);
 end
 
 -- takes care of using the special abilities  the player has

@@ -495,7 +495,7 @@ end
 
 function egg(x,y)
     local frame=0;
-    local sprite = 59;
+    local sprite = 60;
     local damaged_since = 0;
     local x = x;
     local y = y;
@@ -507,11 +507,11 @@ function egg(x,y)
         y+=1;
         if frame%5==0 then y-=1 end;
         if frame>10 then
-            sprite = 59;
+            sprite = 60;
             if was_damaged then sprite-=2 end;
         else
             if was_damaged then sprite-=2 end;
-            sprite = 60;
+            sprite = 61;
         end
         was_damaged, damaged_since = handle_creature_being_damaged(
             was_damaged, damaged_since);
@@ -577,7 +577,7 @@ end
 function initialize_creatures()
     creatures = {};
     creature_sprites = {
-        loot_bug = {default=43,damaged=44},
+        loot_bug = {default=44,damaged=45},
         cave_angel = {default=11,alt=12,damaged=13,damaged_alt=14},
         grunt = {default=1,damaged=2},
         slasher = {default=17,damaged=18},

@@ -2,8 +2,8 @@
 
 -- this file contains all hud elements
 function initialize_hud()
-    hud_sprites = {heart=45,empty_heart=63,ammo=46,fuel=47,points=62};
-    prog_bar_sprite = 61;
+    hud_sprites = {heart=32,empty_heart=48,ammo=46,fuel=47,points=62};
+    prog_bar_sprite = 63;
     number_sprites = {192,193,194,195,196};
     loot_bug_names = {
         "steeve",

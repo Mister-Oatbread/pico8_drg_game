@@ -47,13 +47,11 @@ function _update()
 end
 
 function _draw()
-    cls();
+    cls(1);
     camera(101,101);
     if game_status == "title_screen" then
-        rectfill(100,100,230,230,1);
         draw_wall();
         display_chefs_kiss_banner();
-        -- display_tutorial();
         draw_obstacles();
         draw_drilled_ground_obstacles();
         draw_resources();
@@ -61,11 +59,10 @@ function _draw()
         draw_projectiles();
         draw_creatures();
         draw_player();
-        -- drop pod
         spr(224,140,213,3,3);
         draw_hud();
     elseif game_status == "playing" then
-        draw_map();
+        -- draw_map();
         draw_wall();
         draw_obstacles();
         draw_props();
@@ -77,7 +74,6 @@ function _draw()
         draw_player();
         draw_hud();
     elseif game_status == "end_screen" then
-        rectfill(100,100,230,230,1);
         draw_wall();
         draw_super_wall();
         draw_player();
