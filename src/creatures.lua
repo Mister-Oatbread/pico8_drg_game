@@ -12,130 +12,6 @@ function handle_creature_being_damaged(was_damaged, damaged_since)
     return was_damaged, damaged_since;
 end
 
-function loot_bug(x,y)
-    local sprite = creature_sprites.loot_bug.default;
-    local frame = 0;
-    local x = x;
-    local y = y;
-    local damaged_since = 0;
-    local was_damaged = false;
-    local x_flip = false;
-    local health = 30;
-    local alive = true;
-    local creature_damage = 0;
-    local hitbox={x={2,7},y={1,7}};
-    function animate()
-        if game_status == "playing" then
-            y += 1;
-            if frame%27==26 then y += 1 end;
-        end
-
-        if (frame > 15) then
-            x_flip = false;
-        else
-            x_flip = true;
-        end
-        if was_damaged then
-            sprite = creature_sprites.loot_bug.damaged;
-        else
-            sprite = creature_sprites.loot_bug.default;
-        end
-        was_damaged, damaged_since = handle_creature_being_damaged(
-            was_damaged, damaged_since);
-        frame = (frame+1)%30;
-    end
-    function damage(damage_received)
-        sfx(33);
-        was_damaged = true;
-        health -= damage_received;
-        if (health <= 0) then
-            alive = false;
-            give_ammo(.2);
-            no_lootbugs_killed = false;
-            add_killed_lootbug_name();
-        end
-    end
-    function draw()
-        spr(sprite,x,y,1,1,x_flip,false);
-    end
-    function x_coord() return x end;
-    function y_coord() return y end;
-    function is_alive() return alive end;
-    return {
-        x_coord=x_coord,
-        y_coord=y_coord,
-        animate=animate,
-        damage=damage,
-        creature_damage=creature_damage,
-        draw=draw,
-        hitbox=hitbox,
-        is_alive=is_alive,
-    };
-end
-
-function cave_angel(x,y)
-    local sprite = creature_sprites.cave_angel.default;
-    local frame = 0;
-    local x = x;
-    local y = y;
-    local damaged_since = 0;
-    local was_damaged = false;
-    local x_flip = rnd(2) < 1;
-    local health = 20;
-    local alive = true;
-    local creature_damage = 0; local hitbox={x={2,7},y={1,7}};
-    function animate()
-        if game_status == "playing" then
-            y += 1;
-            if frame%45==0 then x+=sgn(x-player.x_pos) end;
-            if frame%10==0 then y+=1 end;
-        end
-
-        wings_open = frame>30;
-        if was_damaged then
-            if wings_open then
-                sprite = creature_sprites.cave_angel.damaged;
-            else
-                sprite = creature_sprites.cave_angel.damaged_alt;
-            end
-        else
-            if wings_open then
-                sprite = creature_sprites.cave_angel.default;
-            else
-                sprite = creature_sprites.cave_angel.alt;
-            end
-        end
-        was_damaged, damaged_since = handle_creature_being_damaged(
-            was_damaged, damaged_since);
-        frame = (frame+1)%60;
-    end
-    function damage(damage_received)
-        sfx(33);
-        was_damaged = true;
-        health -= damage_received;
-        if (health <= 0) then
-            alive = false;
-            no_cave_angels_killed = false;
-        end
-    end
-    function draw()
-        spr(sprite,x,y,1,1,x_flip,false);
-    end
-    function x_coord() return x end;
-    function y_coord() return y end;
-    function is_alive() return alive end;
-    return {
-        x_coord=x_coord,
-        y_coord=y_coord,
-        animate=animate,
-        damage=damage,
-        creature_damage=creature_damage,
-        draw=draw,
-        hitbox=hitbox,
-        is_alive=is_alive,
-    };
-end
-
 function grunt(x,y)
     local frame = 0;
     local x = x;
@@ -577,8 +453,6 @@ end
 function initialize_creatures()
     creatures = {};
     creature_sprites = {
-        loot_bug = {default=44,damaged=45},
-        cave_angel = {default=11,alt=12,damaged=13,damaged_alt=14},
         grunt = {default=1,damaged=2},
         slasher = {default=17,damaged=18},
         mactera = {default=27,alt=28,damaged=29,damaged_alt=30,spit=31},
