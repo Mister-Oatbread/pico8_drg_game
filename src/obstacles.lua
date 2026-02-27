@@ -1,106 +1,62 @@
 
 
 -- this file takes care of spawning obstacles
+function obstacles()
+    local list={}
+    local sprites_small={67,68,83,84,99,100,115,116}
+    local sprites_big={69,71,101,103}
 
--- takes x,y coord and creates a random obstacle
-function _produce_obstacle_entity(x_coord,y_coord)
-    local sprite_list;
-    local health;
-    local size;
-    if (rnd(1) < obstacle_spawn_probs[1]) then
-        sprite_list = obstacle_sprites_small;
-        size = obstacle_size.small;
-    else
-        sprite_list = obstacle_sprites_big;
-        size = obstacle_size.big;
+    local function spawn(x,y)
+        local sprite,sprites,size
+        if rnd(1)<obstacle_spawn_probs[1] then
+            sprites=sprites_small
+            size=1
+        else
+            sprites=sprites_big
+            size=2
+        end
+        sprite=sprites[flr(rnd(#sprites))+1]
+        return {
+            sprite=sprite,
+            x=x,
+            y=y,
+            size=size,
+            x_flip=rnd(2)<1,
+            y_flip=rnd(2)<1,
+        }
     end
 
-    local x_flip = rnd(2) < 1;
-    local y_flip = rnd(2) < 1;
+    local function update()
+        if game_status=="playing" then
+            for i=#list,1,-1 do
+                list[i].y+=1;
+                if list[i].y>=230 then
+                    deli(list,i)
+                end
+            end
+            if rnd(1)<obstacle_spawn_rate then
+                add(list,spawn(flr(rnd(120))+101,81))
+            end
+        end
+    end
 
-    local sprite = sprite_list[flr(rnd(#sprite_list))+1];
+    local function draw()
+        local sprite,x,y,size,x_flip,y_flip
+        for i=1,#list do
+            sprite=list[i].sprite
+            x=list[i].x
+            y=list[i].y
+            size=list[i].size
+            x_flip=list[i].x_flip
+            y_flip=list[i].y_flip
+            spr(sprite,x,y,size,size,x_flip,y_flip)
+        end
+    end
+
     return {
-        sprite=sprite,
-        x_coord=x_coord,
-        y_coord=y_coord,
-        size=size,
-        x_flip=x_flip,
-        y_flip=y_flip,
-    };
+        update=update,
+        draw=draw,
+    }
 end
 
--- initialize obstacles, none should be there at the beginning
--- chonkers can't be destroyed
-function initialize_obstacles()
-    obstacles = {};
-    drilled_ground_obstacles = {};
-    obstacle_sprites_small = {67,68,83,84,99,100,115,116};
-    obstacle_sprites_big = {69,71,101,103};
-    obstacle_sprites_chonker = {77};
-    obstacle_size = {small=1,big=2,chonker=2};
-    drilled_ground_sprite = 183;
-end
-
--- updates all obstacles and constructs/destructs new ones
-function update_obstacles()
-    -- shift all down
-    if game_status == "playing" then
-
-        local no_obstacles = #obstacles;
-        if no_obstacles > 0 then
-            for i=no_obstacles,1,-1 do
-                obstacles[i].y_coord+=1;
-                if obstacles[i].y_coord>=235 then
-                    deli(obstacles,i);
-                end
-            end
-        end
-
-        local no_drilled_ground_obstacles = #drilled_ground_obstacles;
-        if no_drilled_ground_obstacles > 0 then
-            for i=no_drilled_ground_obstacles,1,-1 do
-                drilled_ground_obstacles[i].y_coord+=1;
-                if drilled_ground_obstacles[i].y_coord>=235 then
-                    deli(drilled_ground_obstacles,i);
-                end
-            end
-        end
-
-        if (rnd(1) < obstacle_spawn_rate) then
-            local x_coord = flr(rnd(120))+101;
-            add(obstacles, _produce_obstacle_entity(x_coord,81));
-        end
-    end
-end
-
--- paint all obstacles
-function draw_obstacles()
-    local sprite, x_coord, y_coord, size, x_flip, y_flip;
-    local no_obstacles = #obstacles;
-
-    if no_obstacles > 0 then
-        for i=1,no_obstacles do
-            sprite = obstacles[i].sprite;
-            x_coord = obstacles[i].x_coord;
-            y_coord = obstacles[i].y_coord;
-            size = obstacles[i].size;
-            x_flip = obstacles[i].x_flip;
-            y_flip = obstacles[i].y_flip;
-            spr(sprite,x_coord,y_coord,size,size,x_flip,y_flip);
-        end
-    end
-end
-
-function draw_drilled_ground_obstacles()
-    local x_coord, y_coord;
-    local no_drilled_ground_obstacles = #drilled_ground_obstacles;
-
-    if no_drilled_ground_obstacles > 0 then
-        for i=1,no_drilled_ground_obstacles do
-            x_coord = drilled_ground_obstacles[i].x_coord;
-            y_coord = drilled_ground_obstacles[i].y_coord;
-            spr(drilled_ground_sprite, x_coord, y_coord, 1, 1, false, false);
-        end
-    end
-end
 

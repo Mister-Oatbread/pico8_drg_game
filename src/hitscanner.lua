@@ -60,15 +60,6 @@ function get_creature_hitbox(creature)
     return {x={x1,x2}, y={y1,y2}};
 end
 
--- takes in resource and retursn hitbox ready to be processed by are_colliding()
-function get_resource_hitbox(resource)
-    local x1 = resource.x_coord+resource.hitbox.x[1]-1;
-    local x2 = resource.x_coord+resource.hitbox.x[2]-1;
-    local y1 = resource.y_coord+resource.hitbox.y[1]-1;
-    local y2 = resource.y_coord+resource.hitbox.y[2]-1;
-    return {x={x1,x2}, y={y1,y2}};
-end
-
 -- paints funny dots at the border of the hitboxes, for debugging only
 function draw_hitbox(hitbox)
     pset(hitbox.x[1],hitbox.y[1],8);
