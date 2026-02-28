@@ -1,7 +1,7 @@
 
 
 function cave_angel(x,y)
-    local frame=0
+    local frame=1
     local x=x
     local y=y
     local damaged_since=0
@@ -19,10 +19,10 @@ function cave_angel(x,y)
             if frame%45==0 then x+=sgn(x-player.x) end
             if frame%10==0 then y+=1 end
         end
-        wings_open=frame>30
+        wings_open=frame>45
         was_damaged, damaged_since = handle_creature_being_damaged(
             was_damaged, damaged_since)
-        frame=(frame+1)%60
+        frame=frame%60+1
     end
 
     local function damage(damage_received)

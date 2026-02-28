@@ -13,6 +13,7 @@ function new_player()
         rns=false}
     local playing_drill={empty=false,full=false}
     local moving_frame=0
+    local use_alt_sprite=false
     local x_flip=false
     local current_sprite=49
     local ammo=25
@@ -254,21 +255,23 @@ function new_player()
 
     -- chooses the current sprite for the player
     local function update_player_animation()
-        moving_frame=(moving_frame+1)%10
-        local moving,x_flip
+        local moving,x_flip,sprinting
         if game_status=="playing" then
-            moving=(not player.is.moving.down
-                or player.is.moving.left or player.is.moving.right)
+            moving=(not is.moving.down
+                or is.moving.left or is.moving.right)
         -- only run if in playing mode, otherwise just default
         elseif game_status=="title_screen" then
-            moving=(player.is_moving.down or player.is_moving.up
-                or player.is_moving.left or player.is_moving.right)
+            moving=(is.moving.down or is.moving.up
+                or is.moving.left or is.moving.right)
         end
+        sprinting=game_status=="playing" and is.moving.up
         local sprite=49
         if moving then sprite+=1 end
         if is.shooting then sprite+=2 end
         if is.drilling then sprite+=5 end
-        local use_alt_sprite = moving_frame>=5
+        use_alt_sprite=moving_frame>=8
+        moving_frame=(moving_frame+1)%16
+        if sprinting then moving_frame=(moving_frame+1)%16 end
 
         if is.shooting then
             x_flip=false

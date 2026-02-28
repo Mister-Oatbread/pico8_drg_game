@@ -14,7 +14,7 @@ local hitbox={x={1,8},y={1,8}}
 local function update()
 display_alt=frame>15
 y=y0+sgn(up_down_frame-up_down_cap/2)
-frame=(frame+1)%30
+frame=frame%30+1
 up_down_frame=(up_down_frame+1)%up_down_cap
 end
 local function damage(damage_received)
@@ -37,7 +37,7 @@ is_alive=is_alive,
 }
 end
 function cave_angel(x,y)
-local frame=0
+local frame=1
 local x=x
 local y=y
 local damaged_since=0
@@ -54,10 +54,10 @@ y+=1
 if frame%45==0 then x+=sgn(x-player.x) end
 if frame%10==0 then y+=1 end
 end
-wings_open=frame>30
+wings_open=frame>45
 was_damaged, damaged_since = handle_creature_being_damaged(
 was_damaged, damaged_since)
-frame=(frame+1)%60
+frame=frame%60+1
 end
 local function damage(damage_received)
 sfx(33)
@@ -89,7 +89,7 @@ is_alive=is_alive,
 }
 end
 function egg(x,y)
-local frame=0
+local frame=1
 local damaged_since=0
 local was_damaged=false
 local x=x
@@ -105,7 +105,7 @@ if frame%5==0 then y-=1 end
 display_alt=frame>10
 was_damaged,damaged_since=handle_creature_being_damaged(
 was_damaged,damaged_since)
-frame = (frame+1)%20
+frame = frame%20+1
 end
 local function damage(damage_received)
 sfx(32)
@@ -140,7 +140,7 @@ is_alive=is_alive,
 }
 end
 function grunt(x,y)
-local frame=0
+local frame=1
 local x=x
 local y=y
 local damaged_since=0
@@ -189,6 +189,7 @@ is_alive=is_alive,
 }
 end
 function loot_bug(x,y)
+local frame=1
 local x=x
 local y=y
 local damaged_since=0
@@ -206,7 +207,7 @@ end
 x_flip=frame>15
 was_damaged,damaged_since=handle_creature_being_damaged(
 was_damaged,damaged_since)
-frame=(frame+1)%30
+frame=frame%30+1
 end
 local function damage(damage_received)
 sfx(33)
@@ -309,7 +310,7 @@ creatures=creatures,
 }
 end
 function mactera(x,y)
-local frame=0
+local frame=1
 local x=x
 local y=y
 local damaged_since=0
@@ -343,7 +344,7 @@ end
 was_damaged,damaged_since=handle_creature_being_damaged(
 was_damaged,damaged_since)
 wings_open=frame>8
-frame=(frame+1)%16
+frame=frame%16+1
 end
 local function damage(damage_received)
 sfx(33)
@@ -421,7 +422,7 @@ is_alive=is_alive,
 }
 end
 function praetorian(x,y)
-local frame=0
+local frame=1
 local x=x
 local y=y
 local damaged_since=0
@@ -441,8 +442,8 @@ end
 if not spitting then x_flip=frame>20 end
 was_damaged,damaged_since=handle_creature_being_damaged(
 was_damaged,damaged_since)
-frame=(frame+1)%40
-if abs(x-player.x_pos-4)<20 and player.y_pos-y<20 then
+frame=frame%40+1
+if abs(x-player.x()-4)<20 and player.y()-y<20 then
 if not spitting then
 add_spit("praet_spit",x,y+16)
 spitting=true
@@ -480,7 +481,7 @@ is_alive=is_alive,
 }
 end
 function slasher(x,y)
-local frame=0
+local frame=1
 local x=x
 local y=y
 local damaged_since=0
@@ -498,7 +499,7 @@ end
 x_flip=frame>12
 was_damaged,damaged_since=handle_creature_being_damaged(
 was_damaged,damaged_since)
-frame=(frame+1)%24
+frame=frame%24+1
 end
 local function damage(damage_received)
 sfx(33)
@@ -995,6 +996,7 @@ drilled_ground=new_drilled_ground()
 performance_monitor=new_performance_monitor()
 end
 function _update()
+game_status="playing"
 performance_monitor.reset_cpu_load()
 player.update()
 drilled_ground.update()
@@ -1233,6 +1235,7 @@ drilling=false,
 rns=false}
 local playing_drill={empty=false,full=false}
 local moving_frame=0
+local use_alt_sprite=false
 local x_flip=false
 local current_sprite=49
 local ammo=25
@@ -1429,20 +1432,22 @@ end
 if player.health <= 0 then game_status = "end_screen" end
 end
 local function update_player_animation()
-moving_frame=(moving_frame+1)%10
-local moving,x_flip
+local moving,x_flip,sprinting
 if game_status=="playing" then
-moving=(not player.is.moving.down
-or player.is.moving.left or player.is.moving.right)
+moving=(not is.moving.down
+or is.moving.left or is.moving.right)
 elseif game_status=="title_screen" then
-moving=(player.is_moving.down or player.is_moving.up
-or player.is_moving.left or player.is_moving.right)
+moving=(is.moving.down or is.moving.up
+or is.moving.left or is.moving.right)
 end
+sprinting=game_status=="playing" and is.moving.up
 local sprite=49
 if moving then sprite+=1 end
 if is.shooting then sprite+=2 end
 if is.drilling then sprite+=5 end
-local use_alt_sprite = moving_frame>=5
+use_alt_sprite=moving_frame>=8
+moving_frame=(moving_frame+1)%16
+if sprinting then moving_frame=(moving_frame+1)%16 end
 if is.shooting then
 x_flip=false
 if use_alt_sprite then sprite+=1 end

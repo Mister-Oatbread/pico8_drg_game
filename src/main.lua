@@ -8,6 +8,7 @@ function _init()
 end
 
 function _update()
+    game_status="playing"
     performance_monitor.reset_cpu_load()
     player.update()
     drilled_ground.update()

@@ -1,7 +1,7 @@
 
 
 function mactera(x,y)
-    local frame=0
+    local frame=1
     local x=x
     local y=y
     local damaged_since=0
@@ -36,7 +36,7 @@ function mactera(x,y)
         was_damaged,damaged_since=handle_creature_being_damaged(
             was_damaged,damaged_since)
         wings_open=frame>8
-        frame=(frame+1)%16
+        frame=frame%16+1
     end
 
     local function damage(damage_received)

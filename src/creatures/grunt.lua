@@ -1,7 +1,7 @@
 
 
 function grunt(x,y)
-    local frame=0
+    local frame=1
     local x=x
     local y=y
     local damaged_since=0

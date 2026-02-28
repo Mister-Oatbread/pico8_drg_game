@@ -1,7 +1,7 @@
 
 
 function slasher(x,y)
-    local frame=0
+    local frame=1
     local x=x
     local y=y
     local damaged_since=0
@@ -20,7 +20,7 @@ function slasher(x,y)
         x_flip=frame>12
         was_damaged,damaged_since=handle_creature_being_damaged(
             was_damaged,damaged_since)
-        frame=(frame+1)%24
+        frame=frame%24+1
     end
 
     local function damage(damage_received)

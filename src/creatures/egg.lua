@@ -1,7 +1,7 @@
 
 
 function egg(x,y)
-    local frame=0
+    local frame=1
     local damaged_since=0
     local was_damaged=false
     local x=x
@@ -18,7 +18,7 @@ function egg(x,y)
         display_alt=frame>10
         was_damaged,damaged_since=handle_creature_being_damaged(
             was_damaged,damaged_since)
-        frame = (frame+1)%20
+        frame = frame%20+1
     end
 
     local function damage(damage_received)

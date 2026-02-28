@@ -17,7 +17,7 @@ function bottom_grunt(x,y)
         display_alt=frame>15
         -- animate grunts moving up and down
         y=y0+sgn(up_down_frame-up_down_cap/2)
-        frame=(frame+1)%30
+        frame=frame%30+1
         up_down_frame=(up_down_frame+1)%up_down_cap
     end
 

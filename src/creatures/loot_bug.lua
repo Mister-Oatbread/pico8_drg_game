@@ -1,6 +1,7 @@
 
 
 function loot_bug(x,y)
+    local frame=1
     local x=x
     local y=y
     local damaged_since=0
@@ -19,7 +20,7 @@ function loot_bug(x,y)
         x_flip=frame>15
         was_damaged,damaged_since=handle_creature_being_damaged(
             was_damaged,damaged_since)
-        frame=(frame+1)%30
+        frame=frame%30+1
     end
 
     local function damage(damage_received)
