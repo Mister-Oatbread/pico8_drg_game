@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+SRC_DIR="./src"
+OUT_FILE="./build.lua"
+
+mkdir -p "$(dirname "$OUT_FILE")"
+
+find "$SRC_DIR" -type f -name "*.lua" \
+  | sort \
+  | xargs cat \
+  | sed -E '
+      s/--.*$//;      # remove inline comments
+      /^[[:space:]]*$/d  # remove empty lines
+      s/^[[:space:]]+//;
+    ' \
+  > "$OUT_FILE"
+
+echo "Build complete: $OUT_FILE"
+
+
