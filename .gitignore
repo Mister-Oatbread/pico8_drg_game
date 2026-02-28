@@ -4,5 +4,6 @@
 *.bin
 *.html
 *.js
+build.lua
 
 
