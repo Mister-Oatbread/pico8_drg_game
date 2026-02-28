@@ -1,42 +1,44 @@
 
 
-function grunt(x,y)
+function egg(x,y)
     local frame=0
+    local damaged_since=0
+    local was_damaged=false
     local x=x
     local y=y
-    local damaged_since=0
     local display_alt=false
-    local was_damaged=false
-    local health=40
+    local health=30
     local alive=true
-    local creature_damage=1
-    local hitbox={x={1,8},y={1,8}}
+    local creature_damage=0
+    local hitbox={x={2,7},y={1,8}}
 
     local function update()
-        if game_status=="playing" then
-            y+=1
-            if frame%6==0 then y+=1 end
-        end
-        x_flip=frame>15
+        y+=1
+        if frame%5==0 then y-=1 end
+        display_alt=frame>10
         was_damaged,damaged_since=handle_creature_being_damaged(
-            was_damaged, damaged_since)
-        frame=(frame+1)%30
+            was_damaged,damaged_since)
+        frame = (frame+1)%20
     end
 
     local function damage(damage_received)
-        sfx(33)
+        sfx(32)
         was_damaged=true
         health-=damage_received
         if health<=0 then
+            give_ammo(.5)
+            give_health(1)
+            player.points+=50
+            no_scout_killed=false
             alive=false
-            player.points+=10
         end
     end
 
     local function draw()
-        local sprite=1
-        if was_damaged then sprite+=1 end
-        spr(sprite,x,y,1,1,x_flip,false)
+        local sprite=58
+        if display_alt then sprite+=1 end
+        if was_damaged then sprite+=2 end
+        spr(sprite,x,y)
     end
 
     local function x() return x end

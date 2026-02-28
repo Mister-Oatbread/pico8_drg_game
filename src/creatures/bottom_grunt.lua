@@ -1,42 +1,31 @@
 
 
-function grunt(x,y)
-    local frame=0
+-- reduced grunt that takes hp at the bottom
+function bottom_grunt(x,y)
+    local frame=rnd(20)
+    local up_down_frame=rnd(20)
+    local up_down_cap=rnd(20)+40
     local x=x
     local y=y
-    local damaged_since=0
+    local y0=y
     local display_alt=false
-    local was_damaged=false
-    local health=40
     local alive=true
     local creature_damage=1
     local hitbox={x={1,8},y={1,8}}
 
     local function update()
-        if game_status=="playing" then
-            y+=1
-            if frame%6==0 then y+=1 end
-        end
-        x_flip=frame>15
-        was_damaged,damaged_since=handle_creature_being_damaged(
-            was_damaged, damaged_since)
+        display_alt=frame>15
+        -- animate grunts moving up and down
+        y=y0+sgn(up_down_frame-up_down_cap/2)
         frame=(frame+1)%30
+        up_down_frame=(up_down_frame+1)%up_down_cap
     end
 
     local function damage(damage_received)
-        sfx(33)
-        was_damaged=true
-        health-=damage_received
-        if health<=0 then
-            alive=false
-            player.points+=10
-        end
     end
 
     local function draw()
-        local sprite=1
-        if was_damaged then sprite+=1 end
-        spr(sprite,x,y,1,1,x_flip,false)
+        spr(1,x,y,1,1,display_alt,true)
     end
 
     local function x() return x end

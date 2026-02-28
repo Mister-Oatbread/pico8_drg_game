@@ -1,26 +1,34 @@
 
 
-function grunt(x,y)
+function praetorian(x,y)
     local frame=0
     local x=x
     local y=y
     local damaged_since=0
-    local display_alt=false
+    local x_flip=false
     local was_damaged=false
-    local health=40
+    local health=80
     local alive=true
     local creature_damage=1
-    local hitbox={x={1,8},y={1,8}}
+    local hitbox={x={4,12},y={2,14}}
+    local spitting=false
+    local spit
 
     local function update()
         if game_status=="playing" then
             y+=1
-            if frame%6==0 then y+=1 end
+            if not spitting and frame%20==0 then y+=1 end
         end
-        x_flip=frame>15
+        if not spitting then x_flip=frame>20 end
         was_damaged,damaged_since=handle_creature_being_damaged(
-            was_damaged, damaged_since)
-        frame=(frame+1)%30
+            was_damaged,damaged_since)
+        frame=(frame+1)%40
+        if abs(x-player.x_pos-4)<20 and player.y_pos-y<20 then
+            if not spitting then
+                add_spit("praet_spit",x,y+16)
+                spitting=true
+            end
+        end
     end
 
     local function damage(damage_received)
@@ -29,14 +37,16 @@ function grunt(x,y)
         health-=damage_received
         if health<=0 then
             alive=false
-            player.points+=10
+            add_spit("praet_cloud",x,y)
+            del(spits,spit)
+            player.points+=100
         end
     end
 
     local function draw()
-        local sprite=1
-        if was_damaged then sprite+=1 end
-        spr(sprite,x,y,1,1,x_flip,false)
+        local sprite=3
+        if was_damaged then sprite+=2 end
+        spr(sprite,x,y,2,2,x_flip,false)
     end
 
     local function x() return x end
