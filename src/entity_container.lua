@@ -17,6 +17,10 @@ function new_entity_container()
         del(list,entity)
     end
 
+    local function deletei_entity(i)
+        deli(list,i)
+    end
+
     local function size_list()
         return #list
     end
@@ -25,6 +29,7 @@ function new_entity_container()
         add=add_entity,
         get=get_list,
         delete=delete_entity,
+        deletei=deletei_entity,
         size=size_list,
     }
 end

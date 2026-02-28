@@ -2,28 +2,27 @@
 
 -- this file contains the functionaly handling shots and hittig stuff
 function new_projectiles()
-    bullet_sprite=15
-    bullets={}
-    spits={}
+    local bullets=new_entity_container()
+    local spits=new_entity_container()
 
     local function update()
-        for i=#bullets,1,-1 do
-            bullets[i].y-=4
-            if bullets[i].y<=91 then
-                deli(bullets,i)
+        for i=bullets.size(),1,-1 do
+            bullets.get(i).y-=4
+            if bullets.get(i).y<=91 then
+                bullets.deletei(i)
             end
         end
-        for i=#spits,1,-1 do
-            spits[i].update()
-            if spits[i].y()>=240 then
-                deli(spits,i)
+        for i=spits.size(),1,-1 do
+            spits.get(i).update()
+            if spits.get(i).y()>=240 then
+                spits.deletei(i)
             end
         end
     end
 
     -- sends a bullet out from the current location of the player
     local function fire_bullet()
-        add(bullets,{x_coord=player.x_pos,y_coord=player.y_pos-8})
+        bullets.add({x=player.x(),y=(player.y())-8})
     end
 
     -- fires a general spit from a creature, which gets constructed differently
@@ -76,14 +75,14 @@ function new_projectiles()
             spr(sprite,x,y,size,size,x_flip,y_flip)
         end
 
-        function x() return x end
-        function y() return y end
+        function x_f() return x end
+        function y_f() return y end
 
         return {
             update=update,
             draw=draw,
-            x=x,
-            y=y,
+            x=x_f,
+            y=y_f,
             persists=persists,
             damage=damage,
             hitbox=hitbox,
@@ -96,11 +95,11 @@ function new_projectiles()
     end
 
     local function draw()
-        for i=1,#bullets do
-            spr(bullet_sprite,bullets[i].x, bullets[i].y)
+        for i=1,bullets.size() do
+            spr(15,bullets.get(i).x, bullets.get(i).y)
         end
-        for i=1,#bullets do
-            spits[i].draw()
+        for i=1,spits.size() do
+            spits.get(i).draw()
         end
     end
 

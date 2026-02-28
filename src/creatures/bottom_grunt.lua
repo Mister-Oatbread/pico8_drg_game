@@ -28,13 +28,13 @@ function bottom_grunt(x,y)
         spr(1,x,y,1,1,display_alt,true)
     end
 
-    local function x() return x end
-    local function y() return y end
+    local function x_f() return x end
+    local function y_f() return y end
     local function is_alive() return alive end
 
     return {
-        x=x,
-        y=y,
+        x=x_f,
+        y=y_f,
         update=update,
         damage=damage,
         creature_damage=creature_damage,

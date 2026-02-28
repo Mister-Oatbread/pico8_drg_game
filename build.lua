@@ -22,12 +22,12 @@ end
 local function draw()
 spr(1,x,y,1,1,display_alt,true)
 end
-local function x() return x end
-local function y() return y end
+local function x_f() return x end
+local function y_f() return y end
 local function is_alive() return alive end
 return {
-x=x,
-y=y,
+x=x_f,
+y=y_f,
 update=update,
 damage=damage,
 creature_damage=creature_damage,
@@ -74,12 +74,12 @@ if was_damaged then sprite+=2 end
 if not wings_open then sprite+=1 end
 spr(sprite,x,y,1,1,x_flip,false)
 end
-local function x() return x end
-local function y() return y end
+local function x_f() return x end
+local function y_f() return y end
 local function is_alive() return alive end
 return {
-x=x,
-y=y,
+x=x_f,
+y=y_f,
 update=update,
 damage=damage,
 creature_damage=creature_damage,
@@ -125,12 +125,12 @@ if display_alt then sprite+=1 end
 if was_damaged then sprite+=2 end
 spr(sprite,x,y)
 end
-local function x() return x end
-local function y() return y end
+local function x_f() return x end
+local function y_f() return y end
 local function is_alive() return alive end
 return {
-x=x,
-y=y,
+x=x_f,
+y=y_f,
 update=update,
 damage=damage,
 creature_damage=creature_damage,
@@ -174,12 +174,12 @@ local sprite=1
 if was_damaged then sprite+=1 end
 spr(sprite,x,y,1,1,x_flip,false)
 end
-local function x() return x end
-local function y() return y end
+local function x_f() return x end
+local function y_f() return y end
 local function is_alive() return alive end
 return {
-x=x,
-y=y,
+x=x_f,
+y=y_f,
 update=update,
 damage=damage,
 creature_damage=creature_damage,
@@ -224,12 +224,12 @@ local sprite=44
 if was_damaged then sprite+=1 end
 spr(sprite,x,y,1,1,x_flip,false)
 end
-local function x() return x end
-local function y() return y end
+local function x_f() return x end
+local function y_f() return y end
 local function is_alive() return alive end
 return {
-x=x,
-y=y,
+x=x_f,
+y=y_f,
 update=update,
 damage=damage,
 creature_damage=creature_damage,
@@ -247,9 +247,9 @@ end
 return was_damaged, damaged_since
 end
 function new_creatures()
-creatures = {}
+creatures = new_entity_container()
 for x=106,220,9 do
-add(creatures,bottom_grunt(x,222))
+creatures.add(bottom_grunt(x,222))
 end
 local function spawn_creature()
 local creature
@@ -273,17 +273,16 @@ creature=mactera(x,y)
 else
 creature=praetorian(x,y)
 end
-add(creatures,creature)
+creatures.add(creature)
 end
 local function update()
-for i=1,#creatures do
-creatures[i].update()
-end
-for i=#creatures,1,-1 do
-if creatures[i].y_coord()>=240 then
-deli(creatures,i)
-elseif not creatures[i].is_alive() then
-deli(creatures,i)
+local creature
+for i=creatures.size(),1,-1 do
+creature=creatures.get(i).update()
+if creature.y()>=240 then
+creatures.delete(creature)
+elseif not creature.is_alive() then
+creatures.delete(creature)
 end
 end
 if rnd()<creature_spawn_rate then
@@ -306,6 +305,7 @@ return {
 update=update,
 draw=draw,
 get_hitbox=get_hitbox,
+creatures=creatures,
 }
 end
 function mactera(x,y)
@@ -361,12 +361,12 @@ if wings_open then sprite+=1 end
 if was_damaged then sprite+=2 end
 spr(sprite,x,y)
 end
-local function x() return x end
-local function y() return y end
+local function x_f() return x end
+local function y_f() return y end
 local function is_alive() return alive end
 return {
-x=x,
-y=y,
+x=x_f,
+y=y_f,
 update=update,
 damage=damage,
 creature_damage=creature_damage,
@@ -406,12 +406,12 @@ local sprite=191+value
 if a.x[1]>b.x[2] or a.x[2]<b.x[1] then sprite+=16 end
 spr(sprite,x,y)
 end
-local function x() return x end
-local function y() return y end
+local function x_f() return x end
+local function y_f() return y end
 local function is_alive() return alive end
 return {
-x_coord=x,
-y_coord=y,
+x=x_f,
+y=y_f,
 update=update,
 damage=damage,
 creature_damage=creature_damage,
@@ -465,12 +465,12 @@ local sprite=3
 if was_damaged then sprite+=2 end
 spr(sprite,x,y,2,2,x_flip,false)
 end
-local function x() return x end
-local function y() return y end
+local function x_f() return x end
+local function y_f() return y end
 local function is_alive() return alive end
 return {
-x=x,
-y=y,
+x=x_f,
+y=y_f,
 update=update,
 damage=damage,
 creature_damage=creature_damage,
@@ -514,12 +514,12 @@ local sprite=17
 if was_damaged then sprite+=1 end
 spr(sprite,x,y,1,1,x_flip,false)
 end
-local function x() return x end
-local function y() return y end
+local function x_f() return x end
+local function y_f() return y end
 local function is_alive() return alive end
 return {
-x=x,
-y=y,
+x=x_f,
+y=y_f,
 update=update,
 damage=damage,
 creature_damage=creature_damage,
@@ -529,27 +529,54 @@ is_alive=is_alive,
 }
 end
 function new_drilled_ground()
-local list={}
+local list = new_entity_container()
 local function spawn(x,y)
-add(list,{x=x,y=y})
+list.add({x=x,y=y})
 end
 local function update()
-for i=#list,1,-1 do
-list[i].y+=1
-if list[i].y>=230 then
-deli(list,i)
+if game_status=="playing" then
+for i=list.size(),1,-1 do
+list.get(i).y+=1
+if list.get(i).y>=230 then
+list.deletei(i)
+end
 end
 end
 end
 local function draw()
-for i=1,#list do
-spr(183,list[i].x,list[i].y)
+for i=1,list.size() do
+spr(183,list.get(i).x,list.get(i).y)
 end
 end
 return {
 spawn=spawn,
 update=update,
 draw=draw,
+}
+end
+function new_entity_container()
+local list={}
+local function add_entity(entity)
+add(list,entity)
+end
+local function get_list(i)
+return list[i]
+end
+local function delete_entity(entity)
+del(list,entity)
+end
+local function deletei_entity(i)
+deli(list,i)
+end
+local function size_list()
+return #list
+end
+return {
+add=add_entity,
+get=get_list,
+delete=delete_entity,
+deletei=deletei_entity,
+size=size_list,
 }
 end
 function initialize_game()
@@ -965,11 +992,14 @@ function _init()
 player=new_player()
 projectiles=new_projectiles()
 drilled_ground=new_drilled_ground()
+performance_monitor=new_performance_monitor()
 end
 function _update()
+performance_monitor.reset_cpu_load()
 player.update()
 drilled_ground.update()
 projectiles.update()
+performance_monitor.register_load()
 end
 function _draw()
 cls(1)
@@ -977,6 +1007,8 @@ camera(101,101)
 drilled_ground.draw()
 player.draw()
 projectiles.draw()
+performance_monitor.register_load()
+performance_monitor.print_current()
 end
 function _produce_map_entity(x_coord, y_coord)
 local sprite_list;
@@ -1209,7 +1241,7 @@ local max_ammo=25
 local max_fuel=150
 local shots_fired=false
 local shot_delay_counter=0
-local shot_delay=3
+local max_shot_delay=3
 local points=0
 local health=3
 local max_health=3
@@ -1282,20 +1314,11 @@ local sound
 if (fuel>0) then
 drilled_ground.spawn(x,y-1)
 fuel-=1
-local drill_box=get_damaging_drills_hitbox()
-local creature_box,creature
-for i=#creatures,1,-1 do
-creature=creatures[i]
-creature_box=get_creature_hitbox(creature)
-if are_colliding(creature_box,drill_box) then
-creature.damage(4)
-end
-end
 end
 end
 local function shoot()
 if ammo > 0 then
-fire_bullet()
+projectiles.fire_bullet()
 ammo-=1
 sfx(-1,2)
 sfx(34,2)
@@ -1303,8 +1326,7 @@ else
 sfx(-1,2)
 sfx(35,2)
 end
-player.shots_fired=true
-player.shot_delay_counter=0
+shots_fired=true
 end
 local function give_ammo(percentage)
 ammo+=ceil(max_ammo*percentage)
@@ -1349,9 +1371,11 @@ update_player_collision_points()
 find_terrain_collision()
 move_player()
 if is.drilling then drill() end
-if shots_fired and shot_delay_counter<shot_delay then
+if shots_fired and shot_delay_counter<max_shot_delay then
 shot_delay_counter+=1
 else
+shots_fired=false
+shot_delay_counter=0
 if is.shooting then shoot() end
 end
 end
@@ -1446,11 +1470,11 @@ playing_drill.full=false
 playing_drill.empty=false
 end
 end
-local function x() return x end
-local function y() return y end
+local function x_f() return x end
+local function y_f() return y end
 return {
-x=x,
-y=y,
+x=x_f,
+y=y_f,
 update=update,
 draw=draw,
 give_ammo=give_ammo,
@@ -1461,25 +1485,24 @@ get_damaging_drills_hitbox=get_damaging_drills_hitbox,
 }
 end
 function new_projectiles()
-bullet_sprite=15
-bullets={}
-spits={}
+local bullets=new_entity_container()
+local spits=new_entity_container()
 local function update()
-for i=#bullets,1,-1 do
-bullets[i].y-=4
-if bullets[i].y<=91 then
-deli(bullets,i)
+for i=bullets.size(),1,-1 do
+bullets.get(i).y-=4
+if bullets.get(i).y<=91 then
+bullets.deletei(i)
 end
 end
-for i=#spits,1,-1 do
-spits[i].update()
-if spits[i].y()>=240 then
-deli(spits,i)
+for i=spits.size(),1,-1 do
+spits.get(i).update()
+if spits.get(i).y()>=240 then
+spits.deletei(i)
 end
 end
 end
 local function fire_bullet()
-add(bullets,{x_coord=player.x_pos,y_coord=player.y_pos-8})
+bullets.add({x=player.x(),y=(player.y())-8})
 end
 local function spit(spit_type, x, y)
 local sprite,speed,size,hitbox,persists,damage
@@ -1523,13 +1546,13 @@ end
 local function draw()
 spr(sprite,x,y,size,size,x_flip,y_flip)
 end
-function x() return x end
-function y() return y end
+function x_f() return x end
+function y_f() return y end
 return {
 update=update,
 draw=draw,
-x=x,
-y=y,
+x=x_f,
+y=y_f,
 persists=persists,
 damage=damage,
 hitbox=hitbox,
@@ -1539,11 +1562,11 @@ local function add_spit(spit_type,x,y)
 add(spits,spit(spit_type,x,y))
 end
 local function draw()
-for i=1,#bullets do
-spr(bullet_sprite,bullets[i].x, bullets[i].y)
+for i=1,bullets.size() do
+spr(15,bullets.get(i).x, bullets.get(i).y)
 end
-for i=1,#bullets do
-spits[i].draw()
+for i=1,spits.size() do
+spits.get(i).draw()
 end
 end
 local function check_bullet_collision()

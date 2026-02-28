@@ -21,7 +21,7 @@ function new_player()
     local max_fuel=150
     local shots_fired=false
     local shot_delay_counter=0
-    local shot_delay=3
+    local max_shot_delay=3
     local points=0
     local health=3
     local max_health=3
@@ -102,22 +102,22 @@ function new_player()
         if (fuel>0) then
             drilled_ground.spawn(x,y-1)
             fuel-=1
-            local drill_box=get_damaging_drills_hitbox()
-            local creature_box,creature
-            -- drill creatures
-            for i=#creatures,1,-1 do
-                creature=creatures[i]
-                creature_box=get_creature_hitbox(creature)
-                if are_colliding(creature_box,drill_box) then
-                    creature.damage(4)
-                end
-            end
+            -- local drill_box=get_damaging_drills_hitbox()
+            -- local creature_box,creature
+            -- -- drill creatures
+            -- for i=#creatures,1,-1 do
+            --     creature=creatures[i]
+            --     creature_box=get_creature_hitbox(creature)
+            --     if are_colliding(creature_box,drill_box) then
+            --         creature.damage(4)
+            --     end
+            -- end
         end
     end
 
     local function shoot()
         if ammo > 0 then
-            fire_bullet()
+            projectiles.fire_bullet()
             ammo-=1
             sfx(-1,2)
             sfx(34,2)
@@ -125,8 +125,7 @@ function new_player()
             sfx(-1,2)
             sfx(35,2)
         end
-        player.shots_fired=true
-        player.shot_delay_counter=0
+        shots_fired=true
     end
 
     -- give ammo based on max capacity and cap it
@@ -181,10 +180,12 @@ function new_player()
         if is.drilling then drill() end
 
         -- shot was recently fired, don't fire again
-        if shots_fired and shot_delay_counter<shot_delay then
+        if shots_fired and shot_delay_counter<max_shot_delay then
             shot_delay_counter+=1
         else
             -- didn't shoot recently, check if player is firing
+            shots_fired=false
+            shot_delay_counter=0
             if is.shooting then shoot() end
         end
     end
@@ -300,12 +301,12 @@ function new_player()
         end
     end
 
-    local function x() return x end
-    local function y() return y end
+    local function x_f() return x end
+    local function y_f() return y end
 
     return {
-        x=x,
-        y=y,
+        x=x_f,
+        y=y_f,
         update=update,
         draw=draw,
         give_ammo=give_ammo,

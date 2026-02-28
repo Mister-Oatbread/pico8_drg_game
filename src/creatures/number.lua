@@ -36,13 +36,13 @@ function number(x,y,value)
         spr(sprite,x,y)
     end
 
-    local function x() return x end
-    local function y() return y end
+    local function x_f() return x end
+    local function y_f() return y end
     local function is_alive() return alive end
 
     return {
-        x_coord=x,
-        y_coord=y,
+        x=x_f,
+        y=y_f,
         update=update,
         damage=damage,
         creature_damage=creature_damage,
