@@ -13,10 +13,10 @@ function handle_creature_being_damaged(was_damaged, damaged_since)
 end
 
 function new_creatures()
-    creatures = {}
+    creatures = new_entity_container()
     -- add bottom grunts to the creatures.
     for x=106,220,9 do
-        add(creatures,bottom_grunt(x,222))
+        creatures.add(bottom_grunt(x,222))
     end
 
     -- handles spawning a creature with correspondig percentages, and
@@ -43,18 +43,17 @@ function new_creatures()
         else
             creature=praetorian(x,y)
         end
-        add(creatures,creature)
+        creatures.add(creature)
     end
 
     local function update()
-        for i=1,#creatures do
-            creatures[i].update()
-        end
-        for i=#creatures,1,-1 do
-            if creatures[i].y_coord()>=240 then
-                deli(creatures,i)
-            elseif not creatures[i].is_alive() then
-                deli(creatures,i)
+        local creature
+        for i=creatures.size(),1,-1 do
+            creature=creatures.get(i).update()
+            if creature.y()>=240 then
+                creatures.delete(creature)
+            elseif not creature.is_alive() then
+                creatures.delete(creature)
             end
         end
         if rnd()<creature_spawn_rate then
@@ -82,6 +81,7 @@ function new_creatures()
         update=update,
         draw=draw,
         get_hitbox=get_hitbox,
+        creatures=creatures,
     }
 end
 

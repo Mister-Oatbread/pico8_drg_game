@@ -1,0 +1,32 @@
+
+
+-- framework that allows to expose basic operations on entity register
+-- of any closure
+function new_entity_container()
+    local list={}
+
+    local function add_entity(entity)
+        add(list,entity)
+    end
+
+    local function get_list(i)
+        return list[i]
+    end
+
+    local function delete_entity(entity)
+        del(list,entity)
+    end
+
+    local function size_list()
+        return #list
+    end
+
+    return {
+        add=add_entity,
+        get=get_list,
+        delete=delete_entity,
+        size=size_list,
+    }
+end
+
+
