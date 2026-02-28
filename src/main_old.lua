@@ -1,0 +1,91 @@
+
+
+function _init()
+    initialize_game()
+    initialize_map()
+    obstacles=obstacles()
+    drilled_ground=drilled_ground()
+    initialize_resources()
+    initialize_creatures()
+    initialize_hud()
+    initialize_player()
+    initialize_bullets()
+    initialize_props()
+    performance_monitor=performance_monitor()
+    print(stat(0));
+end
+
+function _update()
+    performance_monitor.reset_cpu_load()
+    if game_status == "title_screen" then
+        update_inputs()
+        obstacles.update()
+        update_creatures()
+        update_resources()
+        move_player()
+        handle_player_abilities()
+        update_map()
+        update_projectiles()
+        check_bullet_collision()
+        check_spit_collision()
+    elseif game_status == "playing" then
+        update_inputs()
+        update_game()
+        update_map()
+        obstacles.update()
+        drilled_ground.update()
+        update_resources()
+        update_creatures()
+        move_player()
+        handle_player_abilities()
+        update_projectiles()
+        check_bullet_collision()
+        check_spit_collision()
+        update_props()
+    elseif game_status == "end_screen" then
+        snapshot_achievements()
+        if btn(4) and btn(5) then reboot() end
+    end
+    performance_monitor.register_load()
+end
+
+function _draw()
+    cls(1)
+    camera(101,101)
+    if game_status == "title_screen" then
+        draw_wall()
+        display_chefs_kiss_banner()
+        obstacles.draw()
+        drilled_ground.draw()
+        draw_resources()
+        draw_super_wall()
+        draw_projectiles()
+        draw_creatures()
+        draw_player()
+        -- spr(224,140,213,3,3)
+        draw_hud()
+    elseif game_status == "playing" then
+        -- draw_map()
+        draw_wall()
+        obstacles.draw()
+        drilled_ground.draw()
+        draw_props()
+        draw_super_wall()
+        draw_resources()
+        draw_creatures()
+        draw_projectiles()
+        draw_player()
+        draw_hud()
+    elseif game_status == "end_screen" then
+        draw_wall()
+        draw_super_wall()
+        draw_player()
+        draw_hud()
+        display_death_screen()
+        performance_monitor.print_summary()
+    end
+    performance_monitor.register_load()
+    performance_monitor.print_current()
+end
+
+

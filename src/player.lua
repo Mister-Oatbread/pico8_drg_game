@@ -6,12 +6,6 @@
 function player()
     local x=148
     local y=200
-    local sprites={
-        idle={standing=49,moving=50},
-        drilling={standing=54,moving=55},
-        shooting={standing=51,moving=52,moving_alt=53},
-        rns={standing=111,moving=109,moving_alt=110},
-    }
     local is={
         moving={up,down,left,right},
         shooting=false,
@@ -36,15 +30,7 @@ function player()
     local has_invuln=false
     local invuln_duration=30
     local collision_points={left={},right={},top={}}
-    local has_collision={
-        left=false,
-        right=false,
-        top=false,
-    }
-    local at={
-        top_border=false,
-        bottom_border=false,
-    }
+    local has_collision={left=false,right=false,top=false}
     for i=1,8 do
         add(collision_points.left,{x=0,y=0})
         add(collision_points.right,{x=0,y=0})
@@ -62,20 +48,67 @@ function player()
         is.rns=btn(3) and btn(4) and btn(5)
     end
 
+    local function update_player_collision_points()
+        -- left flank
+        for i=1,6 do
+            collision_points.left[i].x=x
+            collision_points.left[i].y=y+i
+        end
+        -- right flank
+        for i=1,6 do
+            collision_points.left[i].x=x+7
+            collision_points.left[i].y=y+i
+        end
+        -- top flank
+        for i=1,6 do
+            collision_points.left[i].x=x+i
+            collision_points.left[i].y=y-1
+        end
+    end
+
+    local function find_terrain_collision()
+        local point,color
+        has_collision.left=false
+        has_collision.right=false
+        has_collision.top=false
+        for i = 1,#collision_points.left do
+            point=collision_points.left[i]
+            color=pget(point.x,point.y)
+            if color==5 or color==13 then
+                has_collision.left=true
+                break
+            end
+        end
+        for i=1,#collision_points.right do
+            point=collision_points.right[i]
+            color=pget(point.x,point.y)
+            if color==5 or color==13 then
+                has_collision.right=true
+                break
+            end
+        end
+        for i=1,#collision_points.top do
+            point=collision_points.top[i]
+            color=pget(point.x,point.y)
+            if color==5 or color==13 then
+                has_collision.top=true
+                break
+            end
+        end
+    end
+
     local function drill()
         local sound
-        if (player.fuel>0) then
-            drilled_ground.spawn(player.x_pos,player.y_pos-1)
-            player.fuel-=1
+        if (fuel>0) then
+            drilled_ground.spawn(x,y-1)
+            fuel-=1
             resources.mine()
-
             local drill_box = get_damaging_drills_hitbox(player)
             local creature_box,creature
-
             -- drill creatures
             for i=#creatures,1,-1 do
-                creature = creatures[i]
-                creature_box = get_creature_hitbox(creature)
+                creature=creatures[i]
+                creature_box=get_creature_hitbox(creature)
                 if are_colliding(creature_box,drill_box) then
                     creature.damage(4)
                 end
@@ -84,79 +117,84 @@ function player()
     end
 
     local function shoot()
-        if player.ammo > 0 then
+        if ammo > 0 then
             fire_bullet()
-            player.ammo -= 1
+            ammo-=1
             sfx(-1,2)
             sfx(34,2)
         else
             sfx(-1,2)
             sfx(35,2)
         end
-        player.shots_fired = true
-        player.shot_delay_counter = 0
+        player.shots_fired=true
+        player.shot_delay_counter=0
     end
 
     -- give ammo based on max capacity and cap it
-    function give_ammo(percentage)
-        player.ammo += ceil(player.max_ammo*percentage)
-        player.fuel += ceil(player.max_fuel*percentage)
+    local function give_ammo(percentage)
+        ammo+=ceil(max_ammo*percentage)
+        fuel+=ceil(max_fuel*percentage)
 
-        if player.ammo > player.max_ammo then player.ammo = player.max_ammo end
-        if player.fuel > player.max_fuel then player.fuel = player.max_fuel end
+        if ammo>max_ammo then ammo=max_ammo end
+        if fuel>max_fuel then fuel=max_fuel end
     end
 
     -- give player amount of health and cap it
-    function give_health(amount)
-        player.health += amount
-        if player.health>player.max_health then player.health=player.max_health end
+    local function give_health(amount)
+        health+=amount
+        if health>max_health then health=max_health end
+    end
+
+    local function move_player()
+        if is.moving.up and not has_collision.top then
+            if y>101 then
+                y-=1
+            end
+        end
+        if is.moving.down then
+            if y<221 then
+                y+=1
+            end
+        end
+        if is.moving.left and not has_collision.left then
+            if x>=102 then
+                x-=1
+            end
+        end
+        if is.moving.right and not has_collision.right then
+            if x<=220 then
+                x+=1
+            end
+        end
+        if has_collision.top then
+            y+=1
+        end
+        if y_pos<=101 then y=101 end
+        if y_pos>=221 then y=221 end
     end
 
     -- handles moving the player around
     local function update()
         fetch_inputs()
-        _update_player_collision_points()
-        _find_terrain_collision()
-        _check_map_bounds()
-        if player.is_moving.up and not player.has_collision.top then
-            if not(player.at.top_border) then
-                player.y_pos -= 1
-            end
-        end
-        if player.is_moving.down then
-            player.y_pos += 1
-        end
-        if player.is_moving.left and not player.has_collision.left then
-            if player.x_pos >= 102 then
-                player.x_pos -= 1
-            end
-        end
-        if player.is_moving.right and not player.has_collision.right then
-            if player.x_pos <= 220 then
-                player.x_pos += 1
-            end
-        end
-        if player.has_collision.top then
-            player.y_pos += 1
-        end
-
-        if player.y_pos <= 101 then player.y_pos = 101 end
-        if player.y_pos >= 221 then player.y_pos = 221 end
+        update_player_collision_points()
+        find_terrain_collision()
+        move_player()
+        check_map_bounds()
         check_if_hit_by_creature()
         handle_being_hit()
-        if player.is_drilling then drill() end
+        if is.drilling then drill() end
 
         -- shot was recently fired, don't fire again
-        if player.shots_fired and player.shot_delay_counter<player.shot_delay then
-            player.shot_delay_counter+=1
+        if shots_fired and shot_delay_counter<shot_delay then
+            shot_delay_counter+=1
         else
             -- didn't shoot recently, check if player is firing
-            if player.is_shooting then shoot() end
+            if is.shooting then shoot() end
         end
     end
 
     -- checks if any hostile creature is currently touching the player
-    function check_if_hit_by_creature()
+    local function check_if_hit_by_creature()
         local player_box = get_player_hitbox(player)
         local creature_box
         local no_creatures = #creatures
@@ -176,7 +214,7 @@ function player()
         end
     end
 
-    function handle_being_hit()
+    local function handle_being_hit()
         if player.is_hit and player.hit_since>player.invuln_duration then
             player.hit_since = 0
             player.is_hit = false
@@ -193,68 +231,36 @@ function player()
     end
 
     -- chooses the current sprite for the player
-    function update_player_animation()
-        player.moving_frame = (player.moving_frame+1)%10
-        local moving
-        if game_status == "playing" then
-            moving = (not player.is_moving.down
-                or player.is_moving.left or player.is_moving.right)
+    local function update_player_animation()
+        moving_frame=(moving_frame+1)%10
+        local moving,x_flip
+        if game_status=="playing" then
+            moving=(not player.is.moving.down
+                or player.is.moving.left or player.is.moving.right)
         -- only run if in playing mode, otherwise just default
-        elseif game_status == "title_screen" then
-            moving = (player.is_moving.down or player.is_moving.up
+        elseif game_status=="title_screen" then
+            moving=(player.is_moving.down or player.is_moving.up
                 or player.is_moving.left or player.is_moving.right)
         end
-
+        local sprite=49
+        if moving then sprite+=1 end
+        if is.shooting then sprite+=2 end
+        if is.drilling then sprite+=5 end
         local use_alt_sprite = player.moving_frame>=5
 
-        if player.is_shooting then
-            if not moving then
-                player.current_sprite = player_sprites.shooting.standing
-            else
-                if use_alt_sprite then
-                    player.current_sprite = player_sprites.shooting.moving_alt
-                else
-                    player.current_sprite = player_sprites.shooting.moving
-                end
-            end
-            player.x_flip = false
-
-        elseif player.is_drilling then
-            if not moving then
-                player.current_sprite = player_sprites.drilling.standing
-                player.x_flip = false
-            else
-                player.current_sprite = player_sprites.drilling.moving
-                player.x_flip = use_alt_sprite
-            end
-
+        if is.shooting then
+            x_flip=false
+            if use_alt_sprite then sprite+=1 end
         else
-            if not moving then
-                player.current_sprite = player_sprites.idle.standing
-                player.x_flip = false
-            else
-                player.current_sprite = player_sprites.idle.moving
-                player.x_flip = use_alt_sprite
-            end
+            x_flip=use_alt_sprite
         end
-
-        if player.is_hit then
-            player.current_sprite -=16
-        end
+        if is_hit then current_sprite-=16 end
     end
 
     -- draws player based on current state
-    function draw_player()
+    local function draw()
         update_player_animation()
-        spr(
-            player.current_sprite,
-            player.x_pos,
-            player.y_pos,
-            1,1,
-            player.x_flip,
-            false
-        )
-
+        spr(current_sprite,x,y,1,1,x_flip,false)
         -- handle drilling sound
         if player.is_drilling then
             if player.fuel>0 and not player.playing_drill.full then
@@ -275,6 +281,8 @@ function player()
     return {
         update=update,
         draw=draw,
+        give_ammo=give_ammo,
+        give_health=give_health,
     }
 end
 

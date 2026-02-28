@@ -1,3 +1,4 @@
+function terrain_collisions()
 function _update_player_collision_points()
 local i=1;
 for y = player.y_pos,player.y_pos+6 do
@@ -56,6 +57,43 @@ break;
 end
 end
 end
+end
+function bottom_grunt(x,y)
+local frame=rnd(20)
+local up_down_frame=rnd(20)
+local up_down_cap=rnd(20)+40
+local x=x
+local y=y
+local y0=y
+local display_alt=false
+local alive=true
+local creature_damage=1
+local hitbox={x={1,8},y={1,8}}
+local function update()
+display_alt=frame>15
+y=y0+sgn(up_down_frame-up_down_cap/2)
+frame=(frame+1)%30
+up_down_frame=(up_down_frame+1)%up_down_cap
+end
+local function damage(damage_received)
+end
+local function draw()
+spr(1,x,y,1,1,display_alt,true)
+end
+local function x() return x end
+local function y() return y end
+local function is_alive() return alive end
+return {
+x=x,
+y=y,
+update=update,
+damage=damage,
+creature_damage=creature_damage,
+draw=draw,
+hitbox=hitbox,
+is_alive=is_alive,
+}
+end
 function cave_angel(x,y)
 local frame=0
 local x=x
@@ -108,6 +146,57 @@ hitbox=hitbox,
 is_alive=is_alive,
 }
 end
+function egg(x,y)
+local frame=0
+local damaged_since=0
+local was_damaged=false
+local x=x
+local y=y
+local display_alt=false
+local health=30
+local alive=true
+local creature_damage=0
+local hitbox={x={2,7},y={1,8}}
+local function update()
+y+=1
+if frame%5==0 then y-=1 end
+display_alt=frame>10
+was_damaged,damaged_since=handle_creature_being_damaged(
+was_damaged,damaged_since)
+frame = (frame+1)%20
+end
+local function damage(damage_received)
+sfx(32)
+was_damaged=true
+health-=damage_received
+if health<=0 then
+give_ammo(.5)
+give_health(1)
+player.points+=50
+no_scout_killed=false
+alive=false
+end
+end
+local function draw()
+local sprite=58
+if display_alt then sprite+=1 end
+if was_damaged then sprite+=2 end
+spr(sprite,x,y)
+end
+local function x() return x end
+local function y() return y end
+local function is_alive() return alive end
+return {
+x=x,
+y=y,
+update=update,
+damage=damage,
+creature_damage=creature_damage,
+draw=draw,
+hitbox=hitbox,
+is_alive=is_alive,
+}
+end
 function grunt(x,y)
 local frame=0
 local x=x
@@ -125,7 +214,7 @@ y+=1
 if frame%6==0 then y+=1 end
 end
 x_flip=frame>15
-was_damaged, damaged_since = handle_creature_being_damaged(
+was_damaged,damaged_since=handle_creature_being_damaged(
 was_damaged, damaged_since)
 frame=(frame+1)%30
 end
@@ -208,462 +297,293 @@ is_alive=is_alive,
 }
 end
 function handle_creature_being_damaged(was_damaged, damaged_since)
-damaged_since += 1;
+damaged_since += 1
 if damaged_since > damaged_sprite_duration then
-was_damaged = false;
-damaged_since = 0;
+was_damaged = false
+damaged_since = 0
 end
-return was_damaged, damaged_since;
+return was_damaged, damaged_since
 end
-function grunt(x,y)
-local frame = 0;
-local x = x;
-local y = y;
-local damaged_since = 0;
-local display_alt = false;
-local was_damaged = false;
-local health = 40;
-local alive = true;
-local creature_damage = 1;
-local hitbox={x={1,8},y={1,8}};
-function animate()
-if game_status == "playing" then
-y += 1;
-if frame%6==0 then y+=1 end;
+function creatures ()
+creatures = {}
+for x=106,220,9 do
+add(creatures,bottom_grunt(x,222))
 end
-display_alt = frame > 15;
-was_damaged, damaged_since = handle_creature_being_damaged(
-was_damaged, damaged_since);
-frame = (frame+1)%30;
-end
-function damage(damage_received)
-sfx(33);
-was_damaged = true;
-health -= damage_received;
-if (health <= 0) then
-alive = false;
-player.points += 10;
-end
-end
-function draw()
-local sprite;
-if was_damaged then
-sprite=creature_sprites.grunt.damaged;
-x_flip = display_alt;
+local function spawn_creature()
+local creature
+local x=flr(rnd(120))+101
+local y=81
+local decision=rnd()
+if decision<creature_spawn_probs[1] then
+if rnd(1000)<1 then
+creature=egg(x,y)
 else
-sprite=creature_sprites.grunt.default;
-x_flip = display_alt;
+creature=loot_bug(x,y)
 end
-spr(sprite,x,y,1,1,x_flip,false);
-end
-function x_coord() return x end;
-function y_coord() return y end;
-function is_alive() return alive end;
-return {
-x_coord=x_coord,
-y_coord=y_coord,
-animate=animate,
-damage=damage,
-creature_damage=creature_damage,
-draw=draw,
-hitbox=hitbox,
-is_alive=is_alive,
-};
-end
-function bottom_grunt(x,y)
-local frame = rnd(20);
-local up_down_frame = rnd(20);
-local up_down_cap = rnd(20)+40;
-local x=x;
-local y=y;
-local y0=y;
-local display_alt = false;
-local alive = true;
-local creature_damage = 1;
-local hitbox={x={1,8},y={1,8}};
-function animate()
-display_alt = frame > 15;
-y = y0 + sgn(up_down_frame - up_down_cap/2);
-frame = (frame+1)%30;
-up_down_frame = (up_down_frame+1)%up_down_cap;
-end
-function damage(damage_received)
-end
-function draw()
-spr(creature_sprites.grunt.default,x,y,1,1,display_alt,true);
-end
-function x_coord() return x end;
-function y_coord() return y end;
-function is_alive() return alive end;
-return{
-x_coord=x_coord,
-y_coord=y_coord,
-animate=animate,
-damage=damage,
-creature_damage=creature_damage,
-draw=draw,
-hitbox=hitbox,
-is_alive=is_alive,
-};
-end
-function slasher(x,y)
-local frame = 0;
-local x = x;
-local y = y;
-local damaged_since = 0;
-local display_alt = false;
-local was_damaged = false;
-local health = 50;
-local alive = true;
-local creature_damage = 2;
-local hitbox={x={1,8},y={1,8}};
-function animate()
-if game_status == "playing" then
-y += 1;
-if frame%5==0 then y+=1 end;
-end
-display_alt = frame > 12;
-was_damaged, damaged_since = handle_creature_being_damaged(
-was_damaged, damaged_since);
-frame = (frame+1)%30;
-end
-function damage(damage_received)
-sfx(33);
-was_damaged = true;
-health -= damage_received;
-if (health <= 0) then
-alive = false;
-player.points+=30;
-end
-end
-function draw()
-local sprite;
-if was_damaged then
-sprite=creature_sprites.slasher.damaged;
-x_flip = display_alt;
+elseif decision<creature_spawn_probs[2] then
+creature=cave_angel(x,y)
+elseif decision<creature_spawn_probs[3] then
+creature=grunt(x,y)
+elseif decision<creature_spawn_probs[4] then
+creature=slasher(x,y)
+elseif decision<creature_spawn_probs[5] then
+creature=mactera(x,y)
 else
-sprite=creature_sprites.slasher.default;
-x_flip = display_alt;
+creature=praetorian(x,y)
 end
-spr(sprite,x,y,1,1,x_flip,false);
+add(creatures,creature)
 end
-function x_coord() return x end;
-function y_coord() return y end;
-function is_alive() return alive end;
+local function update()
+for i=1,#creatures do
+creatures[i].update()
+end
+for i=#creatures,1,-1 do
+if creatures[i].y_coord()>=240 then
+deli(creatures,i)
+elseif not creatures[i].is_alive() then
+deli(creatures,i)
+end
+end
+if rnd()<creature_spawn_rate then
+spawn_creature()
+end
+end
+local function draw()
+for i=1,#creatures do
+creatures[i].draw()
+end
+end
+function get_creature_hitbox(creature)
+local x1=creature.hitbox.x[1]+creature.x()-1;
+local x2=creature.hitbox.x[2]+creature.x()-1;
+local y1=creature.hitbox.y[1]+creature.y()-1;
+local y2=creature.hitbox.y[2]+creature.y()-1;
+return {x={x1,x2},y={y1,y2}};
+end
 return {
-x_coord=x_coord,
-y_coord=y_coord,
-animate=animate,
-damage=damage,
-creature_damage=creature_damage,
+update=update,
 draw=draw,
-hitbox=hitbox,
-is_alive=is_alive,
-};
+}
 end
 function mactera(x,y)
-local sprite = creature_sprites.mactera.default;
-local frame = 0;
-local x = x;
-local y = y;
-local damaged_since = 0;
-local was_damaged = false;
-local x_flip = false;
-local health = 20;
-local alive = true;
-local did_spit = false;
-local perform_spit = false;
-local creature_damage = 0;
-local hitbox={x={2,7},y={1,7}};
-function animate()
-if game_status == "playing" then
-if (player.y_pos - y) < 30 and not did_spit then
-perform_spit = true;
+local frame=0
+local x=x
+local y=y
+local damaged_since=0
+local was_damaged=false
+local wings_open=false
+local health=20
+local alive=true
+local did_spit=false
+local perform_spit=false
+local creature_damage=0
+local hitbox={x={2,7},y={1,7}}
+local function update()
+if game_status=="playing" then
+if (player.y_pos-y)<30 and not did_spit then
+perform_spit=true
 end
 if perform_spit then
 if frame==0 then
-did_spit = true;
-add_spit("mactera_spit", x, y);
+did_spit=true
+add_spit("mactera_spit",x,y)
 end
 if did_spit and frame==0 then
-perform_spit = false;
+perform_spit=false
 end
 else
-y += 1;
-if frame%2==0 then y+=1 end;
+y+=1
+if frame%2==0 then y+=1 end
 end
-if frame%2==0 and not did_spit then x-=sgn(x-player.x_pos) end;
+if frame%2==0 and not did_spit then x-=sgn(x-player.x_pos) end
 end
-wings_open = frame>8;
-if was_damaged then
-if wings_open then
-sprite = creature_sprites.mactera.damaged;
-else
-sprite = creature_sprites.mactera.damaged_alt;
+was_damaged,damaged_since=handle_creature_being_damaged(
+was_damaged,damaged_since)
+wings_open=frame>8
+frame=(frame+1)%16
 end
-else
-if wings_open then
-sprite = creature_sprites.mactera.default;
-else
-sprite = creature_sprites.mactera.alt;
-end
-end
-was_damaged, damaged_since = handle_creature_being_damaged(
-was_damaged, damaged_since);
-frame = (frame+1)%16;
-end
-function damage(damage_received)
-sfx(33);
-was_damaged = true;
-health -= damage_received;
-if (health <= 0) then
-alive = false;
-no_cave_angels_killed = false;
-player.points+=30;
+local function damage(damage_received)
+sfx(33)
+was_damaged=true
+health-=damage_received
+if health<=0 then
+alive=false
+no_cave_angels_killed=false
+player.points+=30
 end
 end
-function draw()
-spr(sprite,x,y,1,1,x_flip,false);
+local function draw()
+local sprite=27
+if wings_open then sprite+=1 end
+if was_damaged then sprite+=2 end
+spr(sprite,x,y)
 end
-function x_coord() return x end;
-function y_coord() return y end;
-function is_alive() return alive end;
+local function x() return x end
+local function y() return y end
+local function is_alive() return alive end
 return {
-x_coord=x_coord,
-y_coord=y_coord,
-animate=animate,
+x=x,
+y=y,
+update=update,
 damage=damage,
 creature_damage=creature_damage,
 draw=draw,
 hitbox=hitbox,
 is_alive=is_alive,
-};
-end
-function praetorian(x,y)
-local frame = 0;
-local x = x;
-local y = y;
-local damaged_since = 0;
-local display_alt = false;
-local was_damaged = false;
-local health = 80;
-local alive = true;
-local creature_damage = 1;
-local hitbox={x={4,12},y={2,14}};
-local spitting = false;
-local spit;
-function animate()
-if game_status == "playing" then
-y += 1;
-if not spitting and frame%20==0 then y+=1 end;
-end
-if not spitting then display_alt = frame > 20 end;
-was_damaged, damaged_since = handle_creature_being_damaged(
-was_damaged, damaged_since);
-frame = (frame+1)%40;
-if abs(x-player.x_pos-4) < 20 and player.y_pos - y < 20 then
-if not spitting then
-add_spit("praet_spit", x, y+16);
-spitting = true;
-end
-end
-end
-function damage(damage_received)
-sfx(33);
-was_damaged = true;
-health -= damage_received;
-if (health <= 0) then
-alive = false;
-add_spit("praet_cloud", x, y);
-del(spits, spit);
-player.points+=100;
-end
-end
-function draw()
-local sprite;
-if was_damaged then
-sprite=creature_sprites.praetorian.damaged;
-x_flip = display_alt;
-else
-sprite=creature_sprites.praetorian.default;
-x_flip = display_alt;
-end
-spr(sprite,x,y,2,2,x_flip,false);
-end
-function x_coord() return x end;
-function y_coord() return y end;
-function is_alive() return alive end;
-return {
-x_coord=x_coord,
-y_coord=y_coord,
-animate=animate,
-damage=damage,
-creature_damage=creature_damage,
-draw=draw,
-hitbox=hitbox,
-is_alive=is_alive,
-};
+}
 end
 function number(x,y,value)
-local value = value;
-local sprite = number_sprites[value];
-local default_sprite = sprite;
-local x = x;
-local y = y;
-local health = 1;
-local alive = true;
-local creature_damage = 0;
-local hitbox={x={3,7},y={1,8}};
-function animate()
-if game_status == "playing" then y+=1 end;
-local b = {x={x+hitbox.x[1]-1, x+hitbox.x[2]-1}};
-local a = {x={player.x_pos+6,player.x_pos+6}};
-local x_good = a.x[1] > b.x[2] or a.x[2] < b.x[1];
-if x_good then sprite=default_sprite else sprite=default_sprite+16 end;
+local value=value
+local x = x
+local y = y
+local health = 1
+local alive = true
+local creature_damage = 0
+local hitbox={x={3,7},y={1,8}}
+local function update()
+if game_status=="playing" then y+=1 end
 end
-function damage(damage_received)
-sfx(33);
-health -= damage_received;
-if (health <= 0) then
-difficulty = value;
-set_hazard_level();
-in_tutorial = false;
-game_status = "playing";
-music(-1);
-music(1);
-alive = false;
+local function damage(damage_received)
+sfx(33)
+health-=damage_received
+if health<=0 then
+difficulty=value
+set_hazard_level()
+in_tutorial=false
+game_status="playing"
+music(-1)
+music(1)
+alive=false
 end
 end
-function draw()
-spr(sprite,x,y,1,1,false,false);
+local function draw()
+local b={x={x+hitbox.x[1]-1, x+hitbox.x[2]-1}}
+local a={x={player.x_pos+6,player.x_pos+6}}
+local sprite=191+value
+if a.x[1]>b.x[2] or a.x[2]<b.x[1] then sprite+=16 end
+spr(sprite,x,y)
 end
-function x_coord() return x end;
-function y_coord() return y end;
-function is_alive() return alive end;
+local function x() return x end
+local function y() return y end
+local function is_alive() return alive end
 return {
-x_coord=x_coord,
-y_coord=y_coord,
-animate=animate,
+x_coord=x,
+y_coord=y,
+update=update,
 damage=damage,
 creature_damage=creature_damage,
 draw=draw,
 hitbox=hitbox,
 is_alive=is_alive,
-};
+}
 end
-function egg(x,y)
-local frame=0;
-local sprite = 60;
-local damaged_since = 0;
-local x = x;
-local y = y;
-local health = 30;
-local alive = true;
-local creature_damage = 0;
-local hitbox={x={2,7},y={1,8}};
-function animate()
-y+=1;
-if frame%5==0 then y-=1 end;
-if frame>10 then
-sprite = 60;
-if was_damaged then sprite-=2 end;
-else
-if was_damaged then sprite-=2 end;
-sprite = 61;
+function praetorian(x,y)
+local frame=0
+local x=x
+local y=y
+local damaged_since=0
+local x_flip=false
+local was_damaged=false
+local health=80
+local alive=true
+local creature_damage=1
+local hitbox={x={4,12},y={2,14}}
+local spitting=false
+local spit
+local function update()
+if game_status=="playing" then
+y+=1
+if not spitting and frame%20==0 then y+=1 end
 end
-was_damaged, damaged_since = handle_creature_being_damaged(
-was_damaged, damaged_since);
-frame = (frame+1)%20;
-end
-function damage(damage_received)
-sfx(32);
-was_damaged = true;
-health -= damage_received;
-if (health <= 0) then
-give_ammo(.5);
-give_health(1);
-player.points+=50;
-no_scout_killed = false;
-alive = false;
+if not spitting then x_flip=frame>20 end
+was_damaged,damaged_since=handle_creature_being_damaged(
+was_damaged,damaged_since)
+frame=(frame+1)%40
+if abs(x-player.x_pos-4)<20 and player.y_pos-y<20 then
+if not spitting then
+add_spit("praet_spit",x,y+16)
+spitting=true
 end
 end
-function draw()
-spr(sprite,x,y,1,1,false,false);
 end
-function x_coord() return x end;
-function y_coord() return y end;
-function is_alive() return alive end;
+local function damage(damage_received)
+sfx(33)
+was_damaged=true
+health-=damage_received
+if health<=0 then
+alive=false
+add_spit("praet_cloud",x,y)
+del(spits,spit)
+player.points+=100
+end
+end
+local function draw()
+local sprite=3
+if was_damaged then sprite+=2 end
+spr(sprite,x,y,2,2,x_flip,false)
+end
+local function x() return x end
+local function y() return y end
+local function is_alive() return alive end
 return {
-x_coord=x_coord,
-y_coord=y_coord,
-animate=animate,
+x=x,
+y=y,
+update=update,
 damage=damage,
 creature_damage=creature_damage,
 draw=draw,
 hitbox=hitbox,
 is_alive=is_alive,
-};
+}
 end
-function spawn_creature()
-local x_coord = flr(rnd(120))+101;
-local y_coord = 81;
-local decision = rnd();
-if decision < creature_spawn_probs[1] then
-if rnd(1000) < 1 then
-creature = egg(x_coord, y_coord);
-else
-creature = loot_bug(x_coord, y_coord);
+function slasher(x,y)
+local frame=0
+local x=x
+local y=y
+local damaged_since=0
+local x_flip=false
+local was_damaged=false
+local health=50
+local alive=true
+local creature_damage=2
+local hitbox={x={1,8},y={1,8}}
+local function update()
+if game_status= "playing" then
+y+=1
+if frame%4==0 then y+=1 end
 end
-elseif decision < creature_spawn_probs[2] then
-creature = cave_angel(x_coord, y_coord);
-elseif decision < creature_spawn_probs[3] then
-creature = grunt(x_coord, y_coord);
-elseif decision < creature_spawn_probs[4] then
-creature = slasher(x_coord, y_coord);
-elseif decision < creature_spawn_probs[5] then
-creature = mactera(x_coord, y_coord);
-else
-creature = praetorian(x_coord, y_coord);
+x_flip=frame>12
+was_damaged,damaged_since=handle_creature_being_damaged(
+was_damaged,damaged_since)
+frame=(frame+1)%24
 end
-add(creatures, creature);
-end
-function initialize_creatures()
-creatures = {};
-creature_sprites = {
-grunt = {default=1,damaged=2},
-slasher = {default=17,damaged=18},
-mactera = {default=27,alt=28,damaged=29,damaged_alt=30,spit=31},
-praetorian = {default=3,damaged=5,cloud=7,spit=9},
-};
-for x_coord=106,220,9 do
-add(creatures, bottom_grunt(x_coord, 222));
+local function damage(damage_received)
+sfx(33)
+was_damaged=true
+health-=damage_received
+if health<=0 then
+alive=false
+player.points+=30
 end
 end
-function update_creatures()
-local no_creatures = #creatures;
-if no_creatures>0 then
-for i=1,no_creatures do
-creatures[i].animate();
+local function draw()
+local sprite=17
+if was_damaged then sprite+=1 end
+spr(sprite,x,y,1,1,x_flip,false)
 end
-for i = no_creatures,1,-1 do
-if creatures[i].y_coord() >= 240 then
-deli(creatures, i);
-elseif not creatures[i].is_alive() then
-deli(creatures, i);
-end
-end
-if rnd() < creature_spawn_rate then
-spawn_creature();
-end
-end
-end
-function draw_creatures()
-local no_creatures = #creatures;
-if no_creatures>0 then
-for i=1,no_creatures do
-creatures[i].draw();
-end
-end
+local function x() return x end
+local function y() return y end
+local function is_alive() return alive end
+return {
+x=x,
+y=y,
+update=update,
+damage=damage,
+creature_damage=creature_damage,
+draw=draw,
+hitbox=hitbox,
+is_alive=is_alive,
+}
 end
 function drilled_ground()
 local list={}
@@ -710,90 +630,90 @@ obstacle_spawn_rate = .04;
 resource_spawn_rate = .05;
 creature_spawn_rate = .06;
 creature_spawn_ratios = {
-8,
-0,
-8,
-0,
-0,
-1,
+8, 
+0, 
+8, 
+0, 
+0, 
+1, 
 };
 resource_spawn_ratios = {
-1,
-0,
-1,
+1, 
+0, 
+1, 
 };
 elseif difficulty == 2 then
 obstacle_spawn_rate = .2;
 resource_spawn_rate = .01;
 creature_spawn_rate = .04;
 creature_spawn_ratios = {
-3,
-1,
-12,
-1,
-0,
-1,
+3, 
+1, 
+12, 
+1, 
+0, 
+1, 
 };
 resource_spawn_ratios = {
-1,
-1,
-1,
+1, 
+1, 
+1, 
 };
 elseif difficulty == 3 then
 obstacle_spawn_rate = .2;
 resource_spawn_rate = .01;
 creature_spawn_rate = .06;
 creature_spawn_ratios = {
-3,
-1,
-10,
-2,
-1,
-1,
+3, 
+1, 
+10, 
+2, 
+1, 
+1, 
 };
 resource_spawn_ratios = {
-1,
-1,
-1,
+1, 
+1, 
+1, 
 };
 elseif difficulty == 4 then
 obstacle_spawn_rate = .2;
 resource_spawn_rate = .01;
 creature_spawn_rate = .06;
 creature_spawn_ratios = {
-3,
-.3,
-10,
-2,
-1,
-1,
+3, 
+.3, 
+10, 
+2, 
+1, 
+1, 
 };
 resource_spawn_ratios = {
-1,
-1,
-1,
+1, 
+1, 
+1, 
 }
 elseif difficulty == 5 then
 obstacle_spawn_rate = .2;
 resource_spawn_rate = .01;
 creature_spawn_rate = .06;
 creature_spawn_ratios = {
-.5,
-.3,
-10,
-3,
-3,
-2,
+.5, 
+.3, 
+10, 
+3, 
+3, 
+2, 
 };
 resource_spawn_ratios = {
-0,
-1,
-0,
+0, 
+1, 
+0, 
 };
 end
 obstacle_spawn_ratios = {
-15,
-1,
+15, 
+1, 
 };
 creature_spawn_probs = get_cum_probs(creature_spawn_ratios);
 obstacle_spawn_probs = get_cum_probs(obstacle_spawn_ratios);
@@ -1357,6 +1277,26 @@ add(list,spawn(flr(rnd(120))+101,81))
 end
 end
 end
+local function update_player_collision_points()
+local i=1;
+for y = player.y_pos,player.y_pos+6 do
+player.collision_points.left[i].x=player.x_pos;
+player.collision_points.left[i].y=y;
+i+=1;
+end
+i=1;
+for y = player.y_pos,player.y_pos+6 do
+player.collision_points.right[i].x=player.x_pos+7;
+player.collision_points.right[i].y=y;
+i+=1;
+end
+i=1;
+for x = player.x_pos+1,player.x_pos+6 do
+player.collision_points.top[i].x=x;
+player.collision_points.top[i].y=player.y_pos-1;
+i+=1;
+end
+end
 local function draw()
 local sprite,x,y,size,x_flip,y_flip
 for i=1,#list do
@@ -1404,12 +1344,6 @@ end
 function player()
 local x=148
 local y=200
-local sprites={
-idle={standing=49,moving=50},
-drilling={standing=54,moving=55},
-shooting={standing=51,moving=52,moving_alt=53},
-rns={standing=111,moving=109,moving_alt=110},
-}
 local is={
 moving={up,down,left,right},
 shooting=false,
@@ -1434,15 +1368,7 @@ local hit_since=0
 local has_invuln=false
 local invuln_duration=30
 local collision_points={left={},right={},top={}}
-local has_collision={
-left=false,
-right=false,
-top=false,
-}
-local at={
-top_border=false,
-bottom_border=false,
-}
+local has_collision={left=false,right=false,top=false}
 for i=1,8 do
 add(collision_points.left,{x=0,y=0})
 add(collision_points.right,{x=0,y=0})
@@ -1457,17 +1383,61 @@ is.shooting=btn(5) and not btn(4)
 is.drilling=btn(4) and not btn(5)
 is.rns=btn(3) and btn(4) and btn(5)
 end
+local function update_player_collision_points()
+for i=1,6 do
+collision_points.left[i].x=x
+collision_points.left[i].y=y+i
+end
+for i=1,6 do
+collision_points.left[i].x=x+7
+collision_points.left[i].y=y+i
+end
+for i=1,6 do
+collision_points.left[i].x=x+i
+collision_points.left[i].y=y-1
+end
+end
+local function find_terrain_collision()
+local point,color
+has_collision.left=false
+has_collision.right=false
+has_collision.top=false
+for i = 1,#collision_points.left do
+point=collision_points.left[i]
+color=pget(point.x,point.y)
+if color==5 or color==13 then
+has_collision.left=true
+break
+end
+end
+for i=1,#collision_points.right do
+point=collision_points.right[i]
+color=pget(point.x,point.y)
+if color==5 or color==13 then
+has_collision.right=true
+break
+end
+end
+for i=1,#collision_points.top do
+point=collision_points.top[i]
+color=pget(point.x,point.y)
+if color==5 or color==13 then
+has_collision.top=true
+break
+end
+end
+end
 local function drill()
 local sound
-if (player.fuel>0) then
-drilled_ground.spawn(player.x_pos,player.y_pos-1)
-player.fuel-=1
+if (fuel>0) then
+drilled_ground.spawn(x,y-1)
+fuel-=1
 resources.mine()
 local drill_box = get_damaging_drills_hitbox(player)
 local creature_box,creature
 for i=#creatures,1,-1 do
-creature = creatures[i]
-creature_box = get_creature_hitbox(creature)
+creature=creatures[i]
+creature_box=get_creature_hitbox(creature)
 if are_colliding(creature_box,drill_box) then
 creature.damage(4)
 end
@@ -1475,66 +1445,71 @@ end
 end
 end
 local function shoot()
-if player.ammo > 0 then
+if ammo > 0 then
 fire_bullet()
-player.ammo -= 1
+ammo-=1
 sfx(-1,2)
 sfx(34,2)
 else
 sfx(-1,2)
 sfx(35,2)
 end
-player.shots_fired = true
-player.shot_delay_counter = 0
+player.shots_fired=true
+player.shot_delay_counter=0
 end
-function give_ammo(percentage)
-player.ammo += ceil(player.max_ammo*percentage)
-player.fuel += ceil(player.max_fuel*percentage)
-if player.ammo > player.max_ammo then player.ammo = player.max_ammo end
-if player.fuel > player.max_fuel then player.fuel = player.max_fuel end
+local function give_ammo(percentage)
+ammo+=ceil(max_ammo*percentage)
+fuel+=ceil(max_fuel*percentage)
+if ammo>max_ammo then ammo=max_ammo end
+if fuel>max_fuel then fuel=max_fuel end
 end
-function give_health(amount)
-player.health += amount
-if player.health>player.max_health then player.health=player.max_health end
+local function give_health(amount)
+health+=amount
+if health>max_health then health=max_health end
+end
+local function move_player()
+if is.moving.up and not has_collision.top then
+if y>101 then
+y-=1
+end
+end
+if is.moving.down then
+if y<221 then
+y+=1
+end
+end
+if is.moving.left and not has_collision.left then
+if x>=102 then
+x-=1
+end
+end
+if is.moving.right and not has_collision.right then
+if x<=220 then
+x+=1
+end
+end
+if has_collision.top then
+y+=1
+end
+if y_pos<=101 then y=101 end
+if y_pos>=221 then y=221 end
 end
 local function update()
 fetch_inputs()
-_update_player_collision_points()
-_find_terrain_collision()
-_check_map_bounds()
-if player.is_moving.up and not player.has_collision.top then
-if not(player.at.top_border) then
-player.y_pos -= 1
-end
-end
-if player.is_moving.down then
-player.y_pos += 1
-end
-if player.is_moving.left and not player.has_collision.left then
-if player.x_pos >= 102 then
-player.x_pos -= 1
-end
-end
-if player.is_moving.right and not player.has_collision.right then
-if player.x_pos <= 220 then
-player.x_pos += 1
-end
-end
-if player.has_collision.top then
-player.y_pos += 1
-end
-if player.y_pos <= 101 then player.y_pos = 101 end
-if player.y_pos >= 221 then player.y_pos = 221 end
+update_player_collision_points()
+find_terrain_collision()
+move_player()
+check_map_bounds()
 check_if_hit_by_creature()
 handle_being_hit()
-if player.is_drilling then drill() end
-if player.shots_fired and player.shot_delay_counter<player.shot_delay then
-player.shot_delay_counter+=1
+if is.drilling then drill() end
+if shots_fired and shot_delay_counter<shot_delay then
+shot_delay_counter+=1
 else
-if player.is_shooting then shoot() end
+if is.shooting then shoot() end
 end
 end
-function check_if_hit_by_creature()
+local function check_if_hit_by_creature()
 local player_box = get_player_hitbox(player)
 local creature_box
 local no_creatures = #creatures
@@ -1552,7 +1527,7 @@ end
 end
 end
 end
-function handle_being_hit()
+local function handle_being_hit()
 if player.is_hit and player.hit_since>player.invuln_duration then
 player.hit_since = 0
 player.is_hit = false
@@ -1565,59 +1540,32 @@ sfx(32)
 end
 if player.health <= 0 then game_status = "end_screen" end
 end
-function update_player_animation()
-player.moving_frame = (player.moving_frame+1)%10
-local moving
-if game_status == "playing" then
-moving = (not player.is_moving.down
-or player.is_moving.left or player.is_moving.right)
-elseif game_status == "title_screen" then
-moving = (player.is_moving.down or player.is_moving.up
+local function update_player_animation()
+moving_frame=(moving_frame+1)%10
+local moving,x_flip
+if game_status=="playing" then
+moving=(not player.is.moving.down
+or player.is.moving.left or player.is.moving.right)
+elseif game_status=="title_screen" then
+moving=(player.is_moving.down or player.is_moving.up
 or player.is_moving.left or player.is_moving.right)
 end
+local sprite=49
+if moving then sprite+=1 end
+if is.shooting then sprite+=2 end
+if is.drilling then sprite+=5 end
 local use_alt_sprite = player.moving_frame>=5
-if player.is_shooting then
-if not moving then
-player.current_sprite = player_sprites.shooting.standing
+if is.shooting then
+x_flip=false
+if use_alt_sprite then sprite+=1 end
 else
-if use_alt_sprite then
-player.current_sprite = player_sprites.shooting.moving_alt
-else
-player.current_sprite = player_sprites.shooting.moving
+x_flip=use_alt_sprite
 end
+if is_hit then current_sprite-=16 end
 end
-player.x_flip = false
-elseif player.is_drilling then
-if not moving then
-player.current_sprite = player_sprites.drilling.standing
-player.x_flip = false
-else
-player.current_sprite = player_sprites.drilling.moving
-player.x_flip = use_alt_sprite
-end
-else
-if not moving then
-player.current_sprite = player_sprites.idle.standing
-player.x_flip = false
-else
-player.current_sprite = player_sprites.idle.moving
-player.x_flip = use_alt_sprite
-end
-end
-if player.is_hit then
-player.current_sprite -=16
-end
-end
-function draw_player()
+local function draw()
 update_player_animation()
-spr(
-player.current_sprite,
-player.x_pos,
-player.y_pos,
-1,1,
-player.x_flip,
-false
-)
+spr(current_sprite,x,y,1,1,x_flip,false)
 if player.is_drilling then
 if player.fuel>0 and not player.playing_drill.full then
 sfx(-1,1)
@@ -1637,77 +1585,78 @@ end
 return {
 update=update,
 draw=draw,
+give_ammo=give_ammo,
+give_health=give_health,
 }
 end
-function initialize_bullets()
-bullet_sprite = 15;
-bullets = {};
-spits = {};
-end
-function update_projectiles()
-local no_bullets = #bullets;
+function projectiles()
+bullet_sprite = 15
+bullets = {}
+spits = {}
+local function update_projectiles()
+local no_bullets = #bullets
 for i=no_bullets,1,-1 do
-bullets[i].y_coord-=4;
+bullets[i].y_coord-=4
 if bullets[i].y_coord<=91 then
-deli(bullets, i);
+deli(bullets, i)
 end
 end
-local no_spits = #spits;
+local no_spits = #spits
 for i=no_spits,1,-1 do
-spits[i].update();
+spits[i].update()
 if spits[i].y_coord() >= 240 then
-deli(spits, i);
+deli(spits, i)
 end
 end
 end
-function fire_bullet()
-add(bullets,{x_coord=player.x_pos, y_coord=player.y_pos-8});
+local function fire_bullet()
+add(bullets,{x_coord=player.x_pos, y_coord=player.y_pos-8})
 end
-function spit(type, x, y)
-local sprite, speed, size, hitbox, persists, damage;
-local x_flip = false;
-local y_flip = false;
-local frame = 0;
+local function spit(type, x, y)
+local sprite, speed, size, hitbox, persists, damage
+local x_flip = false
+local y_flip = false
+local frame = 0
 if type == "praet_spit" then
-sprite = 9;
-speed = 1;
-size = 2;
-hitbox={x={4,12},y={1,16}};
-persists = true;
-damage = 1;
+sprite = 9
+speed = 1
+size = 2
+hitbox={x={4,12},y={1,16}}
+persists = true
+damage = 1
 elseif type == "praet_cloud" then
-sprite = 7;
-speed = 1;
-size = 2;
-hitbox={x={1,16},y={1,16}};
-persists = true;
-damage = 1;
+sprite = 7
+speed = 1
+size = 2
+hitbox={x={1,16},y={1,16}}
+persists = true
+damage = 1
 elseif type == "mactera_spit" then
-sprite = 31;
-speed = 2;
-size = 1;
-hitbox={x={4,4},y={3,7}};
-persists = false;
-damage = 1;
+sprite = 31
+speed = 2
+size = 1
+hitbox={x={4,4},y={3,7}}
+persists = false
+damage = 1
 end
-function update()
+local function update()
 if game_status == "title_screen" then
-y -= 1;
+y -= 1
 end
-y += speed;
+y += speed
 if type == "praet_spit" then
-x_flip = frame>30;
+x_flip = frame>30
 elseif type == "praet_cloud" then
-x_flip = frame>30;
-y_flip = abs(frame-30)<15;
+x_flip = frame>30
+y_flip = abs(frame-30)<15
 end
-frame = (frame+1)%60;
+frame = (frame+1)%60
 end
-function draw()
-spr(sprite, x, y, size, size, x_flip, y_flip);
+local function draw()
+spr(sprite, x, y, size, size, x_flip, y_flip)
 end
-function x_coord() return x end;
-function y_coord() return y end;
+function x_coord() return x end
+function y_coord() return y end
 return {
 update =update,
 draw = draw,
@@ -1716,64 +1665,69 @@ y_coord = y_coord,
 persists = persists,
 damage = damage,
 hitbox = hitbox,
-};
+}
 end
-function add_spit(type, x_coord, y_coord)
-add(spits, spit(type, x_coord, y_coord));
+local function add_spit(type, x_coord, y_coord)
+add(spits, spit(type, x_coord, y_coord))
 end
-function draw_projectiles()
-local no_bullets = #bullets;
+local function draw()
+local no_bullets = #bullets
 if no_bullets > 0 then
 for i=1,no_bullets do
-spr(bullet_sprite, bullets[i].x_coord, bullets[i].y_coord);
+spr(bullet_sprite, bullets[i].x_coord, bullets[i].y_coord)
 end
 end
-local no_spits = #spits;
+local no_spits = #spits
 if no_spits > 0 then
 for i=1,no_spits do
-spits[i].draw();
+spits[i].draw()
 end
 end
 end
-function check_bullet_collision()
-local no_creatures = #creatures;
-local no_bullets = #bullets;
+local function check_bullet_collision()
+local no_creatures = #creatures
+local no_bullets = #bullets
 if no_creatures>0 and no_bullets>0 then
-local creature_box, bullet_box;
+local creature_box, bullet_box
 for i=no_creatures,1,-1 do
-creature_box = get_creature_hitbox(creatures[i]);
-no_bullets = #bullets;
+creature_box = get_creature_hitbox(creatures[i])
+no_bullets = #bullets
 for j=no_bullets,1,-1 do
-bullet_box = get_bullet_hitbox(bullets[j]);
+bullet_box = get_bullet_hitbox(bullets[j])
 if are_colliding(bullet_box, creature_box) then
-deli(bullets,j);
-creatures[i].damage(10);
+deli(bullets,j)
+creatures[i].damage(10)
 end
 end
 end
 end
 end
-function check_spit_collision()
-local no_spits = #spits;
-local player_box = get_player_hitbox(player);
-local spit, spit_box;
-local colliding;
+local function check_spit_collision()
+local no_spits = #spits
+local player_box = get_player_hitbox(player)
+local spit, spit_box
+local colliding
 if no_spits>0 then
 for i=no_spits,1,-1 do
-spit = spits[i];
-spit_box = get_spit_hitbox(spits[i]);
-colliding = are_colliding(player_box, spit_box);
+spit = spits[i]
+spit_box = get_spit_hitbox(spits[i])
+colliding = are_colliding(player_box, spit_box)
 if (colliding and not player.has_invuln) then
-player.health -= spit.damage;
-player.is_hit = true;
-player.hit_since = 0;
-player.has_invuln = true;
+player.health -= spit.damage
+player.is_hit = true
+player.hit_since = 0
+player.has_invuln = true
 if not spit.persists then
-deli(spits, i);
+deli(spits, i)
 end
 end
 end
 end
+end
+return {
+update=update,
+draw=draw,
+}
 end
 function spawn_prop()
 local x_coord = flr(rnd(120))+101;
