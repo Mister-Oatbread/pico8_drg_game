@@ -1,6 +1,6 @@
 
 
-function drilled_ground()
+function new_drilled_ground()
     local list={}
 
     local function spawn(x,y)

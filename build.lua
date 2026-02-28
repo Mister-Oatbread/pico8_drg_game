@@ -1,62 +1,4 @@
 function terrain_collisions()
-function _update_player_collision_points()
-local i=1;
-for y = player.y_pos,player.y_pos+6 do
-player.collision_points.left[i].x=player.x_pos;
-player.collision_points.left[i].y=y;
-i+=1;
-end
-i=1;
-for y = player.y_pos,player.y_pos+6 do
-player.collision_points.right[i].x=player.x_pos+7;
-player.collision_points.right[i].y=y;
-i+=1;
-end
-i=1;
-for x = player.x_pos+1,player.x_pos+6 do
-player.collision_points.top[i].x=x;
-player.collision_points.top[i].y=player.y_pos-1;
-i+=1;
-end
-end
-function _check_map_bounds()
-player.at.top_border = player.y_pos <= 102;
-player.at.bottom_border = player.y_pos >= 220;
-end
-function _find_terrain_collision()
-local point;
-local color;
-player.has_collision.left = false;
-player.has_collision.right = false;
-player.has_collision.top = false;
-local no_collision_points_left = #player.collision_points.left;
-local no_collision_points_right = #player.collision_points.right;
-local no_collision_points_top = #player.collision_points.top;
-for i = 1,no_collision_points_left do
-point = player.collision_points.left[i];
-color = pget(point.x,point.y);
-if (color==5 or color==13) then
-player.has_collision.left=true;
-break;
-end
-end
-for i=1,no_collision_points_right do
-point = player.collision_points.right[i];
-color = pget(point.x,point.y);
-if (color==5 or color==13) then
-player.has_collision.right=true;
-break;
-end
-end
-for i=1,no_collision_points_top do
-point = player.collision_points.top[i];
-color = pget(point.x,point.y);
-if (color==5 or color==13) then
-player.has_collision.top=true;
-break;
-end
-end
-end
 end
 function bottom_grunt(x,y)
 local frame=rnd(20)
@@ -304,7 +246,7 @@ damaged_since = 0
 end
 return was_damaged, damaged_since
 end
-function creatures ()
+function new_creatures()
 creatures = {}
 for x=106,220,9 do
 add(creatures,bottom_grunt(x,222))
@@ -353,16 +295,17 @@ for i=1,#creatures do
 creatures[i].draw()
 end
 end
-function get_creature_hitbox(creature)
-local x1=creature.hitbox.x[1]+creature.x()-1;
-local x2=creature.hitbox.x[2]+creature.x()-1;
-local y1=creature.hitbox.y[1]+creature.y()-1;
-local y2=creature.hitbox.y[2]+creature.y()-1;
+function get_hitbox()
+local x1=hitbox.x[1]+x()-1;
+local x2=hitbox.x[2]+x()-1;
+local y1=hitbox.y[1]+y()-1;
+local y2=hitbox.y[2]+y()-1;
 return {x={x1,x2},y={y1,y2}};
 end
 return {
 update=update,
 draw=draw,
+get_hitbox=get_hitbox,
 }
 end
 function mactera(x,y)
@@ -548,7 +491,7 @@ local alive=true
 local creature_damage=2
 local hitbox={x={1,8},y={1,8}}
 local function update()
-if game_status= "playing" then
+if game_status=="playing" then
 y+=1
 if frame%4==0 then y+=1 end
 end
@@ -585,7 +528,7 @@ hitbox=hitbox,
 is_alive=is_alive,
 }
 end
-function drilled_ground()
+function new_drilled_ground()
 local list={}
 local function spawn(x,y)
 add(list,{x=x,y=y})
@@ -773,47 +716,40 @@ end
 return probs;
 end
 function are_colliding(a, b)
-local x_good = a.x[1] > b.x[2] or a.x[2] < b.x[1];
-local y_good = a.y[1] > b.y[2] or a.y[2] < b.y[1];
+local x_good=a.x[1]>b.x[2] or a.x[2]<b.x[1];
+local y_good=a.y[1]>b.y[2] or a.y[2]<b.y[1];
 return not(x_good or y_good);
 end
 function get_player_hitbox(player)
 return {
-x={player.x_pos+1, player.x_pos+6},
-y={player.y_pos, player.y_pos+7},
+x={player.x+1, player.x+6},
+y={player.y, player.y+7},
 };
 end
 function get_bullet_hitbox(bullet)
 return {
-x={bullet.x_coord+6,bullet.x_coord+6},
-y={bullet.y_coord+5,bullet.y_coord+15},
+x={bullet.x+6,bullet.x+6},
+y={bullet.y+5,bullet.y+15},
 };
 end
 function get_spit_hitbox(spit)
-local x1 = spit.hitbox.x[1]+spit.x_coord()-1;
-local x2 = spit.hitbox.x[2]+spit.x_coord()-1;
-local y1 = spit.hitbox.y[1]+spit.y_coord()-1;
-local y2 = spit.hitbox.y[2]+spit.y_coord()-1;
+local x1=spit.hitbox.x[1]+spit.x()-1;
+local x2=spit.hitbox.x[2]+spit.x()-1;
+local y1=spit.hitbox.y[1]+spit.y()-1;
+local y2=spit.hitbox.y[2]+spit.y()-1;
 return {x={x1,x2}, y={y1,y2}};
 end
 function get_drills_hitbox(player)
 return {
-x={player.x_pos, player.x_pos+7},
-y={player.y_pos-1, player.y_pos+3},
+x={player.x,player.x+7},
+y={player.y-1,player.y+3},
 };
 end
 function get_damaging_drills_hitbox(player)
 return {
-x={player.x_pos, player.x_pos+7},
-y={player.y_pos-3, player.y_pos+3},
+x={player.x,player.x+7},
+y={player.y-3,player.y+3},
 };
-end
-function get_creature_hitbox(creature)
-local x1 = creature.hitbox.x[1]+creature.x_coord()-1;
-local x2 = creature.hitbox.x[2]+creature.x_coord()-1;
-local y1 = creature.hitbox.y[1]+creature.y_coord()-1;
-local y2 = creature.hitbox.y[2]+creature.y_coord()-1;
-return {x={x1,x2}, y={y1,y2}};
 end
 function draw_hitbox(hitbox)
 pset(hitbox.x[1],hitbox.y[1],8);
@@ -1026,87 +962,21 @@ spr(123+i,x0+8*i, y0);
 end
 end
 function _init()
-initialize_game()
-initialize_map()
-obstacles=obstacles()
-drilled_ground=drilled_ground()
-initialize_resources()
-initialize_creatures()
-initialize_hud()
-initialize_player()
-initialize_bullets()
-initialize_props()
-performance_monitor=performance_monitor()
-print(stat(0));
+player=new_player()
+projectiles=new_projectiles()
+drilled_ground=new_drilled_ground()
 end
 function _update()
-performance_monitor.reset_cpu_load()
-if game_status == "title_screen" then
-update_inputs()
-obstacles.update()
-update_creatures()
-update_resources()
-move_player()
-handle_player_abilities()
-update_map()
-update_projectiles()
-check_bullet_collision()
-check_spit_collision()
-elseif game_status == "playing" then
-update_inputs()
-update_game()
-update_map()
-obstacles.update()
+player.update()
 drilled_ground.update()
-update_resources()
-update_creatures()
-move_player()
-handle_player_abilities()
-update_projectiles()
-check_bullet_collision()
-check_spit_collision()
-update_props()
-elseif game_status == "end_screen" then
-snapshot_achievements()
-if btn(4) and btn(5) then reboot() end
-end
-performance_monitor.register_load()
+projectiles.update()
 end
 function _draw()
 cls(1)
 camera(101,101)
-if game_status == "title_screen" then
-draw_wall()
-display_chefs_kiss_banner()
-obstacles.draw()
 drilled_ground.draw()
-draw_resources()
-draw_super_wall()
-draw_projectiles()
-draw_creatures()
-draw_player()
-draw_hud()
-elseif game_status == "playing" then
-draw_wall()
-obstacles.draw()
-drilled_ground.draw()
-draw_props()
-draw_super_wall()
-draw_resources()
-draw_creatures()
-draw_projectiles()
-draw_player()
-draw_hud()
-elseif game_status == "end_screen" then
-draw_wall()
-draw_super_wall()
-draw_player()
-draw_hud()
-display_death_screen()
-performance_monitor.print_summary()
-end
-performance_monitor.register_load()
-performance_monitor.print_current()
+player.draw()
+projectiles.draw()
 end
 function _produce_map_entity(x_coord, y_coord)
 local sprite_list;
@@ -1241,7 +1111,7 @@ super_walls[i].y,
 );
 end
 end
-function obstacles()
+function new_obstacles()
 local list={}
 local sprites_small={67,68,83,84,99,100,115,116}
 local sprites_big={69,71,101,103}
@@ -1277,26 +1147,6 @@ add(list,spawn(flr(rnd(120))+101,81))
 end
 end
 end
-local function update_player_collision_points()
-local i=1;
-for y = player.y_pos,player.y_pos+6 do
-player.collision_points.left[i].x=player.x_pos;
-player.collision_points.left[i].y=y;
-i+=1;
-end
-i=1;
-for y = player.y_pos,player.y_pos+6 do
-player.collision_points.right[i].x=player.x_pos+7;
-player.collision_points.right[i].y=y;
-i+=1;
-end
-i=1;
-for x = player.x_pos+1,player.x_pos+6 do
-player.collision_points.top[i].x=x;
-player.collision_points.top[i].y=player.y_pos-1;
-i+=1;
-end
-end
 local function draw()
 local sprite,x,y,size,x_flip,y_flip
 for i=1,#list do
@@ -1314,7 +1164,7 @@ update=update,
 draw=draw,
 }
 end
-function performance_monitor()
+function new_performance_monitor()
 local cpu_percentage = 0;
 local max_cpu_percentage = 0;
 local min_fps = 60;
@@ -1341,7 +1191,7 @@ print_current = print_current,
 reset_cpu_load = reset_cpu_load,
 };
 end
-function player()
+function new_player()
 local x=148
 local y=200
 local is={
@@ -1352,7 +1202,7 @@ rns=false}
 local playing_drill={empty=false,full=false}
 local moving_frame=0
 local x_flip=false
-local current_sprite=sprites.idle.standing
+local current_sprite=49
 local ammo=25
 local fuel=150
 local max_ammo=25
@@ -1375,7 +1225,7 @@ add(collision_points.right,{x=0,y=0})
 add(collision_points.top,{x=0,y=0})
 end
 local function fetch_inputs()
-is.moving.up=btn(1)
+is.moving.up=btn(2)
 is.moving.down=btn(3)
 is.moving.left=btn(0)
 is.moving.right=btn(1)
@@ -1432,8 +1282,7 @@ local sound
 if (fuel>0) then
 drilled_ground.spawn(x,y-1)
 fuel-=1
-resources.mine()
-local drill_box = get_damaging_drills_hitbox(player)
+local drill_box=get_damaging_drills_hitbox()
 local creature_box,creature
 for i=#creatures,1,-1 do
 creature=creatures[i]
@@ -1491,23 +1340,38 @@ end
 if has_collision.top then
 y+=1
 end
-if y_pos<=101 then y=101 end
-if y_pos>=221 then y=221 end
+if y<=101 then y=101 end
+if y>=221 then y=221 end
 end
 local function update()
 fetch_inputs()
 update_player_collision_points()
 find_terrain_collision()
 move_player()
-check_map_bounds()
-check_if_hit_by_creature()
-handle_being_hit()
 if is.drilling then drill() end
 if shots_fired and shot_delay_counter<shot_delay then
 shot_delay_counter+=1
 else
 if is.shooting then shoot() end
 end
+end
+local function get_hitbox()
+return {
+x={x+1,x+6},
+y={y,y+7},
+};
+end
+function get_drills_hitbox()
+return {
+x={x,x+7},
+y={y-1,y+3},
+};
+end
+function get_damaging_drills_hitbox()
+return {
+x={x,x+7},
+y={y-3,y+3},
+};
 end
 local function check_if_hit_by_creature()
 local player_box = get_player_hitbox(player)
@@ -1554,7 +1418,7 @@ local sprite=49
 if moving then sprite+=1 end
 if is.shooting then sprite+=2 end
 if is.drilling then sprite+=5 end
-local use_alt_sprite = player.moving_frame>=5
+local use_alt_sprite = moving_frame>=5
 if is.shooting then
 x_flip=false
 if use_alt_sprite then sprite+=1 end
@@ -1562,126 +1426,124 @@ else
 x_flip=use_alt_sprite
 end
 if is_hit then current_sprite-=16 end
+spr(sprite,x,y,1,1,x_flip,false)
 end
 local function draw()
 update_player_animation()
-spr(current_sprite,x,y,1,1,x_flip,false)
-if player.is_drilling then
-if player.fuel>0 and not player.playing_drill.full then
+if is.drilling then
+if fuel>0 and not playing_drill.full then
 sfx(-1,1)
 sfx(30,1)
-player.playing_drill.full = true
-elseif player.fuel<=0 and not player.playing_drill.empty then
+playing_drill.full=true
+elseif fuel<=0 and not playing_drill.empty then
 sfx(-1,1)
 sfx(31,1)
-player.playing_drill.empty = true
+playing_drill.empty=true
 end
 else
 sfx(-1,1)
-player.playing_drill.full= false
-player.playing_drill.empty = false
+playing_drill.full=false
+playing_drill.empty=false
 end
 end
+local function x() return x end
+local function y() return y end
 return {
+x=x,
+y=y,
 update=update,
 draw=draw,
 give_ammo=give_ammo,
 give_health=give_health,
+get_hitbox=get_hitbox,
+get_drills_hitbox=get_drills_hitbox,
+get_damaging_drills_hitbox=get_damaging_drills_hitbox,
 }
 end
-function projectiles()
-bullet_sprite = 15
-bullets = {}
-spits = {}
-local function update_projectiles()
-local no_bullets = #bullets
-for i=no_bullets,1,-1 do
-bullets[i].y_coord-=4
-if bullets[i].y_coord<=91 then
-deli(bullets, i)
+function new_projectiles()
+bullet_sprite=15
+bullets={}
+spits={}
+local function update()
+for i=#bullets,1,-1 do
+bullets[i].y-=4
+if bullets[i].y<=91 then
+deli(bullets,i)
 end
 end
-local no_spits = #spits
-for i=no_spits,1,-1 do
+for i=#spits,1,-1 do
 spits[i].update()
-if spits[i].y_coord() >= 240 then
-deli(spits, i)
+if spits[i].y()>=240 then
+deli(spits,i)
 end
 end
 end
 local function fire_bullet()
-add(bullets,{x_coord=player.x_pos, y_coord=player.y_pos-8})
+add(bullets,{x_coord=player.x_pos,y_coord=player.y_pos-8})
 end
-local function spit(type, x, y)
-local sprite, speed, size, hitbox, persists, damage
-local x_flip = false
-local y_flip = false
-local frame = 0
-if type == "praet_spit" then
-sprite = 9
-speed = 1
-size = 2
+local function spit(spit_type, x, y)
+local sprite,speed,size,hitbox,persists,damage
+local x_flip,y_flip=false,false
+local frame=0
+if spit_type=="praet_spit" then
+sprite=9
+speed=1
+size=2
 hitbox={x={4,12},y={1,16}}
-persists = true
-damage = 1
-elseif type == "praet_cloud" then
-sprite = 7
-speed = 1
-size = 2
+persists=true
+damage=1
+elseif spit_type=="praet_cloud" then
+sprite=7
+speed=1
+size=2
 hitbox={x={1,16},y={1,16}}
-persists = true
-damage = 1
-elseif type == "mactera_spit" then
-sprite = 31
-speed = 2
-size = 1
+persists=true
+damage=1
+elseif spit_type=="mactera_spit" then
+sprite=31
+speed=2
+size=1
 hitbox={x={4,4},y={3,7}}
-persists = false
-damage = 1
+persists=false
+damage=1
 end
 local function update()
-if game_status == "title_screen" then
-y -= 1
+if game_status=="title_screen" then
+y-=1
 end
-y += speed
-if type == "praet_spit" then
-x_flip = frame>30
-elseif type == "praet_cloud" then
-x_flip = frame>30
-y_flip = abs(frame-30)<15
+y+=speed
+if type=="praet_spit" then
+x_flip=frame>30
+elseif type=="praet_cloud" then
+x_flip=frame>30
+y_flip=abs(frame-30)<15
 end
-frame = (frame+1)%60
+frame=(frame+1)%60
 end
 local function draw()
-spr(sprite, x, y, size, size, x_flip, y_flip)
+spr(sprite,x,y,size,size,x_flip,y_flip)
 end
-function x_coord() return x end
-function y_coord() return y end
+function x() return x end
+function y() return y end
 return {
-update =update,
-draw = draw,
-x_coord = x_coord,
-y_coord = y_coord,
-persists = persists,
-damage = damage,
-hitbox = hitbox,
+update=update,
+draw=draw,
+x=x,
+y=y,
+persists=persists,
+damage=damage,
+hitbox=hitbox,
 }
 end
-local function add_spit(type, x_coord, y_coord)
-add(spits, spit(type, x_coord, y_coord))
+local function add_spit(spit_type,x,y)
+add(spits,spit(spit_type,x,y))
 end
 local function draw()
-local no_bullets = #bullets
-if no_bullets > 0 then
-for i=1,no_bullets do
-spr(bullet_sprite, bullets[i].x_coord, bullets[i].y_coord)
+for i=1,#bullets do
+spr(bullet_sprite,bullets[i].x, bullets[i].y)
 end
-end
-local no_spits = #spits
-if no_spits > 0 then
-for i=1,no_spits do
+for i=1,#bullets do
 spits[i].draw()
-end
 end
 end
 local function check_bullet_collision()
@@ -1727,6 +1589,7 @@ end
 return {
 update=update,
 draw=draw,
+fire_bullet=fire_bullet,
 }
 end
 function spawn_prop()
@@ -1865,7 +1728,7 @@ prop.draw();
 end
 end
 end
-function resources()
+function new_resources()
 local list={}
 local red_sugar_sprites={64,80,96,112}
 local nitra_sprites={65,81,97,113}

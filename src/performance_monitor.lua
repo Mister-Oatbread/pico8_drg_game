@@ -1,6 +1,6 @@
 
 
-function performance_monitor()
+function new_performance_monitor()
 
     local cpu_percentage = 0;
     local max_cpu_percentage = 0;

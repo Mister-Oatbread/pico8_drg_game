@@ -1,13 +1,12 @@
 
 
 -- this file contains the functionaly handling shots and hittig stuff
-
-function projectiles()
+function new_projectiles()
     bullet_sprite=15
     bullets={}
     spits={}
 
-    local function update_projectiles()
+    local function update()
         for i=#bullets,1,-1 do
             bullets[i].y-=4
             if bullets[i].y<=91 then
@@ -100,7 +99,6 @@ function projectiles()
         for i=1,#bullets do
             spr(bullet_sprite,bullets[i].x, bullets[i].y)
         end
-
         for i=1,#bullets do
             spits[i].draw()
         end
@@ -158,6 +156,8 @@ function projectiles()
     return {
         update=update,
         draw=draw,
+        fire_bullet=fire_bullet,
     }
 end
+
 

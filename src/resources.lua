@@ -1,6 +1,6 @@
 
 
-function resources()
+function new_resources()
     local list={}
     local red_sugar_sprites={64,80,96,112}
     local nitra_sprites={65,81,97,113}

@@ -3,7 +3,7 @@
 -- this file contains the logic for the player character
 
 -- initialize player
-function player()
+function new_player()
     local x=148
     local y=200
     local is={
@@ -14,7 +14,7 @@ function player()
     local playing_drill={empty=false,full=false}
     local moving_frame=0
     local x_flip=false
-    local current_sprite=sprites.idle.standing
+    local current_sprite=49
     local ammo=25
     local fuel=150
     local max_ammo=25
@@ -39,7 +39,7 @@ function player()
 
     -- checks inputs and writes them to the state of the player
     local function fetch_inputs()
-        is.moving.up=btn(1)
+        is.moving.up=btn(2)
         is.moving.down=btn(3)
         is.moving.left=btn(0)
         is.moving.right=btn(1)
@@ -102,8 +102,7 @@ function player()
         if (fuel>0) then
             drilled_ground.spawn(x,y-1)
             fuel-=1
-            resources.mine()
-            local drill_box = get_damaging_drills_hitbox(player)
+            local drill_box=get_damaging_drills_hitbox()
             local creature_box,creature
             -- drill creatures
             for i=#creatures,1,-1 do
@@ -169,8 +168,8 @@ function player()
         if has_collision.top then
             y+=1
         end
-        if y_pos<=101 then y=101 end
-        if y_pos>=221 then y=221 end
+        if y<=101 then y=101 end
+        if y>=221 then y=221 end
     end
 
     -- handles moving the player around
@@ -179,9 +178,6 @@ function player()
         update_player_collision_points()
         find_terrain_collision()
         move_player()
-        check_map_bounds()
-        check_if_hit_by_creature()
-        handle_being_hit()
         if is.drilling then drill() end
 
         -- shot was recently fired, don't fire again
@@ -191,6 +187,31 @@ function player()
             -- didn't shoot recently, check if player is firing
             if is.shooting then shoot() end
         end
+    end
+
+    -- takes in player and returns hitbox ready to be processed by are_colliding()
+    local function get_hitbox()
+        return {
+            x={x+1,x+6},
+            y={y,y+7},
+        };
+    end
+
+    -- takes in player and returns hitbox ready to be processed by are_colliding()
+    -- but for the drills instead of the player
+    function get_drills_hitbox()
+        return {
+            x={x,x+7},
+            y={y-1,y+3},
+        };
+    end
+
+    -- hitbox for hitting creatures
+    function get_damaging_drills_hitbox()
+        return {
+            x={x,x+7},
+            y={y-3,y+3},
+        };
     end
 
     -- checks if any hostile creature is currently touching the player
@@ -246,7 +267,7 @@ function player()
         if moving then sprite+=1 end
         if is.shooting then sprite+=2 end
         if is.drilling then sprite+=5 end
-        local use_alt_sprite = player.moving_frame>=5
+        local use_alt_sprite = moving_frame>=5
 
         if is.shooting then
             x_flip=false
@@ -255,34 +276,43 @@ function player()
             x_flip=use_alt_sprite
         end
         if is_hit then current_sprite-=16 end
+        spr(sprite,x,y,1,1,x_flip,false)
     end
 
     -- draws player based on current state
     local function draw()
         update_player_animation()
-        spr(current_sprite,x,y,1,1,x_flip,false)
         -- handle drilling sound
-        if player.is_drilling then
-            if player.fuel>0 and not player.playing_drill.full then
+        if is.drilling then
+            if fuel>0 and not playing_drill.full then
                 sfx(-1,1)
                 sfx(30,1)
-                player.playing_drill.full = true
-            elseif player.fuel<=0 and not player.playing_drill.empty then
+                playing_drill.full=true
+            elseif fuel<=0 and not playing_drill.empty then
                 sfx(-1,1)
                 sfx(31,1)
-                player.playing_drill.empty = true
+                playing_drill.empty=true
             end
         else
             sfx(-1,1)
-            player.playing_drill.full= false
-            player.playing_drill.empty = false
+            playing_drill.full=false
+            playing_drill.empty=false
         end
     end
+
+    local function x() return x end
+    local function y() return y end
+
     return {
+        x=x,
+        y=y,
         update=update,
         draw=draw,
         give_ammo=give_ammo,
         give_health=give_health,
+        get_hitbox=get_hitbox,
+        get_drills_hitbox=get_drills_hitbox,
+        get_damaging_drills_hitbox=get_damaging_drills_hitbox,
     }
 end
 

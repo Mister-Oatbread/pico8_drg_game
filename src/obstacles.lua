@@ -1,7 +1,7 @@
 
 
 -- this file takes care of spawning obstacles
-function obstacles()
+function new_obstacles()
     local list={}
     local sprites_small={67,68,83,84,99,100,115,116}
     local sprites_big={69,71,101,103}
@@ -37,30 +37,6 @@ function obstacles()
             if rnd(1)<obstacle_spawn_rate then
                 add(list,spawn(flr(rnd(120))+101,81))
             end
-        end
-    end
-
-    local function update_player_collision_points()
-        -- left flank
-        local i=1;
-        for y = player.y_pos,player.y_pos+6 do
-            player.collision_points.left[i].x=player.x_pos;
-            player.collision_points.left[i].y=y;
-            i+=1;
-        end
-        -- right flank
-        i=1;
-        for y = player.y_pos,player.y_pos+6 do
-            player.collision_points.right[i].x=player.x_pos+7;
-            player.collision_points.right[i].y=y;
-            i+=1;
-        end
-        -- top flank
-        i=1;
-        for x = player.x_pos+1,player.x_pos+6 do
-            player.collision_points.top[i].x=x;
-            player.collision_points.top[i].y=player.y_pos-1;
-            i+=1;
         end
     end
 
