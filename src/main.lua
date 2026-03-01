@@ -4,8 +4,11 @@ function _init()
     player=new_player()
     projectiles=new_projectiles()
     drilled_ground=new_drilled_ground()
-    performance_monitor=new_performance_monitor()
     resources=new_resources()
+
+    game_logic=new_game_logic()
+
+    performance_monitor=new_performance_monitor()
 end
 
 function _update()
@@ -25,6 +28,9 @@ function _update()
     drilled_ground.update()
     projectiles.update()
     resources.update()
+
+    game_logic.update()
+
     performance_monitor.register_load()
 end
 
@@ -35,6 +41,7 @@ function _draw()
     resources.draw()
     player.draw()
     projectiles.draw()
+
     performance_monitor.register_load()
     performance_monitor.print_current()
 end

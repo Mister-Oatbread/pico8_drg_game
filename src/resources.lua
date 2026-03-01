@@ -89,10 +89,13 @@ function new_resources()
         end
     end
 
+    local function list_f return list end
+
     return {
         update=update,
-        mine=mine,
         draw=draw,
+        get_hitbox=get_hitbox,
+        get_resources=list_f,
     }
 end
 
