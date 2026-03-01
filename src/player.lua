@@ -15,7 +15,6 @@ function new_player()
     local moving_frame=0
     local use_alt_sprite=false
     local x_flip=false
-    local current_sprite=49
     local ammo=25
     local fuel=150
     local max_ammo=25
@@ -23,7 +22,6 @@ function new_player()
     local shots_fired=false
     local shot_delay_counter=0
     local max_shot_delay=3
-    local points=0
     local health=3
     local max_health=3
     local is_hit=false
@@ -306,6 +304,10 @@ function new_player()
 
     local function x_f() return x end
     local function y_f() return y end
+    local function drilling_f() return is.drilling end
+    local function shooting_f() return is.shooting end
+    local function rns_f() return is.rns end
+    local function hit_f() return is_hit end
 
     return {
         x=x_f,
@@ -317,6 +319,10 @@ function new_player()
         get_hitbox=get_hitbox,
         get_drills_hitbox=get_drills_hitbox,
         get_damaging_drills_hitbox=get_damaging_drills_hitbox,
+        is_drilling=drilling_f,
+        is_shooting=shooting_f,
+        is_rns=rns_f,
+        is_hit=hit_f,
     }
 end
 

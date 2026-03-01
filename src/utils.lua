@@ -9,4 +9,26 @@ function are_colliding(a, b)
     return not(x_good or y_good);
 end
 
+function get_cum_probs(ratios)
+    local sum = 0;
+    local probs = {};
+    for ratio in all(ratios) do
+        add(probs, ratio);
+        sum+=ratio;
+    end
+
+    -- calculate separate probabilities
+    for i=1,#probs do
+        probs[i] = probs[i]/sum;
+    end
+
+    -- calculate cumulative probability by summing over all probabilities that
+    -- came before
+    for i=2,#probs do
+        probs[i] += probs[i-1];
+    end
+
+    return probs;
+end
+
 

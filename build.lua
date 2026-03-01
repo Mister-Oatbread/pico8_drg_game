@@ -994,19 +994,30 @@ player=new_player()
 projectiles=new_projectiles()
 drilled_ground=new_drilled_ground()
 performance_monitor=new_performance_monitor()
+resources=new_resources()
 end
 function _update()
+difficulty=2
+resource_spawn_rate=.01
 game_status="playing"
+resource_spawn_ratios = {
+1, 
+1, 
+1, 
+}
+resource_spawn_probs = get_cum_probs(resource_spawn_ratios)
 performance_monitor.reset_cpu_load()
 player.update()
 drilled_ground.update()
 projectiles.update()
+resources.update()
 performance_monitor.register_load()
 end
 function _draw()
 cls(1)
 camera(101,101)
 drilled_ground.draw()
+resources.draw()
 player.draw()
 projectiles.draw()
 performance_monitor.register_load()
@@ -1237,7 +1248,6 @@ local playing_drill={empty=false,full=false}
 local moving_frame=0
 local use_alt_sprite=false
 local x_flip=false
-local current_sprite=49
 local ammo=25
 local fuel=150
 local max_ammo=25
@@ -1245,7 +1255,6 @@ local max_fuel=150
 local shots_fired=false
 local shot_delay_counter=0
 local max_shot_delay=3
-local points=0
 local health=3
 local max_health=3
 local is_hit=false
@@ -1477,6 +1486,10 @@ end
 end
 local function x_f() return x end
 local function y_f() return y end
+local function drilling_f() return is.drilling end
+local function shooting_f() return is.shooting end
+local function rns_f() return is.rns end
+local function hit_f() return is_hit end
 return {
 x=x_f,
 y=y_f,
@@ -1487,6 +1500,10 @@ give_health=give_health,
 get_hitbox=get_hitbox,
 get_drills_hitbox=get_drills_hitbox,
 get_damaging_drills_hitbox=get_damaging_drills_hitbox,
+is_drilling=drilling_f,
+is_shooting=shooting_f,
+is_rns=rns_f,
+is_hit=hit_f,
 }
 end
 function new_projectiles()
@@ -1757,31 +1774,24 @@ end
 end
 end
 function new_resources()
-local list={}
-local red_sugar_sprites={64,80,96,112}
-local nitra_sprites={65,81,97,113}
-local gold_sprites={66,82,98,114}
-local red_sugar_hitbox={x={3,6},y={3,6}}
-local nitra_hitbox={x={1,8},y={1,8}}
-local gold_hitbox={x={1,8},y={1,8}}
-local mining_sound=38
+local list=new_entity_container()
 local function create(x,y)
 local sprite,sprites,hitbox,res_type
 local decision=rnd(1)
 if decision<resource_spawn_probs[1] then
-sprites=red_sugar_sprites
-hitbox=red_sugar_hitbox
+sprites={64,80,96,112}
+hitbox={x={3,6},y={3,6}}
 res_type="red_sugar"
 elseif decision<resource_spawn_probs[2] then
-sprites=nitra_sprites
-hitbox=nitra_hitbox
+sprites={65,81,97,113}
+hitbox={x={1,8},y={1,8}}
 res_type="nitra"
 else
-sprites=gold_sprites
-hitbox=gold_hitbox
+sprites={66,82,98,114}
+hitbox={x={1,8},y={1,8}}
 res_type="gold"
 end
-sprite=sprites[flr(rnd(#sprite_list))+1]
+sprite=sprites[flr(rnd(#sprites))+1]
 return {
 sprite=sprite,
 x=x,
@@ -1793,20 +1803,20 @@ res_type=res_type,
 }
 end
 local function update()
-for i=#list,1,-1 do
-list[i].y+=1
-if list[i].y_coord>=230 then
-deli(list,i)
+for i=list.size(),1,-1 do
+list.get(i).y+=1
+if list.get(i).y>=230 then
+list.deletei(i)
 end
 end
 if (rnd(1)<resource_spawn_rate) then
-add(list,create(flr(rnd(120))+101,81))
+list.add(create(flr(rnd(120))+101,81))
 end
 end
 local function mine(hitbox_drills)
 local resource
-for i=#resources,1,-1 do
-resource = resources[i]
+for i=resources.size(),1,-1 do
+resource=list.get(i)
 if are_colliding(get_hitbox(resource),hitbox_drills) then
 local res_type=resource.res_type
 if res_type=="red_sugar" then
@@ -1816,9 +1826,9 @@ give_ammo(.5)
 elseif res_type=="gold" then
 points+=100
 end
-deli(resources,i)
+list.deletei(i)
 sfx(-1,3)
-sfx(mining_sound,3)
+sfx(38,3)
 end
 end
 end
@@ -1830,13 +1840,14 @@ local y2=resource.y+resource.hitbox.y[2]-1;
 return {x={x1,x2},y={y1,y2}};
 end
 local function draw()
-local sprite,x,y,x_flip,y_flip
-for i=1,#list do
-sprite=list[i].sprite
-x=list[i].x
-y=list[i].y
-x_flip=list[i].x_flip
-y_flip=list[i].y_flip
+local sprite,x,y,x_flip,y_flip,resource
+for i=1,list.size() do
+resource=list.get(i)
+sprite=resource.sprite
+x=resource.x
+y=resource.y
+x_flip=resource.x_flip
+y_flip=resource.y_flip
 spr(sprite,x,y,1,1,x_flip,y_flip)
 end
 end
@@ -1850,4 +1861,19 @@ function are_colliding(a, b)
 local x_good = a.x[1] > b.x[2] or a.x[2] < b.x[1];
 local y_good = a.y[1] > b.y[2] or a.y[2] < b.y[1];
 return not(x_good or y_good);
+end
+function get_cum_probs(ratios)
+local sum = 0;
+local probs = {};
+for ratio in all(ratios) do
+add(probs, ratio);
+sum+=ratio;
+end
+for i=1,#probs do
+probs[i] = probs[i]/sum;
+end
+for i=2,#probs do
+probs[i] += probs[i-1];
+end
+return probs;
 end
