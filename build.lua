@@ -581,8 +581,35 @@ size=size_list,
 }
 end
 function new_game_logic()
-local function update()
+local function mine_resources()
+local resource,colliding,drilling,res_hitbox
+local hitbox_drills=player.get_drills_hitbox()
+for i=resources.get_resources().size(),1,-1 do
+resource=resources.get_resources().get(i)
+res_hitbox=resources.get_hitbox(resource)
+colliding=are_colliding(res_hitbox,hitbox_drills)
+drilling=player.is_drilling()
+if colliding and drilling then
+local res_type=resource.res_type
+if res_type=="red_sugar" then
+player.give_health(1)
+elseif res_type=="nitra" then
+player.give_ammo(.5)
+elseif res_type=="gold" then
+points+=100
 end
+resources.get_resources().deletei(i)
+sfx(-1,3)
+sfx(38,3)
+end
+end
+end
+local function update()
+mine_resources()
+end
+return {
+update=update
+}
 end
 function initialize_game()
 music(56);
@@ -997,11 +1024,13 @@ function _init()
 player=new_player()
 projectiles=new_projectiles()
 drilled_ground=new_drilled_ground()
-performance_monitor=new_performance_monitor()
 resources=new_resources()
+game_logic=new_game_logic()
+performance_monitor=new_performance_monitor()
 end
 function _update()
 difficulty=2
+points=0
 resource_spawn_rate=.01
 game_status="playing"
 resource_spawn_ratios = {
@@ -1015,6 +1044,7 @@ player.update()
 drilled_ground.update()
 projectiles.update()
 resources.update()
+game_logic.update()
 performance_monitor.register_load()
 end
 function _draw()
@@ -1857,10 +1887,12 @@ y_flip=resource.y_flip
 spr(sprite,x,y,1,1,x_flip,y_flip)
 end
 end
+local function list_f() return list end
 return {
 update=update,
-mine=mine,
 draw=draw,
+get_hitbox=get_hitbox,
+get_resources=list_f,
 }
 end
 function are_colliding(a, b)

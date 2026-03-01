@@ -89,7 +89,7 @@ function new_resources()
         end
     end
 
-    local function list_f return list end
+    local function list_f() return list end
 
     return {
         update=update,

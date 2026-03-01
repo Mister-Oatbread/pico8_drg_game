@@ -14,6 +14,7 @@ end
 function _update()
     -- hacky stuff
     difficulty=2
+    points=0
     resource_spawn_rate=.01
     game_status="playing"
     resource_spawn_ratios = {
