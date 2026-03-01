@@ -580,6 +580,10 @@ deletei=deletei_entity,
 size=size_list,
 }
 end
+function new_game_logic()
+local function update()
+end
+end
 function initialize_game()
 music(56);
 damaged_sprite_duration = 4;
@@ -1352,7 +1356,7 @@ if health>max_health then health=max_health end
 end
 local function move_player()
 if is.moving.up and not has_collision.top then
-if y>101 then
+if y>102 then
 y-=1
 end
 end
@@ -1374,7 +1378,7 @@ end
 if has_collision.top then
 y+=1
 end
-if y<=101 then y=101 end
+if y<=102 then y=102 end
 if y>=221 then y=221 end
 end
 local function update()
@@ -1457,11 +1461,13 @@ if is.drilling then sprite+=5 end
 use_alt_sprite=moving_frame>=8
 moving_frame=(moving_frame+1)%16
 if sprinting then moving_frame=(moving_frame+1)%16 end
+if moving then
 if is.shooting then
 x_flip=false
 if use_alt_sprite then sprite+=1 end
 else
 x_flip=use_alt_sprite
+end
 end
 if is_hit then current_sprite-=16 end
 spr(sprite,x,y,1,1,x_flip,false)
@@ -1820,9 +1826,9 @@ resource=list.get(i)
 if are_colliding(get_hitbox(resource),hitbox_drills) then
 local res_type=resource.res_type
 if res_type=="red_sugar" then
-give_health(1)
+player.give_health(1)
 elseif res_type=="nitra" then
-give_ammo(.5)
+player.give_ammo(.5)
 elseif res_type=="gold" then
 points+=100
 end
@@ -1832,7 +1838,7 @@ sfx(38,3)
 end
 end
 end
-function get_hitbox(resource)
+local function get_hitbox(resource)
 local x1=resource.x+resource.hitbox.x[1]-1;
 local x2=resource.x+resource.hitbox.x[2]-1;
 local y1=resource.y+resource.hitbox.y[1]-1;

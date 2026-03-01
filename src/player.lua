@@ -144,7 +144,7 @@ function new_player()
 
     local function move_player()
         if is.moving.up and not has_collision.top then
-            if y>101 then
+            if y>102 then
                 y-=1
             end
         end
@@ -166,7 +166,7 @@ function new_player()
         if has_collision.top then
             y+=1
         end
-        if y<=101 then y=101 end
+        if y<=102 then y=102 end
         if y>=221 then y=221 end
     end
 
@@ -271,11 +271,13 @@ function new_player()
         moving_frame=(moving_frame+1)%16
         if sprinting then moving_frame=(moving_frame+1)%16 end
 
-        if is.shooting then
-            x_flip=false
-            if use_alt_sprite then sprite+=1 end
-        else
-            x_flip=use_alt_sprite
+        if moving then
+            if is.shooting then
+                x_flip=false
+                if use_alt_sprite then sprite+=1 end
+            else
+                x_flip=use_alt_sprite
+            end
         end
         if is_hit then current_sprite-=16 end
         spr(sprite,x,y,1,1,x_flip,false)

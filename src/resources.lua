@@ -55,9 +55,9 @@ function new_resources()
             if are_colliding(get_hitbox(resource),hitbox_drills) then
                 local res_type=resource.res_type
                 if res_type=="red_sugar" then
-                    give_health(1)
+                    player.give_health(1)
                 elseif res_type=="nitra" then
-                    give_ammo(.5)
+                    player.give_ammo(.5)
                 elseif res_type=="gold" then
                     points+=100
                 end
@@ -68,7 +68,7 @@ function new_resources()
         end
     end
 
-    function get_hitbox(resource)
+    local function get_hitbox(resource)
         local x1=resource.x+resource.hitbox.x[1]-1;
         local x2=resource.x+resource.hitbox.x[2]-1;
         local y1=resource.y+resource.hitbox.y[1]-1;
