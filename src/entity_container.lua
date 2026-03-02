@@ -25,12 +25,17 @@ function new_entity_container()
         return #list
     end
 
+    local function replace_entity(i,new_entity)
+        list[i]=new_entity
+    end
+
     return {
         add=add_entity,
         get=get_list,
         delete=delete_entity,
         deletei=deletei_entity,
         size=size_list,
+        replace=replace_entity,
     }
 end
 

@@ -2,162 +2,131 @@
 
 -- this file contains the needed files to generate the rolling background
 
--- takes x,y coord and creates a random base sprite with a 70% chance,
--- or special sprite else
-function _produce_map_entity(x_coord, y_coord)
-    local sprite_list;
-    if (rnd(1) < .90) then
-        sprite_list = map_sprites_base;
-    else
-        sprite_list = map_sprites_special;
+function new_map()
+
+    -- takes x,y coord and creates a random wall sprite with random x flip and
+    -- according orientation for wall
+    local function create_wall(x,y)
+        local x_flip=x>140
+        local y_flip=rnd(2)<1
+        local sprites={
+            136,138,152,154,168,170,184,186,
+            137,139,153,155,169,171,185,187,
+        }
+        local sprite=sprites[flr(rnd(#sprites))+1]
+        return {
+            sprite=sprite,
+            x=x,
+            y=y,
+            x_flip=x_flip,
+            y_flip=y_flip,
+        }
     end
-    local x_flip = rnd(2) < 1;
-    local y_flip = rnd(2) < 1;
 
-    local sprite = sprite_list[flr(rnd(#sprite_list))+1];
-    return {
-        sprite=sprite,
-        x_coord=x_coord,
-        y_coord=y_coord,
-        x_flip=x_flip,
-        y_flip=y_flip,
-    };
-end
+    -- init -------------
 
--- takes x,y coord and creates a random wall sprite with random x flip and
--- according orientation for wall
-function _produce_wall_entity(x_coord, y_coord)
-    x_flip = x_coord > 140;
-    y_flip = rnd(2) < 1;
-
-    local sprite = wall_sprites[flr(rnd(#wall_sprites))+1];
-    return {
-        sprite=sprite,
-        x_coord=x_coord,
-        y_coord=y_coord,
-        x_flip=x_flip,
-        y_flip=y_flip,
-    };
-end
-
--- initialize map
-function initialize_map()
     -- catalogue all sprites and infrastructure
-    map_entity = {sprite, x_coord, y_coord};
-    wall_entity = {sprite,x_coord, y_coord};
-    map_sprites_base = {128,128,128,128,128,144,160,176};
-    map_sprites_special = {
-        130,146,162,178,
-        131,147,163,179,
-        132,148,164,180,
-        133,149,165,181,
-    };
-    wall_sprites = {
-        136,138,152,154,168,170,184,186,
-        137,139,153,155,169,171,185,187,
-    };
-    super_wall_sprite = 167;
-    terrain = {};
-    walls = {};
-    super_walls = {};
-
-    camera_position = {x_coord=101, y_coord = 101};
-
-    -- initialize terrain by looping over all positions and generating
-    -- random sprite
-    local x_coord = 101;
-    local y_coord = 91;
-    while (x_coord < 228) do
-        while (y_coord < 228) do
-            add(terrain,_produce_map_entity(x_coord,y_coord));
-            y_coord += 8;
-        end
-        x_coord += 8;
-        y_coord = 91;
-    end
+    -- local map_sprites_base={128,128,128,128,128,144,160,176}
+    local terrain=new_entity_container()
+    local walls=new_entity_container()
+    local super_walls=new_entity_container()
 
     -- initialize walls with random sprite
-    x_coord = 102;
-    y_coord = 91;
-    while (x_coord < 228) do
-        while (y_coord < 228) do
-            add(walls, _produce_wall_entity(x_coord, y_coord));
-            y_coord += 8;
+    for x=102,220,118 do
+        for y=91,228,8 do
+            walls.add(create_wall(x,y))
         end
-        x_coord += 118;
-        y_coord = 91;
     end
 
-    x_coord = 101;
-    y_coord = 91;
-    while (x_coord < 238) do
-        while (y_coord < 238) do
-            add(super_walls, {x=x_coord, y=y_coord});
-            y_coord += 8;
+    -- initialize super walls
+    for i=101,230,127 do
+        for j=91,228,8 do
+            super_walls.add({x=i,y=j})
         end
-        x_coord += 127;
-        y_coord = 91;
     end
-end
 
--- slides the floor one frame to the bottom, and realigns the floor if needed
-function update_map()
-    if game_status == "playing" then
-        local no_terrain = #terrain;
-        local no_walls = #walls;
+    -- -- takes x,y coord and creates a random base sprite with a 70% chance,
+    -- -- or special sprite else
+    -- local function produce_map_entity(x,y)
+    --     local sprite_list
+    --     if (rnd(1) < .90) then
+    --         sprite_list = map_sprites_base
+    --     else
+    --         sprite_list = map_sprites_special
+    --     end
+    --     local x_flip = rnd(2) < 1
+    --     local y_flip = rnd(2) < 1
+    --
+    --     local sprite = sprite_list[flr(rnd(#sprite_list))+1]
+    --     return {
+    --         sprite=sprite,
+    --         x_coord=x_coord,
+    --         y_coord=y_coord,
+    --         x_flip=x_flip,
+    --         y_flip=y_flip,
+    --     }
+    -- end
+
+    -- slides the floor one frame to the bottom, and realigns the floor if needed
+    local function update()
+        local wall
+        if game_status=="playing" then
+            for i=1,walls.size() do
+                wall=walls.get(i)
+                wall.y+=1
+                if wall.y>=230 then
+                    walls.replace(i,create_wall(wall.x,91))
+                end
+            end
+        end
+    end
+
+    -- paint all terrain tiles at their current location
+    local function draw_map()
+        local sprite, x_coord, y_coord, x_flip, y_flip
+        local no_terrain = #terrain
         for i=1,no_terrain do
-            terrain[i].y_coord += 1;
-            if (terrain[i].y_coord >= 235) then
-                terrain[i] = _produce_map_entity(terrain[i].x_coord,91);
-            end
-        end
-        for i=1,no_walls do
-            walls[i].y_coord += 1;
-            if (walls[i].y_coord >= 235) then
-                walls[i] = _produce_wall_entity(walls[i].x_coord,91);
-            end
+            sprite = terrain[i].sprite
+            x_coord = terrain[i].x_coord
+            y_coord = terrain[i].y_coord
+            x_flip = terrain[i].x_flip
+            y_flip = terrain[i].y_flip
+            spr(sprite,x_coord,y_coord,1,1,x_flip,y_flip)
         end
     end
-end
 
--- paint all terrain tiles at their current location
-function draw_map()
-    local sprite, x_coord, y_coord, x_flip, y_flip;
-    local no_terrain = #terrain;
-    for i=1,no_terrain do
-        sprite = terrain[i].sprite;
-        x_coord = terrain[i].x_coord;
-        y_coord = terrain[i].y_coord;
-        x_flip = terrain[i].x_flip;
-        y_flip = terrain[i].y_flip;
-        spr(sprite,x_coord,y_coord,1,1,x_flip,y_flip);
+    local function draw_wall()
+        local wall
+        for i=1,walls.size() do
+            wall=walls.get(i)
+            spr(
+                wall.sprite,
+                wall.x,
+                wall.y,
+                1,1,
+                wall.x_flip,
+                wall.y_flip
+            )
+        end
     end
-end
 
-function draw_wall()
-    local sprite, x_coord, y_coord, x_flip, y_flip;
-    local no_walls = #walls;
-    for i=1,no_walls do
-        sprite = walls[i].sprite;
-        x_coord = walls[i].x_coord;
-        y_coord = walls[i].y_coord;
-        x_flip = walls[i].x_flip;
-        y_flip = walls[i].y_flip;
-        spr(sprite,x_coord,y_coord,1,1,x_flip,y_flip);
+    local function draw_super_wall()
+        for i=1,super_walls.size() do
+            spr(
+                167,
+                super_walls.get(i).x,
+                super_walls.get(i).y,
+                1,1,false,false
+            )
+        end
     end
-end
 
-function draw_super_wall()
-    local no_super_walls = #super_walls
-    for i=1,no_super_walls do
-        spr(
-            super_wall_sprite,
-            super_walls[i].x,
-            super_walls[i].y,
-            1,1,false,false
-        );
-    end
+    return {
+        update=update,
+        draw_wall=draw_wall,
+        draw_super_wall=draw_super_wall,
+        draw_terrain=draw_terrain,
+    }
 end
-
 
 

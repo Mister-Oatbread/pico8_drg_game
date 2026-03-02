@@ -55,13 +55,13 @@ function new_player()
         end
         -- right flank
         for i=1,6 do
-            collision_points.left[i].x=x+7
-            collision_points.left[i].y=y+i
+            collision_points.right[i].x=x+7
+            collision_points.right[i].y=y+i
         end
         -- top flank
         for i=1,6 do
-            collision_points.left[i].x=x+i
-            collision_points.left[i].y=y-1
+            collision_points.top[i].x=x+i
+            collision_points.top[i].y=y-1
         end
     end
 
@@ -70,7 +70,7 @@ function new_player()
         has_collision.left=false
         has_collision.right=false
         has_collision.top=false
-        for i = 1,#collision_points.left do
+        for i=1,#collision_points.left do
             point=collision_points.left[i]
             color=pget(point.x,point.y)
             if color==5 or color==13 then

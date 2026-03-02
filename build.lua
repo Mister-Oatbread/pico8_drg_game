@@ -572,12 +572,16 @@ end
 local function size_list()
 return #list
 end
+local function replace_entity(i,new_entity)
+list[i]=new_entity
+end
 return {
 add=add_entity,
 get=get_list,
 delete=delete_entity,
 deletei=deletei_entity,
 size=size_list,
+replace=replace_entity,
 }
 end
 function new_game_logic()
@@ -1025,6 +1029,7 @@ player=new_player()
 projectiles=new_projectiles()
 drilled_ground=new_drilled_ground()
 resources=new_resources()
+map=new_map()
 game_logic=new_game_logic()
 performance_monitor=new_performance_monitor()
 end
@@ -1040,155 +1045,110 @@ resource_spawn_ratios = {
 }
 resource_spawn_probs = get_cum_probs(resource_spawn_ratios)
 performance_monitor.reset_cpu_load()
-player.update()
-drilled_ground.update()
 projectiles.update()
 resources.update()
+map.update()
+drilled_ground.update()
+player.update()
 game_logic.update()
 performance_monitor.register_load()
 end
 function _draw()
 cls(1)
 camera(101,101)
-drilled_ground.draw()
 resources.draw()
-player.draw()
 projectiles.draw()
+map.draw_wall()
+drilled_ground.draw()
+player.draw()
+map.draw_super_wall()
 performance_monitor.register_load()
 performance_monitor.print_current()
 end
-function _produce_map_entity(x_coord, y_coord)
-local sprite_list;
-if (rnd(1) < .90) then
-sprite_list = map_sprites_base;
-else
-sprite_list = map_sprites_special;
-end
-local x_flip = rnd(2) < 1;
-local y_flip = rnd(2) < 1;
-local sprite = sprite_list[flr(rnd(#sprite_list))+1];
-return {
-sprite=sprite,
-x_coord=x_coord,
-y_coord=y_coord,
-x_flip=x_flip,
-y_flip=y_flip,
-};
-end
-function _produce_wall_entity(x_coord, y_coord)
-x_flip = x_coord > 140;
-y_flip = rnd(2) < 1;
-local sprite = wall_sprites[flr(rnd(#wall_sprites))+1];
-return {
-sprite=sprite,
-x_coord=x_coord,
-y_coord=y_coord,
-x_flip=x_flip,
-y_flip=y_flip,
-};
-end
-function initialize_map()
-map_entity = {sprite, x_coord, y_coord};
-wall_entity = {sprite,x_coord, y_coord};
-map_sprites_base = {128,128,128,128,128,144,160,176};
-map_sprites_special = {
-130,146,162,178,
-131,147,163,179,
-132,148,164,180,
-133,149,165,181,
-};
-wall_sprites = {
+function new_map()
+local function create_wall(x,y)
+local x_flip=x>140
+local y_flip=rnd(2)<1
+local sprites={
 136,138,152,154,168,170,184,186,
 137,139,153,155,169,171,185,187,
-};
-super_wall_sprite = 167;
-terrain = {};
-walls = {};
-super_walls = {};
-camera_position = {x_coord=101, y_coord = 101};
-local x_coord = 101;
-local y_coord = 91;
-while (x_coord < 228) do
-while (y_coord < 228) do
-add(terrain,_produce_map_entity(x_coord,y_coord));
-y_coord += 8;
+}
+local sprite=sprites[flr(rnd(#sprites))+1]
+return {
+sprite=sprite,
+x=x,
+y=y,
+x_flip=x_flip,
+y_flip=y_flip,
+}
 end
-x_coord += 8;
-y_coord = 91;
-end
-x_coord = 102;
-y_coord = 91;
-while (x_coord < 228) do
-while (y_coord < 228) do
-add(walls, _produce_wall_entity(x_coord, y_coord));
-y_coord += 8;
-end
-x_coord += 118;
-y_coord = 91;
-end
-x_coord = 101;
-y_coord = 91;
-while (x_coord < 238) do
-while (y_coord < 238) do
-add(super_walls, {x=x_coord, y=y_coord});
-y_coord += 8;
-end
-x_coord += 127;
-y_coord = 91;
+local terrain=new_entity_container()
+local walls=new_entity_container()
+local super_walls=new_entity_container()
+for x=102,220,118 do
+for y=91,228,8 do
+walls.add(create_wall(x,y))
 end
 end
-function update_map()
-if game_status == "playing" then
-local no_terrain = #terrain;
-local no_walls = #walls;
+for i=101,230,127 do
+for j=91,228,8 do
+super_walls.add({x=i,y=j})
+end
+end
+local function update()
+local wall
+if game_status=="playing" then
+for i=1,walls.size() do
+wall=walls.get(i)
+wall.y+=1
+if wall.y>=230 then
+walls.replace(i,create_wall(wall.x,91))
+end
+end
+end
+end
+local function draw_map()
+local sprite, x_coord, y_coord, x_flip, y_flip
+local no_terrain = #terrain
 for i=1,no_terrain do
-terrain[i].y_coord += 1;
-if (terrain[i].y_coord >= 235) then
-terrain[i] = _produce_map_entity(terrain[i].x_coord,91);
+sprite = terrain[i].sprite
+x_coord = terrain[i].x_coord
+y_coord = terrain[i].y_coord
+x_flip = terrain[i].x_flip
+y_flip = terrain[i].y_flip
+spr(sprite,x_coord,y_coord,1,1,x_flip,y_flip)
 end
 end
-for i=1,no_walls do
-walls[i].y_coord += 1;
-if (walls[i].y_coord >= 235) then
-walls[i] = _produce_wall_entity(walls[i].x_coord,91);
-end
-end
-end
-end
-function draw_map()
-local sprite, x_coord, y_coord, x_flip, y_flip;
-local no_terrain = #terrain;
-for i=1,no_terrain do
-sprite = terrain[i].sprite;
-x_coord = terrain[i].x_coord;
-y_coord = terrain[i].y_coord;
-x_flip = terrain[i].x_flip;
-y_flip = terrain[i].y_flip;
-spr(sprite,x_coord,y_coord,1,1,x_flip,y_flip);
-end
-end
-function draw_wall()
-local sprite, x_coord, y_coord, x_flip, y_flip;
-local no_walls = #walls;
-for i=1,no_walls do
-sprite = walls[i].sprite;
-x_coord = walls[i].x_coord;
-y_coord = walls[i].y_coord;
-x_flip = walls[i].x_flip;
-y_flip = walls[i].y_flip;
-spr(sprite,x_coord,y_coord,1,1,x_flip,y_flip);
-end
-end
-function draw_super_wall()
-local no_super_walls = #super_walls
-for i=1,no_super_walls do
+local function draw_wall()
+local wall
+for i=1,walls.size() do
+wall=walls.get(i)
 spr(
-super_wall_sprite,
-super_walls[i].x,
-super_walls[i].y,
-1,1,false,false
-);
+wall.sprite,
+wall.x,
+wall.y,
+1,1,
+wall.x_flip,
+wall.y_flip
+)
 end
+end
+local function draw_super_wall()
+for i=1,super_walls.size() do
+spr(
+167,
+super_walls.get(i).x,
+super_walls.get(i).y,
+1,1,false,false
+)
+end
+end
+return {
+update=update,
+draw_wall=draw_wall,
+draw_super_wall=draw_super_wall,
+draw_terrain=draw_terrain,
+}
 end
 function new_obstacles()
 local list={}
@@ -1317,12 +1277,12 @@ collision_points.left[i].x=x
 collision_points.left[i].y=y+i
 end
 for i=1,6 do
-collision_points.left[i].x=x+7
-collision_points.left[i].y=y+i
+collision_points.right[i].x=x+7
+collision_points.right[i].y=y+i
 end
 for i=1,6 do
-collision_points.left[i].x=x+i
-collision_points.left[i].y=y-1
+collision_points.top[i].x=x+i
+collision_points.top[i].y=y-1
 end
 end
 local function find_terrain_collision()
@@ -1330,7 +1290,7 @@ local point,color
 has_collision.left=false
 has_collision.right=false
 has_collision.top=false
-for i = 1,#collision_points.left do
+for i=1,#collision_points.left do
 point=collision_points.left[i]
 color=pget(point.x,point.y)
 if color==5 or color==13 then
