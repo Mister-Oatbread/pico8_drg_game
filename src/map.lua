@@ -45,31 +45,9 @@ function new_map()
         end
     end
 
-    -- -- takes x,y coord and creates a random base sprite with a 70% chance,
-    -- -- or special sprite else
-    -- local function produce_map_entity(x,y)
-    --     local sprite_list
-    --     if (rnd(1) < .90) then
-    --         sprite_list = map_sprites_base
-    --     else
-    --         sprite_list = map_sprites_special
-    --     end
-    --     local x_flip = rnd(2) < 1
-    --     local y_flip = rnd(2) < 1
-    --
-    --     local sprite = sprite_list[flr(rnd(#sprite_list))+1]
-    --     return {
-    --         sprite=sprite,
-    --         x_coord=x_coord,
-    --         y_coord=y_coord,
-    --         x_flip=x_flip,
-    --         y_flip=y_flip,
-    --     }
-    -- end
-
     -- slides the floor one frame to the bottom, and realigns the floor if needed
     local function update()
-        local wall
+        local wall,terrain_piece
         if game_status=="playing" then
             for i=1,walls.size() do
                 wall=walls.get(i)
@@ -78,21 +56,26 @@ function new_map()
                     walls.replace(i,create_wall(wall.x,91))
                 end
             end
+            for i=terrain.size(),1,-1 do
+                terrain_piece=terrain.get(i)
+                terrain_piece.y+=1
+                if terrain_piece.y>230 then
+                    terrain.deletei(i)
+                end
+            end
+            if rnd()<.2 then
+                terrain.add(spawn_pebble())
+            end
         end
     end
 
-    -- paint all terrain tiles at their current location
-    local function draw_map()
-        local sprite, x_coord, y_coord, x_flip, y_flip
-        local no_terrain = #terrain
-        for i=1,no_terrain do
-            sprite = terrain[i].sprite
-            x_coord = terrain[i].x_coord
-            y_coord = terrain[i].y_coord
-            x_flip = terrain[i].x_flip
-            y_flip = terrain[i].y_flip
-            spr(sprite,x_coord,y_coord,1,1,x_flip,y_flip)
-        end
+    local function spawn_pebble()
+        x=flr(rnd(128))+101
+        return {
+            color=6,
+            x=x,
+            y=94,
+        }
     end
 
     local function draw_wall()
@@ -118,6 +101,13 @@ function new_map()
                 super_walls.get(i).y,
                 1,1,false,false
             )
+        end
+    end
+
+    local function draw_terrain()
+        local terrain_piece
+        for i=1,terrain.size() do
+            pset(terrain_piece.x,terrain_piece.y,terrain_piece.color)
         end
     end
 
