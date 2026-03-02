@@ -21,6 +21,8 @@ function _update()
     resource_spawn_ratios = {
         1, -- red_sugar
         1, -- nitra
+
+    -- activate secondary palette
         1, -- gold
     }
     resource_spawn_probs = get_cum_probs(resource_spawn_ratios)
@@ -41,10 +43,11 @@ end
 function _draw()
     cls(1)
     camera(101,101)
-    resources.draw()
-    projectiles.draw()
+    map.draw_terrain()
     map.draw_wall()
     drilled_ground.draw()
+    resources.draw()
+    projectiles.draw()
     player.draw()
     map.draw_super_wall()
 

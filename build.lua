@@ -1025,6 +1025,7 @@ spr(123+i,x0+8*i, y0);
 end
 end
 function _init()
+poke(0x5f5f,0x10)
 player=new_player()
 projectiles=new_projectiles()
 drilled_ground=new_drilled_ground()
@@ -1056,10 +1057,11 @@ end
 function _draw()
 cls(1)
 camera(101,101)
-resources.draw()
-projectiles.draw()
+map.draw_terrain()
 map.draw_wall()
 drilled_ground.draw()
+resources.draw()
+projectiles.draw()
 player.draw()
 map.draw_super_wall()
 performance_monitor.register_load()
@@ -1074,12 +1076,17 @@ local sprites={
 137,139,153,155,169,171,185,187,
 }
 local sprite=sprites[flr(rnd(#sprites))+1]
+local color_base,color_off
+if rnd(2)<1 then color_base=5 else color_base=-11 end
+if rnd(2)<1 then color_off=13 else color_off=-3 end
 return {
 sprite=sprite,
 x=x,
 y=y,
 x_flip=x_flip,
 y_flip=y_flip,
+color_base=color_base,
+color_off=color_off,
 }
 end
 local terrain=new_entity_container()
@@ -1095,8 +1102,18 @@ for j=91,228,8 do
 super_walls.add({x=i,y=j})
 end
 end
+local function spawn_pebble()
+local x=flr(rnd(128))+101
+local color
+if rnd(2)<1 then color=6 else color=11 end
+return {
+color=color,
+x=x,
+y=94,
+}
+end
 local function update()
-local wall
+local wall,terrain_piece
 if game_status=="playing" then
 for i=1,walls.size() do
 wall=walls.get(i)
@@ -1105,18 +1122,16 @@ if wall.y>=230 then
 walls.replace(i,create_wall(wall.x,91))
 end
 end
+for i=terrain.size(),1,-1 do
+terrain_piece=terrain.get(i)
+terrain_piece.y+=1
+if terrain_piece.y>230 then
+terrain.deletei(i)
 end
 end
-local function draw_map()
-local sprite, x_coord, y_coord, x_flip, y_flip
-local no_terrain = #terrain
-for i=1,no_terrain do
-sprite = terrain[i].sprite
-x_coord = terrain[i].x_coord
-y_coord = terrain[i].y_coord
-x_flip = terrain[i].x_flip
-y_flip = terrain[i].y_flip
-spr(sprite,x_coord,y_coord,1,1,x_flip,y_flip)
+if rnd()<.2 then
+terrain.add(spawn_pebble())
+end
 end
 end
 local function draw_wall()
@@ -1142,6 +1157,15 @@ super_walls.get(i).y,
 1,1,false,false
 )
 end
+end
+local function draw_terrain()
+pal(11,134,0)
+local terrain_piece
+for i=1,terrain.size() do
+terrain_piece=terrain.get(i)
+pset(terrain_piece.x,terrain_piece.y,terrain_piece.color)
+end
+pal(0)
 end
 return {
 update=update,

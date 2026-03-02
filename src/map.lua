@@ -14,12 +14,17 @@ function new_map()
             137,139,153,155,169,171,185,187,
         }
         local sprite=sprites[flr(rnd(#sprites))+1]
+        local color_base,color_off
+        if rnd(2)<1 then color_base=5 else color_base=-11 end
+        if rnd(2)<1 then color_off=13 else color_off=-3 end
         return {
             sprite=sprite,
             x=x,
             y=y,
             x_flip=x_flip,
             y_flip=y_flip,
+            color_base=color_base,
+            color_off=color_off,
         }
     end
 
@@ -43,6 +48,17 @@ function new_map()
         for j=91,228,8 do
             super_walls.add({x=i,y=j})
         end
+    end
+
+    local function spawn_pebble()
+        local x=flr(rnd(128))+101
+        local color
+        if rnd(2)<1 then color=6 else color=11 end
+        return {
+            color=color,
+            x=x,
+            y=94,
+        }
     end
 
     -- slides the floor one frame to the bottom, and realigns the floor if needed
@@ -69,19 +85,12 @@ function new_map()
         end
     end
 
-    local function spawn_pebble()
-        x=flr(rnd(128))+101
-        return {
-            color=6,
-            x=x,
-            y=94,
-        }
-    end
-
     local function draw_wall()
         local wall
         for i=1,walls.size() do
             wall=walls.get(i)
+            -- pal(5,wall.color_base,1)
+            -- pal(13,wall.color_off,1)
             spr(
                 wall.sprite,
                 wall.x,
@@ -91,6 +100,7 @@ function new_map()
                 wall.y_flip
             )
         end
+        -- pal()
     end
 
     local function draw_super_wall()
@@ -105,10 +115,13 @@ function new_map()
     end
 
     local function draw_terrain()
+        pal(11,134,1)
         local terrain_piece
         for i=1,terrain.size() do
+            terrain_piece=terrain.get(i)
             pset(terrain_piece.x,terrain_piece.y,terrain_piece.color)
         end
+        pal(0)
     end
 
     return {
