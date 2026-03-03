@@ -16,6 +16,7 @@ end
 function _update()
     -- hacky stuff start
     difficulty=2
+    coop=true
     points=0
     resource_spawn_rate=.01
     game_status="playing"
@@ -41,6 +42,7 @@ function _update()
     resources.update()
     map.update()
     player_1.update()
+    if coop then player_2.update() end
 
     game_logic.update()
 
@@ -57,9 +59,11 @@ function _draw()
     resources.draw()
     projectiles.draw()
     player_1.draw()
+    if coop then player_2.draw() end
     map.draw_vines()
     map.draw_super_wall()
     hud.draw(player_1)
+    if coop then hud.draw(player_2) end
 
     performance_monitor.register_load()
     performance_monitor.print_current()

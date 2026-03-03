@@ -7,7 +7,7 @@ function new_projectiles()
 
     local function update()
         for i=bullets.size(),1,-1 do
-            bullets.get(i).y-=4
+            bullets.get(i).y-=6
             if bullets.get(i).y<=91 then
                 bullets.deletei(i)
             end
@@ -97,7 +97,7 @@ function new_projectiles()
 
     local function draw()
         for i=1,bullets.size() do
-            spr(15,bullets.get(i).x, bullets.get(i).y)
+            spr(29,bullets.get(i).x, bullets.get(i).y)
         end
         for i=1,spits.size() do
             spits.get(i).draw()

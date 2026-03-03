@@ -14,16 +14,16 @@ function new_player(number)
         rns=false}
     local was_mining=false
     local mined_since=0
-    local playing_drill_sound
+    local playing={drill_sound=false,gun_sound=false}
     local moving_frame=0
     local points=0
-    local ammo=number==1 and 25 or 50
+    local ammo=number==1 and 25 or 100
     local fuel=number==1 and 150 or 0
-    local max_ammo=number==1 and 25 or 50
+    local max_ammo=number==1 and 25 or 100
     local max_fuel=number==1 and 150 or 0
     local shots_fired=false
     local shot_delay_counter=0
-    local max_shot_delay=3
+    local max_shot_delay=number==1 and 3 or 1
     local health=3
     local max_health=3
     local is_hit=false
@@ -41,13 +41,14 @@ function new_player(number)
 
     -- checks inputs and writes them to the state of the player
     local function fetch_inputs()
-        is.moving.up=btn(2,number)
-        is.moving.down=btn(3,number)
-        is.moving.left=btn(0,number)
-        is.moving.right=btn(1,number)
-        is.shooting=btn(5,number) and not btn(4,number)
-        local drilling_button=btn(4,number) and not btn(5,number)
-        is.rns=btn(3,number) and btn(4,number) and btn(5,number)
+        local p=number-1
+        is.moving.up=btn(2,p)
+        is.moving.down=btn(3,p)
+        is.moving.left=btn(0,p)
+        is.moving.right=btn(1,p)
+        is.shooting=btn(5,p) and not btn(4,p)
+        local drilling_button=btn(4,p) and not btn(5,p)
+        is.rns=btn(3,p) and btn(4,p) and btn(5,p)
 
         is.drilling=drilling_button and fuel>0
         local mining_button=drilling_button and fuel<=0
@@ -110,18 +111,18 @@ function new_player(number)
 
     local function mine()
         map.spawn_drilled_ground(53,x,y-2)
-        sfx(-1,1)
-        sfx(31,1)
+        sfx(-1,number)
+        sfx(31,number)
     end
 
     local function drill()
         if fuel>0 then
             map.spawn_drilled_ground(52,x,y-2)
             fuel-=1
-            if not playing_drill_sound then
-                sfx(-1,1)
-                sfx(30,1)
-                playing_drill_sound=true
+            if not playing.drill_sound then
+                sfx(-1,number)
+                sfx(30,number)
+                playing.drill_sound=true
             end
             -- local drill_box=get_damaging_drills_hitbox()
             -- local creature_box,creature
@@ -140,11 +141,18 @@ function new_player(number)
         if ammo > 0 then
             projectiles.fire_bullet(number)
             ammo-=1
-            sfx(-1,2)
-            sfx(34,2)
+            if not playing.gun_sound and number==2 then
+                sfx(-1,number)
+                sfx(36,number)
+                playing.gun_sound=true
+            elseif number==1 then
+                sfx(-1,number)
+                sfx(34,number)
+            end
+
         else
-            sfx(-1,2)
-            sfx(35,2)
+            sfx(-1,number)
+            sfx(35,number)
         end
         shots_fired=true
     end
@@ -203,9 +211,9 @@ function new_player(number)
         if is.drilling then
             drill()
         else
-            if playing_drill_sound then
-                sfx(-1,1)
-                playing_drill_sound=false
+            if playing.drill_sound then
+                sfx(-1,number)
+                playing.drill_sound=false
             end
         end
         if is.mining then mine() end
@@ -217,7 +225,14 @@ function new_player(number)
             -- didn't shoot recently, check if player is firing
             shots_fired=false
             shot_delay_counter=0
-            if is.shooting then shoot() end
+            if is.shooting then
+                shoot()
+            else
+                if playing.gun_sound then
+                    sfx(-1,number)
+                    playing.gun_sound=false
+                end
+            end
         end
     end
 
@@ -286,6 +301,14 @@ function new_player(number)
     local function draw_gun()
         pset(x+6,y,5)
         pset(x+6,y+1,5)
+        if number==2 then
+            pset(x+5,y,5)
+            pset(x+7,y,5)
+            pset(x+7,y+1,5)
+            pset(x+7,y+2,5)
+            pset(x+7,y+3,5)
+            pset(x+7,y+4,5)
+        end
     end
 
     local function draw_drills()

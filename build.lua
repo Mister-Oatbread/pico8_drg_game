@@ -840,6 +840,7 @@ performance_monitor=new_performance_monitor()
 end
 function _update()
 difficulty=2
+coop=true
 points=0
 resource_spawn_rate=.01
 game_status="playing"
@@ -860,6 +861,7 @@ projectiles.update()
 resources.update()
 map.update()
 player_1.update()
+if coop then player_2.update() end
 game_logic.update()
 performance_monitor.register_load()
 end
@@ -873,9 +875,11 @@ map.draw_drilled_ground()
 resources.draw()
 projectiles.draw()
 player_1.draw()
+if coop then player_2.draw() end
 map.draw_vines()
 map.draw_super_wall()
 hud.draw(player_1)
+if coop then hud.draw(player_2) end
 performance_monitor.register_load()
 performance_monitor.print_current()
 end
@@ -1106,16 +1110,16 @@ mining=false,
 rns=false}
 local was_mining=false
 local mined_since=0
-local playing_drill_sound
+local playing={drill_sound=false,gun_sound=false}
 local moving_frame=0
 local points=0
-local ammo=number==1 and 25 or 50
+local ammo=number==1 and 25 or 100
 local fuel=number==1 and 150 or 0
-local max_ammo=number==1 and 25 or 50
+local max_ammo=number==1 and 25 or 100
 local max_fuel=number==1 and 150 or 0
 local shots_fired=false
 local shot_delay_counter=0
-local max_shot_delay=3
+local max_shot_delay=number==1 and 3 or 1
 local health=3
 local max_health=3
 local is_hit=false
@@ -1131,13 +1135,14 @@ add(collision_points.right,{x=0,y=0})
 add(collision_points.top,{x=0,y=0})
 end
 local function fetch_inputs()
-is.moving.up=btn(2,number)
-is.moving.down=btn(3,number)
-is.moving.left=btn(0,number)
-is.moving.right=btn(1,number)
-is.shooting=btn(5,number) and not btn(4,number)
-local drilling_button=btn(4,number) and not btn(5,number)
-is.rns=btn(3,number) and btn(4,number) and btn(5,number)
+local p=number-1
+is.moving.up=btn(2,p)
+is.moving.down=btn(3,p)
+is.moving.left=btn(0,p)
+is.moving.right=btn(1,p)
+is.shooting=btn(5,p) and not btn(4,p)
+local drilling_button=btn(4,p) and not btn(5,p)
+is.rns=btn(3,p) and btn(4,p) and btn(5,p)
 is.drilling=drilling_button and fuel>0
 local mining_button=drilling_button and fuel<=0
 is.mining=mining_button and not was_mining
@@ -1191,17 +1196,17 @@ end
 end
 local function mine()
 map.spawn_drilled_ground(53,x,y-2)
-sfx(-1,1)
-sfx(31,1)
+sfx(-1,number)
+sfx(31,number)
 end
 local function drill()
 if fuel>0 then
 map.spawn_drilled_ground(52,x,y-2)
 fuel-=1
-if not playing_drill_sound then
-sfx(-1,1)
-sfx(30,1)
-playing_drill_sound=true
+if not playing.drill_sound then
+sfx(-1,number)
+sfx(30,number)
+playing.drill_sound=true
 end
 end
 end
@@ -1209,11 +1214,17 @@ local function shoot()
 if ammo > 0 then
 projectiles.fire_bullet(number)
 ammo-=1
-sfx(-1,2)
-sfx(34,2)
+if not playing.gun_sound and number==2 then
+sfx(-1,number)
+sfx(36,number)
+playing.gun_sound=true
+elseif number==1 then
+sfx(-1,number)
+sfx(34,number)
+end
 else
-sfx(-1,2)
-sfx(35,2)
+sfx(-1,number)
+sfx(35,number)
 end
 shots_fired=true
 end
@@ -1263,9 +1274,9 @@ move_player()
 if is.drilling then
 drill()
 else
-if playing_drill_sound then
-sfx(-1,1)
-playing_drill_sound=false
+if playing.drill_sound then
+sfx(-1,number)
+playing.drill_sound=false
 end
 end
 if is.mining then mine() end
@@ -1274,7 +1285,14 @@ shot_delay_counter+=1
 else
 shots_fired=false
 shot_delay_counter=0
-if is.shooting then shoot() end
+if is.shooting then
+shoot()
+else
+if playing.gun_sound then
+sfx(-1,number)
+playing.gun_sound=false
+end
+end
 end
 end
 local function get_hitbox()
@@ -1329,6 +1347,14 @@ end
 local function draw_gun()
 pset(x+6,y,5)
 pset(x+6,y+1,5)
+if number==2 then
+pset(x+5,y,5)
+pset(x+7,y,5)
+pset(x+7,y+1,5)
+pset(x+7,y+2,5)
+pset(x+7,y+3,5)
+pset(x+7,y+4,5)
+end
 end
 local function draw_drills()
 pset(x+6,y,5)
@@ -1402,7 +1428,7 @@ local bullets=new_entity_container()
 local spits=new_entity_container()
 local function update()
 for i=bullets.size(),1,-1 do
-bullets.get(i).y-=4
+bullets.get(i).y-=6
 if bullets.get(i).y<=91 then
 bullets.deletei(i)
 end
@@ -1477,7 +1503,7 @@ add(spits,spit(spit_type,x,y))
 end
 local function draw()
 for i=1,bullets.size() do
-spr(15,bullets.get(i).x, bullets.get(i).y)
+spr(29,bullets.get(i).x, bullets.get(i).y)
 end
 for i=1,spits.size() do
 spits.get(i).draw()
