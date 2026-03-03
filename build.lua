@@ -1025,7 +1025,6 @@ spr(123+i,x0+8*i, y0);
 end
 end
 function _init()
-poke(0x5f5f,0x10)
 player=new_player()
 projectiles=new_projectiles()
 drilled_ground=new_drilled_ground()
@@ -1069,24 +1068,19 @@ performance_monitor.print_current()
 end
 function new_map()
 local function create_wall(x,y)
-local x_flip=x>140
-local y_flip=rnd(2)<1
 local sprites={
 136,138,152,154,168,170,184,186,
 137,139,153,155,169,171,185,187,
 }
 local sprite=sprites[flr(rnd(#sprites))+1]
-local color_base,color_off
-if rnd(2)<1 then color_base=5 else color_base=-11 end
-if rnd(2)<1 then color_off=13 else color_off=-3 end
 return {
 sprite=sprite,
 x=x,
 y=y,
-x_flip=x_flip,
-y_flip=y_flip,
-color_base=color_base,
-color_off=color_off,
+x_flip=x>140,
+y_flip=rnd(2)<1,
+swap_gray=rnd(2)<1,
+swap_blue=rnd(2)<1,
 }
 end
 local terrain=new_entity_container()
@@ -1097,7 +1091,7 @@ for y=91,228,8 do
 walls.add(create_wall(x,y))
 end
 end
-for i=101,230,127 do
+for i=98,230,130 do
 for j=91,228,8 do
 super_walls.add({x=i,y=j})
 end
@@ -1105,7 +1099,7 @@ end
 local function spawn_pebble()
 local x=flr(rnd(128))+101
 local color
-if rnd(2)<1 then color=6 else color=11 end
+if rnd(2)<1 then color=6 else color=2 end
 return {
 color=color,
 x=x,
@@ -1138,6 +1132,8 @@ local function draw_wall()
 local wall
 for i=1,walls.size() do
 wall=walls.get(i)
+if wall.swap_gray then pal(6,13) end
+if wall.swap_blue then pal(13,6) end
 spr(
 wall.sprite,
 wall.x,
@@ -1146,6 +1142,7 @@ wall.y,
 wall.x_flip,
 wall.y_flip
 )
+pal()
 end
 end
 local function draw_super_wall()
@@ -1159,13 +1156,11 @@ super_walls.get(i).y,
 end
 end
 local function draw_terrain()
-pal(11,134,0)
 local terrain_piece
 for i=1,terrain.size() do
 terrain_piece=terrain.get(i)
 pset(terrain_piece.x,terrain_piece.y,terrain_piece.color)
 end
-pal(0)
 end
 return {
 update=update,
