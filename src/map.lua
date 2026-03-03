@@ -30,6 +30,7 @@ function new_map()
     local super_walls=new_entity_container()
     local drilled_ground=new_entity_container()
     local obstacles=new_entity_container()
+    local vines=new_entity_container()
 
     -- initialize walls with random sprite
     for x=102,220,118 do
@@ -46,13 +47,25 @@ function new_map()
     end
 
     local function spawn_pebble()
-        local x=flr(rnd(128))+101
+        local x=
         local color
         if rnd(2)<1 then color=6 else color=2 end
         return {
             color=color,
-            x=x,
+            x=flr(rnd(128))+101,
             y=94,
+        }
+    end
+
+    local function spawn_vine()
+        local sprites={76,78,108,110}
+        local sprite=
+        return {
+            sprite=sprites[flr(rnd(#sprites))],
+            x=flr(rnd(112))+101,
+            y=81,
+            x_flip=rnd(2)<1,
+            y_flip=rnd(2)<1,
         }
     end
 
@@ -108,13 +121,22 @@ function new_map()
                 terrain.add(spawn_pebble())
             end
             for i=obstacles.size(),1,-1 do
-                obstacles.get(i).y+=1;
+                obstacles.get(i).y+=1
                 if obstacles.get(i).y>=230 then
                     obstacles.deletei(i)
                 end
             end
             if rnd()<obstacle_spawn_rate then
                 obstacles.add(spawn_obstacle(flr(rnd(120))+101,81))
+            end
+            for i=vines.size(),1,-1 do
+                vines.get(i).y+=1
+                if vines.get(i).y>=230 then
+                    vines.deletei(i)
+                end
+            end
+            if rnd()<.05 then
+                vines.add(spawn_vine())
             end
         end
     end
@@ -178,6 +200,14 @@ function new_map()
         end
     end
 
+    local function draw_vines()
+        local vine
+        for i=1,vines.size() do
+            vine=vines.get(i)
+            spr(vine.sprite,vine.x,vine.y,2,2,vine.x_flip,vine.y_flip)
+        end
+    end
+
     return {
         update=update,
         draw_wall=draw_wall,
@@ -185,6 +215,7 @@ function new_map()
         draw_terrain=draw_terrain,
         draw_drilled_ground=draw_drilled_ground,
         draw_obstacles=draw_obstacles,
+        draw_vines=draw_vines,
         spawn_drilled_ground=spawn_drilled_ground,
     }
 end

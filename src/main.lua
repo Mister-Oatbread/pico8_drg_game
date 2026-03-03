@@ -55,6 +55,7 @@ function _draw()
     resources.draw()
     projectiles.draw()
     player.draw()
+    map.draw_vines()
     map.draw_super_wall()
 
     performance_monitor.register_load()
