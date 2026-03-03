@@ -559,18 +559,18 @@ end
 function new_game_logic()
 local function mine_resources()
 local resource,colliding,drilling,res_hitbox
-local hitbox_drills=player.get_drills_hitbox()
+local hitbox_drills=player_1.get_drills_hitbox()
 for i=resources.get_resources().size(),1,-1 do
 resource=resources.get_resources().get(i)
 res_hitbox=resources.get_hitbox(resource)
 colliding=are_colliding(res_hitbox,hitbox_drills)
-drilling=player.is_drilling()
+drilling=player_1.is_drilling()
 if colliding and drilling then
 local res_type=resource.res_type
 if res_type=="red_sugar" then
-player.give_health(1)
+player_1.give_health(1)
 elseif res_type=="nitra" then
-player.give_ammo(.5)
+player_1.give_ammo(.5)
 elseif res_type=="gold" then
 points+=100
 end
@@ -792,215 +792,46 @@ pset(hitbox.x[2],hitbox.y[1],8);
 pset(hitbox.x[1],hitbox.y[2],8);
 pset(hitbox.x[2],hitbox.y[2],8);
 end
-function initialize_hud()
-hud_sprites = {heart=32,empty_heart=48,ammo=46,fuel=47,points=62};
-prog_bar_sprite = 63;
-number_sprites = {192,193,194,195,196};
-loot_bug_names = {
-"steeve",
-"jimini",
-"jebediah",
-"david",
-"eva",
-"lloyd",
-"molly",
-"randy",
-"emilia",
-"olliver",
-"matilda",
-"benjamin",
-"elodie",
-"julien",
-"amelia",
-"sebby",
-"charlie",
-"rosalie",
-"freddie",
-"isabelle",
-"tobias",
-"lucien",
-"henry",
-"maxime",
-"oliver",
-"samuel",
-"august",
-"finnley",
-"steevie",
-};
-killed_loot_bugs = {};
-haz_level_selection = 3;
-local x0 = 105;
-local y0 = 120;
-add(obstacles, {
-sprite=199,
-x_coord=x0,
-y_coord=y0,
-size=4,
-false,
-false});
-add(obstacles, {
-sprite=203,
-x_coord=x0+32,
-y_coord=y0,
-size=4,
-false,
-false});
-add(obstacles, {
-sprite=207,
-x_coord=x0+64,
-y_coord=y0,
-size=4,
-false,
-false});
-add(obstacles, {
-sprite=224,
-x_coord=140,
-y_coord=213,
-size=3,
-false,
-false});
-x0 = 160;
-y0 = 200;
-add(obstacles, {
-sprite=227,
-x_coord=x0,
-y_coord=y0,
-size=2,
-x_flip=false,
-y_flip=false});
-add(obstacles, {
-sprite=229,
-x_coord=x0+16,
-y_coord=y0,
-size=2,
-x_flip=false,
-y_flip=false});
-add(resources, {sprite=65, x_coord=151, y_coord=170,
-x_flip=rnd(2)<1, y_flip=rnd(2)<1, hitbox=nitra_hitbox});
-add(resources, {sprite=82, x_coord=148, y_coord=190,
-x_flip=rnd(2)<1, y_flip=rnd(2)<1, hitbox=gold_hitbox});
-add(resources, {sprite=64, x_coord=164, y_coord=185,
-x_flip=rnd(2)<1, y_flip=rnd(2)<1, hitbox=red_sugar_hitbox});
-add(creatures, loot_bug(190, 180));
-add(creatures, cave_angel(182, 165));
-add(creatures, grunt(180, 120));
-add(creatures, slasher(190, 120));
-add(creatures, praetorian(200, 120));
-add(creatures, mactera(218, 120));
-add(obstacles, {sprite=101,x_coord=200,y_coord=160,
-size=2,x_flip=false,y_flip=false});
-add(obstacles, {sprite=84,x_coord=200,y_coord=155,
-size=1,x_flip=false,y_flip=true});
-x0 = 128;
-y0 = 160;
-add(creatures, number(x0,y0,1));
-add(creatures, number(x0+10,y0,2));
-add(creatures, number(x0+20,y0,3));
-add(creatures, number(x0+30,y0,4));
-add(creatures, number(x0+40,y0,5));
-end
-function draw_hud()
-_draw_hearts();
-spr(hud_sprites.ammo,105,190);
-spr(hud_sprites.fuel,105,200);
-spr(hud_sprites.points,105,210);
-_draw_prog_bar(player.ammo/player.max_ammo,112,192);
-_draw_prog_bar(player.fuel/player.max_fuel,112,202);
-print(player.points, 115,211,7);
-end
-function _draw_prog_bar(percentage, x_coord, y_coord)
-local green_pixels = flr(percentage*10);
-local color;
-spr(prog_bar_sprite,x_coord, y_coord);
-spr(prog_bar_sprite,x_coord+5, y_coord);
-for x=1,10 do
-if x<=green_pixels then color=11 else color=8 end;
-pset(x_coord+x,y_coord+1,color);
+function new_hud()
+local function draw_prog_bar(percentage,x,y)
+local green_pixels=flr(percentage*10)
+local color
+spr(63,x,y)
+spr(63,x+4,y)
+for i=1,10 do
+color=i>green_pixels and 8 or 11
+pset(x+i,y+1,color)
 end
 end
-function add_killed_lootbug_name()
-add(killed_loot_bugs, loot_bug_names[flr(rnd(#loot_bug_names))]);
+local function draw_hearts(player,x)
+for i=1,3 do
+if i>player.health() then
+pal(8,6)
 end
-function _draw_hearts()
-local x0 = 105;
-local y0 = 180;
-local hearts = {hud_sprites.heart, hud_sprites.heart, hud_sprites.heart};
-if player.health < 1 then
-hearts[1] = hud_sprites.empty_heart;
-end
-if player.health < 2 then
-hearts[2] = hud_sprites.empty_heart;
-end
-if player.health < 3 then
-hearts[3] = hud_sprites.empty_heart;
-end
-spr(hearts[1],x0,y0);
-spr(hearts[2],x0+8,y0);
-spr(hearts[3],x0+16,y0);
-end
-function display_death_screen()
-sfx(-1,0);
-sfx(-1,1);
-sfx(-1,2);
-sfx(-1,3);
-player.is_moving.up = false;
-player.is_moving.down = false;
-player.is_moving.left = false;
-player.is_moving.right = false;
-player.is_drilling = false;
-player.is_hit = false;
-player.x_pos = 130;
-player.y_pos = 182;
-print("awards:", 111,126,7);
-print("",113,126,7);
-if no_lootbugs_killed then
-print("-no lootbugs");
-print(" killed (+100)");
-end
-if no_cave_angels_killed then
-print("-no cave angels");
-print(" killed (+100)");
-end
-if no_scout_killed then
-print("-you spared");
-print(" the scouts (+100)");
-end
-if in_tutorial then
-print("-died during the");
-print(" tutorial (+500)");
-end
-if not no_lootbugs_killed then
-print("killed",190,130,7);
-print("loot");
-print("bugs:");
-local y = 148;
-for name in all(killed_loot_bugs) do
-print(name,192,y);
-y+=6;
+spr(31,x+8*(i-1),180)
+pal()
 end
 end
-print("game over!", 120, 105, 7);
-print("score: "..player.points);
-print("distance travelled: "..game_time);
+local function draw(player)
+local x=player.number==1 and 105 or 180
+draw_hearts(player,x)
+spr(46,105,190)
+spr(47,105,200)
+spr(62,105,210)
+draw_prog_bar(player.ammo()/player.max_ammo,112,192)
+draw_prog_bar(player.fuel()/player.max_fuel,112,202)
+print(points,115,211,7)
 end
-function display_chefs_kiss_banner()
-local x0 = 105;
-local y0 = 120;
-spr(199, x0, y0, 4, 4);
-spr(203, x0+32, y0, 4, 4);
-spr(207, x0+64, y0, 4, 4);
-print("shoot haz level:",105,152,9);
-x0 = 105;
-y0 = 103;
-for i=0,4 do
-spr(123+i,x0+8*i, y0);
-end
+return {
+draw=draw,
+}
 end
 function _init()
-player=new_player()
+player_1=new_player(1)
 projectiles=new_projectiles()
 resources=new_resources()
 map=new_map()
+hud=new_hud()
 game_logic=new_game_logic()
 performance_monitor=new_performance_monitor()
 end
@@ -1025,7 +856,7 @@ performance_monitor.reset_cpu_load()
 projectiles.update()
 resources.update()
 map.update()
-player.update()
+player_1.update()
 game_logic.update()
 performance_monitor.register_load()
 end
@@ -1038,16 +869,17 @@ map.draw_obstacles()
 map.draw_drilled_ground()
 resources.draw()
 projectiles.draw()
-player.draw()
+player_1.draw()
+map.draw_vines()
 map.draw_super_wall()
+hud.draw(player_1)
 performance_monitor.register_load()
 performance_monitor.print_current()
 end
 function new_map()
 local function create_wall(x,y)
-local sprite=64+flr(rnd(4))+16*flr(rnd(4))
 return {
-sprite=sprite,
+sprite=64+flr(rnd(4))+16*flr(rnd(4)),
 x=x,
 y=y,
 x_flip=x>140,
@@ -1061,6 +893,7 @@ local walls=new_entity_container()
 local super_walls=new_entity_container()
 local drilled_ground=new_entity_container()
 local obstacles=new_entity_container()
+local vines=new_entity_container()
 for x=102,220,118 do
 for y=91,228,8 do
 walls.add(create_wall(x,y))
@@ -1072,17 +905,26 @@ super_walls.add({x=i,y=j})
 end
 end
 local function spawn_pebble()
-local x=flr(rnd(128))+101
 local color
 if rnd(2)<1 then color=6 else color=2 end
 return {
 color=color,
-x=x,
+x=flr(rnd(128))+101,
 y=94,
 }
 end
-local function spawn_drilled_ground(x,y)
-drilled_ground.add({x=x,y=y})
+local function spawn_vine()
+local sprites={76,78,108,110}
+return {
+sprite=sprites[flr(rnd(#sprites))+1],
+x=flr(rnd(112))+101,
+y=81,
+x_flip=rnd(2)<1,
+y_flip=rnd(2)<1,
+}
+end
+local function spawn_drilled_ground(sprite,x,y)
+drilled_ground.add({sprite=sprite,x=x,y=y})
 end
 local function spawn_obstacle(x,y)
 local sprite,sprites,size
@@ -1130,13 +972,22 @@ if rnd()<.8 then
 terrain.add(spawn_pebble())
 end
 for i=obstacles.size(),1,-1 do
-obstacles.get(i).y+=1;
+obstacles.get(i).y+=1
 if obstacles.get(i).y>=230 then
 obstacles.deletei(i)
 end
 end
 if rnd()<obstacle_spawn_rate then
 obstacles.add(spawn_obstacle(flr(rnd(120))+101,81))
+end
+for i=vines.size(),1,-1 do
+vines.get(i).y+=1
+if vines.get(i).y>=230 then
+vines.deletei(i)
+end
+end
+if rnd()<.05 then
+vines.add(spawn_vine())
 end
 end
 end
@@ -1175,8 +1026,10 @@ pset(terrain_piece.x,terrain_piece.y,terrain_piece.color)
 end
 end
 local function draw_drilled_ground()
+local ground_piece
 for i=1,drilled_ground.size() do
-spr(52,drilled_ground.get(i).x,drilled_ground.get(i).y)
+ground_piece=drilled_ground.get(i)
+spr(ground_piece.sprite,ground_piece.x,ground_piece.y)
 end
 end
 local function draw_obstacles()
@@ -1194,6 +1047,13 @@ obstacle.y_flip
 )
 end
 end
+local function draw_vines()
+local vine
+for i=1,vines.size() do
+vine=vines.get(i)
+spr(vine.sprite,vine.x,vine.y,2,2,vine.x_flip,vine.y_flip)
+end
+end
 return {
 update=update,
 draw_wall=draw_wall,
@@ -1201,6 +1061,7 @@ draw_super_wall=draw_super_wall,
 draw_terrain=draw_terrain,
 draw_drilled_ground=draw_drilled_ground,
 draw_obstacles=draw_obstacles,
+draw_vines=draw_vines,
 spawn_drilled_ground=spawn_drilled_ground,
 }
 end
@@ -1231,20 +1092,21 @@ print_current = print_current,
 reset_cpu_load = reset_cpu_load,
 };
 end
-function new_player()
+function new_player(number)
 local x=148
 local y=200
 local is={
 moving={up,down,left,right},
 shooting=false,
 drilling=false,
+mining=false,
 rns=false}
-local playing_drill={empty=false,full=false}
+local playing_drill_sound
 local moving_frame=0
 local use_alt_sprite=false
 local x_flip=false
 local ammo=25
-local fuel=150
+local fuel=15
 local max_ammo=25
 local max_fuel=150
 local shots_fired=false
@@ -1258,6 +1120,7 @@ local has_invuln=false
 local invuln_duration=30
 local collision_points={left={},right={},top={}}
 local has_collision={left=false,right=false,top=false}
+local number=number
 for i=1,8 do
 add(collision_points.left,{x=0,y=0})
 add(collision_points.right,{x=0,y=0})
@@ -1271,6 +1134,8 @@ is.moving.right=btn(1)
 is.shooting=btn(5) and not btn(4)
 is.drilling=btn(4) and not btn(5)
 is.rns=btn(3) and btn(4) and btn(5)
+is.mining=btn(4) and not btn(5) and fuel<=0 and not is.mining
+is.drilling=is.drilling and fuel>0
 end
 local function update_player_collision_points()
 for i=1,6 do
@@ -1317,13 +1182,19 @@ end
 end
 end
 local function mine()
-return true
+map.spawn_drilled_ground(53,x,y-2)
+sfx(-1,1)
+sfx(31,1)
 end
 local function drill()
-local sound
-if (fuel>0) then
-map.spawn_drilled_ground(x,y-2)
+if fuel>0 then
+map.spawn_drilled_ground(52,x,y-2)
 fuel-=1
+if not playing_drill_sound then
+sfx(-1,1)
+sfx(30,1)
+playing_drill_sound=true
+end
 end
 end
 local function shoot()
@@ -1380,7 +1251,15 @@ fetch_inputs()
 update_player_collision_points()
 find_terrain_collision()
 move_player()
-if is.drilling then drill() end
+if is.drilling then
+drill()
+else
+if playing_drill_sound then
+sfx(-1,1)
+playing_drill_sound=false
+end
+end
+if is.mining then mine() end
 if shots_fired and shot_delay_counter<max_shot_delay then
 shot_delay_counter+=1
 else
@@ -1450,6 +1329,11 @@ pset(x+2,y,5)
 pset(x+1,y,5)
 pset(x+1,y+1,5)
 end
+local function draw_pickaxe()
+pset(x+6,y,5)
+pset(x+6,y+1,4)
+pset(x+6,y+2,4)
+end
 local function update_player_animation()
 local moving,x_flip
 if game_status=="playing" then
@@ -1470,24 +1354,10 @@ spr(sprite,x,y,1,1,x_flip,false)
 pal()
 if is.shooting then draw_gun() end
 if is.drilling then draw_drills() end
+if is.mining then draw_pickaxe() end
 end
 local function draw()
 update_player_animation()
-if is.drilling then
-if fuel>0 and not playing_drill.full then
-sfx(-1,1)
-sfx(30,1)
-playing_drill.full=true
-elseif fuel<=0 and not playing_drill.empty then
-sfx(-1,1)
-sfx(31,1)
-playing_drill.empty=true
-end
-else
-sfx(-1,1)
-playing_drill.full=false
-playing_drill.empty=false
-end
 end
 local function x_f() return x end
 local function y_f() return y end
@@ -1495,6 +1365,9 @@ local function drilling_f() return is.drilling end
 local function shooting_f() return is.shooting end
 local function rns_f() return is.rns end
 local function hit_f() return is_hit end
+local function health_f() return health end
+local function ammo_f() return health end
+local function fuel_f() return fuel end
 return {
 x=x_f,
 y=y_f,
@@ -1509,6 +1382,12 @@ is_drilling=drilling_f,
 is_shooting=shooting_f,
 is_rns=rns_f,
 is_hit=hit_f,
+health=health_f,
+number=number,
+ammo=ammo_f,
+fuel=fuel_f,
+max_ammo=max_ammo,
+max_fuel=max_fuel,
 }
 end
 function new_projectiles()
@@ -1528,7 +1407,7 @@ spits.deletei(i)
 end
 end
 end
-local function fire_bullet()
+local function fire_bullet(player)
 bullets.add({x=player.x(),y=(player.y())-8})
 end
 local function spit(spit_type, x, y)

@@ -9,9 +9,8 @@ function new_map()
     -- according orientation for wall
     local function create_wall(x,y)
         -- choose one of the sprites
-        local sprite=64+flr(rnd(4))+16*flr(rnd(4))
         return {
-            sprite=sprite,
+            sprite=64+flr(rnd(4))+16*flr(rnd(4)),
             x=x,
             y=y,
             x_flip=x>140,
@@ -24,7 +23,6 @@ function new_map()
     -- init -------------
 
     -- catalogue all sprites and infrastructure
-    -- local map_sprites_base={128,128,128,128,128,144,160,176}
     local terrain=new_entity_container()
     local walls=new_entity_container()
     local super_walls=new_entity_container()
@@ -47,7 +45,6 @@ function new_map()
     end
 
     local function spawn_pebble()
-        local x=
         local color
         if rnd(2)<1 then color=6 else color=2 end
         return {
@@ -59,9 +56,8 @@ function new_map()
 
     local function spawn_vine()
         local sprites={76,78,108,110}
-        local sprite=
         return {
-            sprite=sprites[flr(rnd(#sprites))],
+            sprite=sprites[flr(rnd(#sprites))+1],
             x=flr(rnd(112))+101,
             y=81,
             x_flip=rnd(2)<1,
@@ -69,8 +65,8 @@ function new_map()
         }
     end
 
-    local function spawn_drilled_ground(x,y)
-        drilled_ground.add({x=x,y=y})
+    local function spawn_drilled_ground(sprite,x,y)
+        drilled_ground.add({sprite=sprite,x=x,y=y})
     end
 
     local function spawn_obstacle(x,y)
@@ -179,8 +175,10 @@ function new_map()
     end
 
     local function draw_drilled_ground()
+        local ground_piece
         for i=1,drilled_ground.size() do
-            spr(52,drilled_ground.get(i).x,drilled_ground.get(i).y)
+            ground_piece=drilled_ground.get(i)
+            spr(ground_piece.sprite,ground_piece.x,ground_piece.y)
         end
     end
 

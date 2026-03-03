@@ -3,20 +3,21 @@
 -- this file contains the logic for the player character
 
 -- initialize player
-function new_player()
+function new_player(number)
     local x=148
     local y=200
     local is={
         moving={up,down,left,right},
         shooting=false,
         drilling=false,
+        mining=false,
         rns=false}
-    local playing_drill={empty=false,full=false}
+    local playing_drill_sound
     local moving_frame=0
     local use_alt_sprite=false
     local x_flip=false
     local ammo=25
-    local fuel=150
+    local fuel=15
     local max_ammo=25
     local max_fuel=150
     local shots_fired=false
@@ -30,6 +31,7 @@ function new_player()
     local invuln_duration=30
     local collision_points={left={},right={},top={}}
     local has_collision={left=false,right=false,top=false}
+    local number=number
     for i=1,8 do
         add(collision_points.left,{x=0,y=0})
         add(collision_points.right,{x=0,y=0})
@@ -45,6 +47,11 @@ function new_player()
         is.shooting=btn(5) and not btn(4)
         is.drilling=btn(4) and not btn(5)
         is.rns=btn(3) and btn(4) and btn(5)
+
+        -- check if we are currently mining or drilling,
+        -- since both go over one button
+        is.mining=btn(4) and not btn(5) and fuel<=0 and not is.mining
+        is.drilling=is.drilling and fuel>0
     end
 
     local function update_player_collision_points()
@@ -97,14 +104,20 @@ function new_player()
     end
 
     local function mine()
-        return true
+        map.spawn_drilled_ground(53,x,y-2)
+        sfx(-1,1)
+        sfx(31,1)
     end
 
     local function drill()
-        local sound
-        if (fuel>0) then
-            map.spawn_drilled_ground(x,y-2)
+        if fuel>0 then
+            map.spawn_drilled_ground(52,x,y-2)
             fuel-=1
+            if not playing_drill_sound then
+                sfx(-1,1)
+                sfx(30,1)
+                playing_drill_sound=true
+            end
             -- local drill_box=get_damaging_drills_hitbox()
             -- local creature_box,creature
             -- -- drill creatures
@@ -180,7 +193,15 @@ function new_player()
         update_player_collision_points()
         find_terrain_collision()
         move_player()
-        if is.drilling then drill() end
+        if is.drilling then
+            drill()
+        else
+            if playing_drill_sound then
+                sfx(-1,1)
+                playing_drill_sound=false
+            end
+        end
+        if is.mining then mine() end
 
         -- shot was recently fired, don't fire again
         if shots_fired and shot_delay_counter<max_shot_delay then
@@ -269,6 +290,12 @@ function new_player()
         pset(x+1,y+1,5)
     end
 
+    local function draw_pickaxe()
+        pset(x+6,y,5)
+        pset(x+6,y+1,4)
+        pset(x+6,y+2,4)
+    end
+
     -- chooses the current sprite for the player
     local function update_player_animation()
         local moving,x_flip
@@ -294,27 +321,12 @@ function new_player()
         pal()
         if is.shooting then draw_gun() end
         if is.drilling then draw_drills() end
+        if is.mining then draw_pickaxe() end
     end
 
     -- draws player based on current state
     local function draw()
         update_player_animation()
-        -- handle drilling sound
-        if is.drilling then
-            if fuel>0 and not playing_drill.full then
-                sfx(-1,1)
-                sfx(30,1)
-                playing_drill.full=true
-            elseif fuel<=0 and not playing_drill.empty then
-                sfx(-1,1)
-                sfx(31,1)
-                playing_drill.empty=true
-            end
-        else
-            sfx(-1,1)
-            playing_drill.full=false
-            playing_drill.empty=false
-        end
     end
 
     local function x_f() return x end
@@ -323,6 +335,9 @@ function new_player()
     local function shooting_f() return is.shooting end
     local function rns_f() return is.rns end
     local function hit_f() return is_hit end
+    local function health_f() return health end
+    local function ammo_f() return health end
+    local function fuel_f() return fuel end
 
     return {
         x=x_f,
@@ -338,6 +353,12 @@ function new_player()
         is_shooting=shooting_f,
         is_rns=rns_f,
         is_hit=hit_f,
+        health=health_f,
+        number=number,
+        ammo=ammo_f,
+        fuel=fuel_f,
+        max_ammo=max_ammo,
+        max_fuel=max_fuel,
     }
 end
 

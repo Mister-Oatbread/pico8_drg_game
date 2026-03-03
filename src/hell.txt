@@ -1,0 +1,193 @@
+
+
+    number_sprites={192,193,194,195,196};
+    loot_bug_names={
+        "steeve",
+        "jimini",
+        "jebediah",
+        "david",
+        "eva",
+        "lloyd",
+        "molly",
+        "randy",
+
+        "emilia",
+        "olliver",
+        "matilda",
+        "benjamin",
+        "elodie",
+        "julien",
+        "amelia",
+        "sebby",
+        "charlie",
+        "rosalie",
+        "freddie",
+        "isabelle",
+        "tobias",
+        "lucien",
+        "henry",
+        "maxime",
+        "oliver",
+        "samuel",
+        "august",
+        "finnley",
+
+        "steevie",
+    };
+    killed_loot_bugs = {};
+    haz_level_selection = 3;
+
+    -- add banner
+    local x0 = 105;
+    local y0 = 120;
+    add(obstacles, {
+        sprite=199,
+        x_coord=x0,
+        y_coord=y0,
+        size=4,
+        false,
+        false});
+    add(obstacles, {
+        sprite=203,
+        x_coord=x0+32,
+        y_coord=y0,
+        size=4,
+        false,
+        false});
+    add(obstacles, {
+        sprite=207,
+        x_coord=x0+64,
+        y_coord=y0,
+        size=4,
+        false,
+        false});
+    add(obstacles, {
+        sprite=224,
+        x_coord=140,
+        y_coord=213,
+        size=3,
+        false,
+        false});
+
+    -- controls guide
+    x0 = 160;
+    y0 = 200;
+    add(obstacles, {
+        sprite=227,
+        x_coord=x0,
+        y_coord=y0,
+        size=2,
+        x_flip=false,
+        y_flip=false});
+    add(obstacles, {
+        sprite=229,
+        x_coord=x0+16,
+        y_coord=y0,
+        size=2,
+        x_flip=false,
+        y_flip=false});
+
+    -- tutorial sprites
+    add(resources, {sprite=65, x_coord=151, y_coord=170,
+        x_flip=rnd(2)<1, y_flip=rnd(2)<1, hitbox=nitra_hitbox});
+    add(resources, {sprite=82, x_coord=148, y_coord=190,
+        x_flip=rnd(2)<1, y_flip=rnd(2)<1, hitbox=gold_hitbox});
+    add(resources, {sprite=64, x_coord=164, y_coord=185,
+        x_flip=rnd(2)<1, y_flip=rnd(2)<1, hitbox=red_sugar_hitbox});
+    add(creatures, loot_bug(190, 180));
+    add(creatures, cave_angel(182, 165));
+    add(creatures, grunt(180, 120));
+    add(creatures, slasher(190, 120));
+    add(creatures, praetorian(200, 120));
+    add(creatures, mactera(218, 120));
+    add(obstacles, {sprite=101,x_coord=200,y_coord=160,
+        size=2,x_flip=false,y_flip=false});
+    add(obstacles, {sprite=84,x_coord=200,y_coord=155,
+        size=1,x_flip=false,y_flip=true});
+
+    -- add numbers for haz level selection
+    x0 = 128;
+    y0 = 160;
+    add(creatures, number(x0,y0,1));
+    add(creatures, number(x0+10,y0,2));
+    add(creatures, number(x0+20,y0,3));
+    add(creatures, number(x0+30,y0,4));
+    add(creatures, number(x0+40,y0,5));
+end
+
+
+
+-- randomly draws a name from the killed loot bugs for the death screen
+function add_killed_lootbug_name()
+    add(killed_loot_bugs, loot_bug_names[flr(rnd(#loot_bug_names))]);
+end
+
+
+-- post game summary
+function display_death_screen()
+    -- cleaning up game state
+    sfx(-1,0);
+    sfx(-1,1);
+    sfx(-1,2);
+    sfx(-1,3);
+    player.is_moving.up = false;
+    player.is_moving.down = false;
+    player.is_moving.left = false;
+    player.is_moving.right = false;
+    player.is_drilling = false;
+    player.is_hit = false;
+    player.x_pos = 130;
+    player.y_pos = 182;
+
+    print("awards:", 111,126,7);
+    print("",113,126,7);
+    if no_lootbugs_killed then
+        print("-no lootbugs");
+        print(" killed (+100)");
+    end
+    if no_cave_angels_killed then
+        print("-no cave angels");
+        print(" killed (+100)");
+    end
+    if no_scout_killed then
+        print("-you spared");
+        print(" the scouts (+100)");
+    end
+    if in_tutorial then
+        print("-died during the");
+        print(" tutorial (+500)");
+    end
+    -- if not no_lootbugs_killed then
+    if not no_lootbugs_killed then
+        print("killed",190,130,7);
+        print("loot");
+        print("bugs:");
+        local y = 148;
+        for name in all(killed_loot_bugs) do
+            print(name,192,y);
+            y+=6;
+        end
+    end
+    print("game over!", 120, 105, 7);
+    print("score: "..player.points);
+    print("distance travelled: "..game_time);
+end
+
+function display_chefs_kiss_banner()
+    local x0 = 105;
+    local y0 = 120;
+
+    spr(199, x0, y0, 4, 4);
+    spr(203, x0+32, y0, 4, 4);
+    spr(207, x0+64, y0, 4, 4);
+    print("shoot haz level:",105,152,9);
+
+    -- display oatbread banner
+    x0 = 105;
+    y0 = 103;
+    for i=0,4 do
+        spr(123+i,x0+8*i, y0);
+    end
+end
+
+

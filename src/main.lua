@@ -1,10 +1,11 @@
 
 
 function _init()
-    player=new_player()
+    player_1=new_player(1)
     projectiles=new_projectiles()
     resources=new_resources()
     map=new_map()
+    hud=new_hud()
 
     game_logic=new_game_logic()
 
@@ -38,7 +39,7 @@ function _update()
     projectiles.update()
     resources.update()
     map.update()
-    player.update()
+    player_1.update()
 
     game_logic.update()
 
@@ -54,9 +55,10 @@ function _draw()
     map.draw_drilled_ground()
     resources.draw()
     projectiles.draw()
-    player.draw()
+    player_1.draw()
     map.draw_vines()
     map.draw_super_wall()
+    hud.draw(player_1)
 
     performance_monitor.register_load()
     performance_monitor.print_current()
