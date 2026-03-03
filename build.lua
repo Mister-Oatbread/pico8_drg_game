@@ -1068,11 +1068,7 @@ performance_monitor.print_current()
 end
 function new_map()
 local function create_wall(x,y)
-local sprites={
-136,138,152,154,168,170,184,186,
-137,139,153,155,169,171,185,187,
-}
-local sprite=sprites[flr(rnd(#sprites))+1]
+local sprite=136+flr(rnd(4))+16*flr(rnd(4))
 return {
 sprite=sprite,
 x=x,

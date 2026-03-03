@@ -7,11 +7,8 @@ function new_map()
     -- takes x,y coord and creates a random wall sprite with random x flip and
     -- according orientation for wall
     local function create_wall(x,y)
-        local sprites={
-            136,138,152,154,168,170,184,186,
-            137,139,153,155,169,171,185,187,
-        }
-        local sprite=sprites[flr(rnd(#sprites))+1]
+        -- choose one of the sprites
+        local sprite=136+flr(rnd(4))+16*flr(rnd(4))
         return {
             sprite=sprite,
             x=x,
