@@ -5,11 +5,11 @@ function new_hud()
 
     -- takes a percentage, as well as x and y position, and paints a prog bar
     local function draw_prog_bar(percentage,x,y)
-        local green_pixels=flr(percentage*10)
+        local green_pixels=flr(percentage*12)
         local color
         spr(63,x,y)
-        spr(63,x+4,y)
-        for i=1,10 do
+        spr(63,x+6,y)
+        for i=1,12 do
             color=i>green_pixels and 8 or 11
             pset(x+i,y+1,color)
         end
@@ -27,15 +27,16 @@ function new_hud()
     end
 
     local function draw(player)
-        local x=player.number==1 and 105 or 180
+        local x=player.number==1 and 105 or 202
         draw_hearts(player,x)
-        -- ammo, fuel, points
-        spr(46,105,190)
-        spr(47,105,200)
-        spr(62,105,210)
-        draw_prog_bar(player.ammo()/player.max_ammo,112,192)
-        draw_prog_bar(player.fuel()/player.max_fuel,112,202)
-        print(points,115,211,7)
+        spr(46,x,190)
+        draw_prog_bar(player.ammo()/player.max_ammo,x+9,192)
+        if player.max_fuel>0 then
+            spr(47,x,200)
+            draw_prog_bar(player.fuel()/player.max_fuel,x+9,202)
+        end
+        spr(62,x,210)
+        print(points,x+10,211,7)
     end
 
     return {

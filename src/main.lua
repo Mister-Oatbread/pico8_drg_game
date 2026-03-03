@@ -2,6 +2,7 @@
 
 function _init()
     player_1=new_player(1)
+    player_2=new_player(2)
     projectiles=new_projectiles()
     resources=new_resources()
     map=new_map()

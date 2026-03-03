@@ -12,14 +12,15 @@ function new_player(number)
         drilling=false,
         mining=false,
         rns=false}
+    local was_mining=false
+    local mined_since=0
     local playing_drill_sound
     local moving_frame=0
-    local use_alt_sprite=false
-    local x_flip=false
-    local ammo=25
-    local fuel=15
-    local max_ammo=25
-    local max_fuel=150
+    local points=0
+    local ammo=number==1 and 25 or 50
+    local fuel=number==1 and 150 or 0
+    local max_ammo=number==1 and 25 or 50
+    local max_fuel=number==1 and 150 or 0
     local shots_fired=false
     local shot_delay_counter=0
     local max_shot_delay=3
@@ -40,18 +41,22 @@ function new_player(number)
 
     -- checks inputs and writes them to the state of the player
     local function fetch_inputs()
-        is.moving.up=btn(2)
-        is.moving.down=btn(3)
-        is.moving.left=btn(0)
-        is.moving.right=btn(1)
-        is.shooting=btn(5) and not btn(4)
-        is.drilling=btn(4) and not btn(5)
-        is.rns=btn(3) and btn(4) and btn(5)
+        is.moving.up=btn(2,number)
+        is.moving.down=btn(3,number)
+        is.moving.left=btn(0,number)
+        is.moving.right=btn(1,number)
+        is.shooting=btn(5,number) and not btn(4,number)
+        local drilling_button=btn(4,number) and not btn(5,number)
+        is.rns=btn(3,number) and btn(4,number) and btn(5,number)
 
+        is.drilling=drilling_button and fuel>0
+        local mining_button=drilling_button and fuel<=0
         -- check if we are currently mining or drilling,
         -- since both go over one button
-        is.mining=btn(4) and not btn(5) and fuel<=0 and not is.mining
-        is.drilling=is.drilling and fuel>0
+        is.mining=mining_button and not was_mining
+        if is.mining then mined_since=0 end
+        was_mining=mining_button or mined_since<5
+        mined_since+=1
     end
 
     local function update_player_collision_points()
@@ -133,7 +138,7 @@ function new_player(number)
 
     local function shoot()
         if ammo > 0 then
-            projectiles.fire_bullet()
+            projectiles.fire_bullet(number)
             ammo-=1
             sfx(-1,2)
             sfx(34,2)
@@ -158,6 +163,8 @@ function new_player(number)
         health+=amount
         if health>max_health then health=max_health end
     end
+
+    local function give_points(amount) points+=amount end
 
     local function move_player()
         if is.moving.up and not has_collision.top then
@@ -224,7 +231,7 @@ function new_player(number)
 
     -- takes in player and returns hitbox ready to be processed by are_colliding()
     -- but for the drills instead of the player
-    function get_drills_hitbox()
+    local function get_drills_hitbox()
         return {
             x={x,x+7},
             y={y-1,y+3},
@@ -232,7 +239,7 @@ function new_player(number)
     end
 
     -- hitbox for hitting creatures
-    function get_damaging_drills_hitbox()
+    local function get_damaging_drills_hitbox()
         return {
             x={x,x+7},
             y={y-3,y+3},
@@ -296,8 +303,8 @@ function new_player(number)
         pset(x+6,y+2,4)
     end
 
-    -- chooses the current sprite for the player
-    local function update_player_animation()
+    -- draws player based on current state
+    local function draw()
         local moving,x_flip
         if game_status=="playing" then
             moving=(not is.moving.down
@@ -307,7 +314,7 @@ function new_player(number)
             moving=(is.moving.down or is.moving.up
                 or is.moving.left or is.moving.right)
         end
-        local sprite=48
+        local sprite=number==1 and 48 or 32
         local speed=1
         if game_status=="playing" and is.moving.up then speed=2 end
 
@@ -321,22 +328,17 @@ function new_player(number)
         pal()
         if is.shooting then draw_gun() end
         if is.drilling then draw_drills() end
-        if is.mining then draw_pickaxe() end
-    end
-
-    -- draws player based on current state
-    local function draw()
-        update_player_animation()
+        if is.mining or was_mining then draw_pickaxe() end
     end
 
     local function x_f() return x end
     local function y_f() return y end
-    local function drilling_f() return is.drilling end
+    local function drilling_f() return is.drilling or is.mining end
     local function shooting_f() return is.shooting end
     local function rns_f() return is.rns end
     local function hit_f() return is_hit end
     local function health_f() return health end
-    local function ammo_f() return health end
+    local function ammo_f() return ammo end
     local function fuel_f() return fuel end
 
     return {
@@ -346,6 +348,7 @@ function new_player(number)
         draw=draw,
         give_ammo=give_ammo,
         give_health=give_health,
+        give_points=give_points,
         get_hitbox=get_hitbox,
         get_drills_hitbox=get_drills_hitbox,
         get_damaging_drills_hitbox=get_damaging_drills_hitbox,

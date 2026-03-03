@@ -794,11 +794,11 @@ pset(hitbox.x[2],hitbox.y[2],8);
 end
 function new_hud()
 local function draw_prog_bar(percentage,x,y)
-local green_pixels=flr(percentage*10)
+local green_pixels=flr(percentage*12)
 local color
 spr(63,x,y)
-spr(63,x+4,y)
-for i=1,10 do
+spr(63,x+6,y)
+for i=1,12 do
 color=i>green_pixels and 8 or 11
 pset(x+i,y+1,color)
 end
@@ -813,14 +813,16 @@ pal()
 end
 end
 local function draw(player)
-local x=player.number==1 and 105 or 180
+local x=player.number==1 and 105 or 202
 draw_hearts(player,x)
-spr(46,105,190)
-spr(47,105,200)
-spr(62,105,210)
-draw_prog_bar(player.ammo()/player.max_ammo,112,192)
-draw_prog_bar(player.fuel()/player.max_fuel,112,202)
-print(points,115,211,7)
+spr(46,x,190)
+draw_prog_bar(player.ammo()/player.max_ammo,x+9,192)
+if player.max_fuel>0 then
+spr(47,x,200)
+draw_prog_bar(player.fuel()/player.max_fuel,x+9,202)
+end
+spr(62,x,210)
+print(points,x+10,211,7)
 end
 return {
 draw=draw,
@@ -828,6 +830,7 @@ draw=draw,
 end
 function _init()
 player_1=new_player(1)
+player_2=new_player(2)
 projectiles=new_projectiles()
 resources=new_resources()
 map=new_map()
@@ -1101,14 +1104,15 @@ shooting=false,
 drilling=false,
 mining=false,
 rns=false}
+local was_mining=false
+local mined_since=0
 local playing_drill_sound
 local moving_frame=0
-local use_alt_sprite=false
-local x_flip=false
-local ammo=25
-local fuel=15
-local max_ammo=25
-local max_fuel=150
+local points=0
+local ammo=number==1 and 25 or 50
+local fuel=number==1 and 150 or 0
+local max_ammo=number==1 and 25 or 50
+local max_fuel=number==1 and 150 or 0
 local shots_fired=false
 local shot_delay_counter=0
 local max_shot_delay=3
@@ -1127,15 +1131,19 @@ add(collision_points.right,{x=0,y=0})
 add(collision_points.top,{x=0,y=0})
 end
 local function fetch_inputs()
-is.moving.up=btn(2)
-is.moving.down=btn(3)
-is.moving.left=btn(0)
-is.moving.right=btn(1)
-is.shooting=btn(5) and not btn(4)
-is.drilling=btn(4) and not btn(5)
-is.rns=btn(3) and btn(4) and btn(5)
-is.mining=btn(4) and not btn(5) and fuel<=0 and not is.mining
-is.drilling=is.drilling and fuel>0
+is.moving.up=btn(2,number)
+is.moving.down=btn(3,number)
+is.moving.left=btn(0,number)
+is.moving.right=btn(1,number)
+is.shooting=btn(5,number) and not btn(4,number)
+local drilling_button=btn(4,number) and not btn(5,number)
+is.rns=btn(3,number) and btn(4,number) and btn(5,number)
+is.drilling=drilling_button and fuel>0
+local mining_button=drilling_button and fuel<=0
+is.mining=mining_button and not was_mining
+if is.mining then mined_since=0 end
+was_mining=mining_button or mined_since<5
+mined_since+=1
 end
 local function update_player_collision_points()
 for i=1,6 do
@@ -1199,7 +1207,7 @@ end
 end
 local function shoot()
 if ammo > 0 then
-projectiles.fire_bullet()
+projectiles.fire_bullet(number)
 ammo-=1
 sfx(-1,2)
 sfx(34,2)
@@ -1219,6 +1227,7 @@ local function give_health(amount)
 health+=amount
 if health>max_health then health=max_health end
 end
+local function give_points(amount) points+=amount end
 local function move_player()
 if is.moving.up and not has_collision.top then
 if y>102 then
@@ -1274,13 +1283,13 @@ x={x+1,x+6},
 y={y,y+7},
 };
 end
-function get_drills_hitbox()
+local function get_drills_hitbox()
 return {
 x={x,x+7},
 y={y-1,y+3},
 };
 end
-function get_damaging_drills_hitbox()
+local function get_damaging_drills_hitbox()
 return {
 x={x,x+7},
 y={y-3,y+3},
@@ -1334,7 +1343,7 @@ pset(x+6,y,5)
 pset(x+6,y+1,4)
 pset(x+6,y+2,4)
 end
-local function update_player_animation()
+local function draw()
 local moving,x_flip
 if game_status=="playing" then
 moving=(not is.moving.down
@@ -1343,7 +1352,7 @@ elseif game_status=="title_screen" then
 moving=(is.moving.down or is.moving.up
 or is.moving.left or is.moving.right)
 end
-local sprite=48
+local sprite=number==1 and 48 or 32
 local speed=1
 if game_status=="playing" and is.moving.up then speed=2 end
 if moving then sprite+=1 end
@@ -1354,19 +1363,16 @@ spr(sprite,x,y,1,1,x_flip,false)
 pal()
 if is.shooting then draw_gun() end
 if is.drilling then draw_drills() end
-if is.mining then draw_pickaxe() end
-end
-local function draw()
-update_player_animation()
+if is.mining or was_mining then draw_pickaxe() end
 end
 local function x_f() return x end
 local function y_f() return y end
-local function drilling_f() return is.drilling end
+local function drilling_f() return is.drilling or is.mining end
 local function shooting_f() return is.shooting end
 local function rns_f() return is.rns end
 local function hit_f() return is_hit end
 local function health_f() return health end
-local function ammo_f() return health end
+local function ammo_f() return ammo end
 local function fuel_f() return fuel end
 return {
 x=x_f,
@@ -1375,6 +1381,7 @@ update=update,
 draw=draw,
 give_ammo=give_ammo,
 give_health=give_health,
+give_points=give_points,
 get_hitbox=get_hitbox,
 get_drills_hitbox=get_drills_hitbox,
 get_damaging_drills_hitbox=get_damaging_drills_hitbox,
@@ -1407,7 +1414,8 @@ spits.deletei(i)
 end
 end
 end
-local function fire_bullet(player)
+local function fire_bullet(number)
+player=number==1 and player_1 or player_2
 bullets.add({x=player.x(),y=(player.y())-8})
 end
 local function spit(spit_type, x, y)

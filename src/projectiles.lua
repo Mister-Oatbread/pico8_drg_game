@@ -21,7 +21,8 @@ function new_projectiles()
     end
 
     -- sends a bullet out from the current location of the player
-    local function fire_bullet(player)
+    local function fire_bullet(number)
+        player=number==1 and player_1 or player_2
         bullets.add({x=player.x(),y=(player.y())-8})
     end
 
