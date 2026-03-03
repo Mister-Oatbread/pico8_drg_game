@@ -3,7 +3,6 @@
 function _init()
     player=new_player()
     projectiles=new_projectiles()
-    drilled_ground=new_drilled_ground()
     resources=new_resources()
     map=new_map()
 
@@ -18,21 +17,27 @@ function _update()
     points=0
     resource_spawn_rate=.01
     game_status="playing"
-    resource_spawn_ratios = {
+    resource_spawn_ratios={
         1, -- red_sugar
         1, -- nitra
 
     -- activate secondary palette
         1, -- gold
     }
-    resource_spawn_probs = get_cum_probs(resource_spawn_ratios)
+    obstacle_spawn_rate=.2
+    obstacle_spawn_ratios={
+        15, -- small
+        1, -- big
+    }
+
+    obstacle_spawn_probs=get_cum_probs(obstacle_spawn_ratios)
+    resource_spawn_probs=get_cum_probs(resource_spawn_ratios)
     -- hacky stuff end
 
     performance_monitor.reset_cpu_load()
     projectiles.update()
     resources.update()
     map.update()
-    drilled_ground.update()
     player.update()
 
     game_logic.update()
@@ -45,7 +50,8 @@ function _draw()
     camera(101,101)
     map.draw_terrain()
     map.draw_wall()
-    drilled_ground.draw()
+    map.draw_obstacles()
+    map.draw_drilled_ground()
     resources.draw()
     projectiles.draw()
     player.draw()

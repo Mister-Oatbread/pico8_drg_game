@@ -1,5 +1,3 @@
-function terrain_collisions()
-end
 function bottom_grunt(x,y)
 local frame=rnd(20)
 local up_down_frame=rnd(20)
@@ -529,58 +527,32 @@ hitbox=hitbox,
 is_alive=is_alive,
 }
 end
-function new_drilled_ground()
-local list = new_entity_container()
-local function spawn(x,y)
-list.add({x=x,y=y})
-end
-local function update()
-if game_status=="playing" then
-for i=list.size(),1,-1 do
-list.get(i).y+=1
-if list.get(i).y>=230 then
-list.deletei(i)
-end
-end
-end
-end
-local function draw()
-for i=1,list.size() do
-spr(183,list.get(i).x,list.get(i).y)
-end
-end
-return {
-spawn=spawn,
-update=update,
-draw=draw,
-}
-end
 function new_entity_container()
-local list={}
+local entities={}
 local function add_entity(entity)
-add(list,entity)
+add(entities,entity)
 end
-local function get_list(i)
-return list[i]
+local function get_entities(i)
+return entities[i]
 end
 local function delete_entity(entity)
-del(list,entity)
+del(entities,entity)
 end
 local function deletei_entity(i)
-deli(list,i)
+deli(entities,i)
 end
-local function size_list()
-return #list
+local function size_entities()
+return #entities
 end
 local function replace_entity(i,new_entity)
-list[i]=new_entity
+entities[i]=new_entity
 end
 return {
 add=add_entity,
-get=get_list,
+get=get_entities,
 delete=delete_entity,
 deletei=deletei_entity,
-size=size_list,
+size=size_entities,
 replace=replace_entity,
 }
 end
@@ -1027,7 +999,6 @@ end
 function _init()
 player=new_player()
 projectiles=new_projectiles()
-drilled_ground=new_drilled_ground()
 resources=new_resources()
 map=new_map()
 game_logic=new_game_logic()
@@ -1038,17 +1009,22 @@ difficulty=2
 points=0
 resource_spawn_rate=.01
 game_status="playing"
-resource_spawn_ratios = {
+resource_spawn_ratios={
 1, 
 1, 
 1, 
 }
-resource_spawn_probs = get_cum_probs(resource_spawn_ratios)
+obstacle_spawn_rate=.2
+obstacle_spawn_ratios={
+15, 
+1, 
+}
+obstacle_spawn_probs=get_cum_probs(obstacle_spawn_ratios)
+resource_spawn_probs=get_cum_probs(resource_spawn_ratios)
 performance_monitor.reset_cpu_load()
 projectiles.update()
 resources.update()
 map.update()
-drilled_ground.update()
 player.update()
 game_logic.update()
 performance_monitor.register_load()
@@ -1058,7 +1034,8 @@ cls(1)
 camera(101,101)
 map.draw_terrain()
 map.draw_wall()
-drilled_ground.draw()
+map.draw_obstacles()
+map.draw_drilled_ground()
 resources.draw()
 projectiles.draw()
 player.draw()
@@ -1068,7 +1045,7 @@ performance_monitor.print_current()
 end
 function new_map()
 local function create_wall(x,y)
-local sprite=136+flr(rnd(4))+16*flr(rnd(4))
+local sprite=64+flr(rnd(4))+16*flr(rnd(4))
 return {
 sprite=sprite,
 x=x,
@@ -1082,6 +1059,8 @@ end
 local terrain=new_entity_container()
 local walls=new_entity_container()
 local super_walls=new_entity_container()
+local drilled_ground=new_entity_container()
+local obstacles=new_entity_container()
 for x=102,220,118 do
 for y=91,228,8 do
 walls.add(create_wall(x,y))
@@ -1102,6 +1081,28 @@ x=x,
 y=94,
 }
 end
+local function spawn_drilled_ground(x,y)
+drilled_ground.add({x=x,y=y})
+end
+local function spawn_obstacle(x,y)
+local sprite,sprites,size
+if rnd(1)<obstacle_spawn_probs[1] then
+sprites={68,69,70,71,84,85,86,87,100,101,116,117}
+size=1
+else
+sprites={72,74,102,104,106}
+size=2
+end
+sprite=sprites[flr(rnd(#sprites))+1]
+return {
+sprite=sprite,
+x=x,
+y=y,
+size=size,
+x_flip=rnd(2)<1,
+y_flip=rnd(2)<1,
+}
+end
 local function update()
 local wall,terrain_piece
 if game_status=="playing" then
@@ -1119,8 +1120,23 @@ if terrain_piece.y>230 then
 terrain.deletei(i)
 end
 end
-if rnd()<.2 then
+for i=drilled_ground.size(),1,-1 do
+drilled_ground.get(i).y+=1
+if drilled_ground.get(i).y>=230 then
+drilled_ground.deletei(i)
+end
+end
+if rnd()<.8 then
 terrain.add(spawn_pebble())
+end
+for i=obstacles.size(),1,-1 do
+obstacles.get(i).y+=1;
+if obstacles.get(i).y>=230 then
+obstacles.deletei(i)
+end
+end
+if rnd()<obstacle_spawn_rate then
+obstacles.add(spawn_obstacle(flr(rnd(120))+101,81))
 end
 end
 end
@@ -1144,7 +1160,7 @@ end
 local function draw_super_wall()
 for i=1,super_walls.size() do
 spr(
-167,
+61,
 super_walls.get(i).x,
 super_walls.get(i).y,
 1,1,false,false
@@ -1158,64 +1174,34 @@ terrain_piece=terrain.get(i)
 pset(terrain_piece.x,terrain_piece.y,terrain_piece.color)
 end
 end
+local function draw_drilled_ground()
+for i=1,drilled_ground.size() do
+spr(52,drilled_ground.get(i).x,drilled_ground.get(i).y)
+end
+end
+local function draw_obstacles()
+local obstacle
+for i=1,obstacles.size() do
+obstacle=obstacles.get(i)
+spr(
+obstacle.sprite,
+obstacle.x,
+obstacle.y,
+obstacle.size,
+obstacle.size,
+obstacle.x_flip,
+obstacle.y_flip
+)
+end
+end
 return {
 update=update,
 draw_wall=draw_wall,
 draw_super_wall=draw_super_wall,
 draw_terrain=draw_terrain,
-}
-end
-function new_obstacles()
-local list={}
-local sprites_small={67,68,83,84,99,100,115,116}
-local sprites_big={69,71,101,103}
-local function spawn(x,y)
-local sprite,sprites,size
-if rnd(1)<obstacle_spawn_probs[1] then
-sprites=sprites_small
-size=1
-else
-sprites=sprites_big
-size=2
-end
-sprite=sprites[flr(rnd(#sprites))+1]
-return {
-sprite=sprite,
-x=x,
-y=y,
-size=size,
-x_flip=rnd(2)<1,
-y_flip=rnd(2)<1,
-}
-end
-local function update()
-if game_status=="playing" then
-for i=#list,1,-1 do
-list[i].y+=1;
-if list[i].y>=230 then
-deli(list,i)
-end
-end
-if rnd(1)<obstacle_spawn_rate then
-add(list,spawn(flr(rnd(120))+101,81))
-end
-end
-end
-local function draw()
-local sprite,x,y,size,x_flip,y_flip
-for i=1,#list do
-sprite=list[i].sprite
-x=list[i].x
-y=list[i].y
-size=list[i].size
-x_flip=list[i].x_flip
-y_flip=list[i].y_flip
-spr(sprite,x,y,size,size,x_flip,y_flip)
-end
-end
-return {
-update=update,
-draw=draw,
+draw_drilled_ground=draw_drilled_ground,
+draw_obstacles=draw_obstacles,
+spawn_drilled_ground=spawn_drilled_ground,
 }
 end
 function new_performance_monitor()
@@ -1330,10 +1316,13 @@ break
 end
 end
 end
+local function mine()
+return true
+end
 local function drill()
 local sound
 if (fuel>0) then
-drilled_ground.spawn(x,y-1)
+map.spawn_drilled_ground(x,y-2)
 fuel-=1
 end
 end
@@ -1449,8 +1438,20 @@ sfx(32)
 end
 if player.health <= 0 then game_status = "end_screen" end
 end
+local function draw_gun()
+pset(x+6,y,5)
+pset(x+6,y+1,5)
+end
+local function draw_drills()
+pset(x+6,y,5)
+pset(x+6,y+1,5)
+pset(x+5,y,5)
+pset(x+2,y,5)
+pset(x+1,y,5)
+pset(x+1,y+1,5)
+end
 local function update_player_animation()
-local moving,x_flip,sprinting
+local moving,x_flip
 if game_status=="playing" then
 moving=(not is.moving.down
 or is.moving.left or is.moving.right)
@@ -1458,24 +1459,17 @@ elseif game_status=="title_screen" then
 moving=(is.moving.down or is.moving.up
 or is.moving.left or is.moving.right)
 end
-sprinting=game_status=="playing" and is.moving.up
-local sprite=49
+local sprite=48
+local speed=1
+if game_status=="playing" and is.moving.up then speed=2 end
 if moving then sprite+=1 end
-if is.shooting then sprite+=2 end
-if is.drilling then sprite+=5 end
-use_alt_sprite=moving_frame>=8
-moving_frame=(moving_frame+1)%16
-if sprinting then moving_frame=(moving_frame+1)%16 end
-if moving then
-if is.shooting then
-x_flip=false
-if use_alt_sprite then sprite+=1 end
-else
-x_flip=use_alt_sprite
-end
-end
-if is_hit then current_sprite-=16 end
+x_flip=moving_frame>=8
+moving_frame=(moving_frame+speed)%16
+if is_hit then pal(8,10) end
 spr(sprite,x,y,1,1,x_flip,false)
+pal()
+if is.shooting then draw_gun() end
+if is.drilling then draw_drills() end
 end
 local function draw()
 update_player_animation()
@@ -1787,22 +1781,22 @@ end
 function new_resources()
 local list=new_entity_container()
 local function create(x,y)
-local sprite,sprites,hitbox,res_type
+local sprite,sprites,hitbox,res_type,start_sprite
 local decision=rnd(1)
 if decision<resource_spawn_probs[1] then
-sprites={64,80,96,112}
+start_sprite=136
 hitbox={x={3,6},y={3,6}}
 res_type="red_sugar"
 elseif decision<resource_spawn_probs[2] then
-sprites={65,81,97,113}
+start_sprite=152
 hitbox={x={1,8},y={1,8}}
 res_type="nitra"
 else
-sprites={66,82,98,114}
+start_sprite=168
 hitbox={x={1,8},y={1,8}}
 res_type="gold"
 end
-sprite=sprites[flr(rnd(#sprites))+1]
+sprite=start_sprite+flr(rnd(4))
 return {
 sprite=sprite,
 x=x,

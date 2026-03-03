@@ -1,28 +1,29 @@
 
 
+
 function new_resources()
     local list=new_entity_container()
 
     local function create(x,y)
-        local sprite,sprites,hitbox,res_type
+        local sprite,sprites,hitbox,res_type,start_sprite
         local decision=rnd(1)
         if decision<resource_spawn_probs[1] then
             -- red sugar
-            sprites={64,80,96,112}
+            start_sprite=136
             hitbox={x={3,6},y={3,6}}
             res_type="red_sugar"
         elseif decision<resource_spawn_probs[2] then
             -- nitra
-            sprites={65,81,97,113}
+            start_sprite=152
             hitbox={x={1,8},y={1,8}}
             res_type="nitra"
         else
             -- gold
-            sprites={66,82,98,114}
+            start_sprite=168
             hitbox={x={1,8},y={1,8}}
             res_type="gold"
         end
-        sprite=sprites[flr(rnd(#sprites))+1]
+        sprite=start_sprite+flr(rnd(4))
         return {
             sprite=sprite,
             x=x,

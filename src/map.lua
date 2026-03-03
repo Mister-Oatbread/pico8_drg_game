@@ -3,12 +3,13 @@
 -- this file contains the needed files to generate the rolling background
 
 function new_map()
+    -- create walls needs to come first
 
     -- takes x,y coord and creates a random wall sprite with random x flip and
     -- according orientation for wall
     local function create_wall(x,y)
         -- choose one of the sprites
-        local sprite=136+flr(rnd(4))+16*flr(rnd(4))
+        local sprite=64+flr(rnd(4))+16*flr(rnd(4))
         return {
             sprite=sprite,
             x=x,
@@ -27,6 +28,8 @@ function new_map()
     local terrain=new_entity_container()
     local walls=new_entity_container()
     local super_walls=new_entity_container()
+    local drilled_ground=new_entity_container()
+    local obstacles=new_entity_container()
 
     -- initialize walls with random sprite
     for x=102,220,118 do
@@ -53,6 +56,30 @@ function new_map()
         }
     end
 
+    local function spawn_drilled_ground(x,y)
+        drilled_ground.add({x=x,y=y})
+    end
+
+    local function spawn_obstacle(x,y)
+        local sprite,sprites,size
+        if rnd(1)<obstacle_spawn_probs[1] then
+            sprites={68,69,70,71,84,85,86,87,100,101,116,117}
+            size=1
+        else
+            sprites={72,74,102,104,106}
+            size=2
+        end
+        sprite=sprites[flr(rnd(#sprites))+1]
+        return {
+            sprite=sprite,
+            x=x,
+            y=y,
+            size=size,
+            x_flip=rnd(2)<1,
+            y_flip=rnd(2)<1,
+        }
+    end
+
     -- slides the floor one frame to the bottom, and realigns the floor if needed
     local function update()
         local wall,terrain_piece
@@ -71,8 +98,23 @@ function new_map()
                     terrain.deletei(i)
                 end
             end
-            if rnd()<.2 then
+            for i=drilled_ground.size(),1,-1 do
+                drilled_ground.get(i).y+=1
+                if drilled_ground.get(i).y>=230 then
+                    drilled_ground.deletei(i)
+                end
+            end
+            if rnd()<.8 then
                 terrain.add(spawn_pebble())
+            end
+            for i=obstacles.size(),1,-1 do
+                obstacles.get(i).y+=1;
+                if obstacles.get(i).y>=230 then
+                    obstacles.deletei(i)
+                end
+            end
+            if rnd()<obstacle_spawn_rate then
+                obstacles.add(spawn_obstacle(flr(rnd(120))+101,81))
             end
         end
     end
@@ -98,7 +140,7 @@ function new_map()
     local function draw_super_wall()
         for i=1,super_walls.size() do
             spr(
-                167,
+                61,
                 super_walls.get(i).x,
                 super_walls.get(i).y,
                 1,1,false,false
@@ -114,11 +156,36 @@ function new_map()
         end
     end
 
+    local function draw_drilled_ground()
+        for i=1,drilled_ground.size() do
+            spr(52,drilled_ground.get(i).x,drilled_ground.get(i).y)
+        end
+    end
+
+    local function draw_obstacles()
+        local obstacle
+        for i=1,obstacles.size() do
+            obstacle=obstacles.get(i)
+            spr(
+                obstacle.sprite,
+                obstacle.x,
+                obstacle.y,
+                obstacle.size,
+                obstacle.size,
+                obstacle.x_flip,
+                obstacle.y_flip
+            )
+        end
+    end
+
     return {
         update=update,
         draw_wall=draw_wall,
         draw_super_wall=draw_super_wall,
         draw_terrain=draw_terrain,
+        draw_drilled_ground=draw_drilled_ground,
+        draw_obstacles=draw_obstacles,
+        spawn_drilled_ground=spawn_drilled_ground,
     }
 end
 

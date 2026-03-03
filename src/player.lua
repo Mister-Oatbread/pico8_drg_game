@@ -96,10 +96,14 @@ function new_player()
         end
     end
 
+    local function mine()
+        return true
+    end
+
     local function drill()
         local sound
         if (fuel>0) then
-            drilled_ground.spawn(x,y-1)
+            map.spawn_drilled_ground(x,y-2)
             fuel-=1
             -- local drill_box=get_damaging_drills_hitbox()
             -- local creature_box,creature
@@ -251,9 +255,23 @@ function new_player()
         if player.health <= 0 then game_status = "end_screen" end
     end
 
+    local function draw_gun()
+        pset(x+6,y,5)
+        pset(x+6,y+1,5)
+    end
+
+    local function draw_drills()
+        pset(x+6,y,5)
+        pset(x+6,y+1,5)
+        pset(x+5,y,5)
+        pset(x+2,y,5)
+        pset(x+1,y,5)
+        pset(x+1,y+1,5)
+    end
+
     -- chooses the current sprite for the player
     local function update_player_animation()
-        local moving,x_flip,sprinting
+        local moving,x_flip
         if game_status=="playing" then
             moving=(not is.moving.down
                 or is.moving.left or is.moving.right)
@@ -262,25 +280,20 @@ function new_player()
             moving=(is.moving.down or is.moving.up
                 or is.moving.left or is.moving.right)
         end
-        sprinting=game_status=="playing" and is.moving.up
-        local sprite=49
-        if moving then sprite+=1 end
-        if is.shooting then sprite+=2 end
-        if is.drilling then sprite+=5 end
-        use_alt_sprite=moving_frame>=8
-        moving_frame=(moving_frame+1)%16
-        if sprinting then moving_frame=(moving_frame+1)%16 end
+        local sprite=48
+        local speed=1
+        if game_status=="playing" and is.moving.up then speed=2 end
 
-        if moving then
-            if is.shooting then
-                x_flip=false
-                if use_alt_sprite then sprite+=1 end
-            else
-                x_flip=use_alt_sprite
-            end
-        end
-        if is_hit then current_sprite-=16 end
+        if moving then sprite+=1 end
+
+        x_flip=moving_frame>=8
+        moving_frame=(moving_frame+speed)%16
+
+        if is_hit then pal(8,10) end
         spr(sprite,x,y,1,1,x_flip,false)
+        pal()
+        if is.shooting then draw_gun() end
+        if is.drilling then draw_drills() end
     end
 
     -- draws player based on current state
