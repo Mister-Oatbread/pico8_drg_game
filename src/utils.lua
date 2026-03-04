@@ -9,6 +9,16 @@ function are_colliding(a, b)
     return not(x_good or y_good);
 end
 
+function coinflip() return rnd(2)<1 end
+
+function choose_one(list) return list[flr(rnd(#list))+1] end
+
+-- -- TODO: check if you can generalize this to house most of the update loops
+-- function iterate(list,update_command)
+--     return false
+-- end
+
+-- calculate cumulative probability based on ratios
 function get_cum_probs(ratios)
     local sum = 0;
     local probs = {};

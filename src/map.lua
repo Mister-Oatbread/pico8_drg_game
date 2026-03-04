@@ -14,9 +14,9 @@ function new_map()
             x=x,
             y=y,
             x_flip=x>140,
-            y_flip=rnd(2)<1,
-            swap_gray=rnd(2)<1,
-            swap_blue=rnd(2)<1,
+            y_flip=coinflip(),
+            swap_gray=coinflip(),
+            swap_blue=coinflip(),
         }
     end
 
@@ -45,8 +45,7 @@ function new_map()
     end
 
     local function spawn_pebble()
-        local color
-        if rnd(2)<1 then color=6 else color=2 end
+        local color=coinflip() and 6 or 2
         return {
             color=color,
             x=flr(rnd(128))+101,
@@ -57,11 +56,11 @@ function new_map()
     local function spawn_vine()
         local sprites={76,78,108,110}
         return {
-            sprite=sprites[flr(rnd(#sprites))+1],
+            sprite=choose_one(sprites),
             x=flr(rnd(112))+101,
             y=81,
-            x_flip=rnd(2)<1,
-            y_flip=rnd(2)<1,
+            x_flip=coinflip(),
+            y_flip=coinflip(),
         }
     end
 
@@ -71,21 +70,21 @@ function new_map()
 
     local function spawn_obstacle(x,y)
         local sprite,sprites,size
-        if rnd(1)<obstacle_spawn_probs[1] then
+        if rnd()<obstacle_spawn_probs[1] then
             sprites={68,69,70,71,84,85,86,87,100,101,116,117}
             size=1
         else
             sprites={72,74,102,104,106}
             size=2
         end
-        sprite=sprites[flr(rnd(#sprites))+1]
+        sprite=choose_one(sprites)
         return {
             sprite=sprite,
             x=x,
             y=y,
             size=size,
-            x_flip=rnd(2)<1,
-            y_flip=rnd(2)<1,
+            x_flip=coinflip(),
+            y_flip=coinflip(),
         }
     end
 

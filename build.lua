@@ -558,14 +558,17 @@ replace=replace_entity,
 end
 function new_game_logic()
 local function mine_resources()
-local resource,colliding,drilling,res_hitbox
-local hitbox_drills=player_1.get_drills_hitbox()
+local resource,colliding,drilling_1,drilling_2,res_hitbox
+local hitbox_drills_1=player_1.get_drills_hitbox()
+local hitbox_drills_2=player_2.get_drills_hitbox()
+drilling_1=player_1.is_drilling()
+drilling_2=player_2.is_drilling()
+if drilling_1 or drilling_2 then
 for i=resources.get_resources().size(),1,-1 do
 resource=resources.get_resources().get(i)
 res_hitbox=resources.get_hitbox(resource)
-colliding=are_colliding(res_hitbox,hitbox_drills)
-drilling=player_1.is_drilling()
-if colliding and drilling then
+colliding_1=are_colliding(res_hitbox,hitbox_drills)
+if colliding then
 local res_type=resource.res_type
 if res_type=="red_sugar" then
 player_1.give_health(1)
@@ -577,6 +580,7 @@ end
 resources.get_resources().deletei(i)
 sfx(-1,3)
 sfx(38,3)
+end
 end
 end
 end
@@ -874,8 +878,8 @@ map.draw_obstacles()
 map.draw_drilled_ground()
 resources.draw()
 projectiles.draw()
-player_1.draw()
 if coop then player_2.draw() end
+player_1.draw()
 map.draw_vines()
 map.draw_super_wall()
 hud.draw(player_1)
@@ -890,9 +894,9 @@ sprite=64+flr(rnd(4))+16*flr(rnd(4)),
 x=x,
 y=y,
 x_flip=x>140,
-y_flip=rnd(2)<1,
-swap_gray=rnd(2)<1,
-swap_blue=rnd(2)<1,
+y_flip=coinflip(),
+swap_gray=coinflip(),
+swap_blue=coinflip(),
 }
 end
 local terrain=new_entity_container()
@@ -912,8 +916,7 @@ super_walls.add({x=i,y=j})
 end
 end
 local function spawn_pebble()
-local color
-if rnd(2)<1 then color=6 else color=2 end
+local color=coinflip() and 6 or 2
 return {
 color=color,
 x=flr(rnd(128))+101,
@@ -923,11 +926,11 @@ end
 local function spawn_vine()
 local sprites={76,78,108,110}
 return {
-sprite=sprites[flr(rnd(#sprites))+1],
+sprite=choose_one(sprites),
 x=flr(rnd(112))+101,
 y=81,
-x_flip=rnd(2)<1,
-y_flip=rnd(2)<1,
+x_flip=coinflip(),
+y_flip=coinflip(),
 }
 end
 local function spawn_drilled_ground(sprite,x,y)
@@ -935,21 +938,21 @@ drilled_ground.add({sprite=sprite,x=x,y=y})
 end
 local function spawn_obstacle(x,y)
 local sprite,sprites,size
-if rnd(1)<obstacle_spawn_probs[1] then
+if rnd()<obstacle_spawn_probs[1] then
 sprites={68,69,70,71,84,85,86,87,100,101,116,117}
 size=1
 else
 sprites={72,74,102,104,106}
 size=2
 end
-sprite=sprites[flr(rnd(#sprites))+1]
+sprite=choose_one(sprites)
 return {
 sprite=sprite,
 x=x,
 y=y,
 size=size,
-x_flip=rnd(2)<1,
-y_flip=rnd(2)<1,
+x_flip=coinflip(),
+y_flip=coinflip(),
 }
 end
 local function update()
@@ -1556,138 +1559,138 @@ fire_bullet=fire_bullet,
 }
 end
 function spawn_prop()
-local x_coord = flr(rnd(120))+101;
-local y_coord = 81;
-local decision = rnd(100);
-local prop;
-if decision < 50 then
-prop = nectar_rind(x_coord, y_coord);
-elseif decision < 80 then
-prop = orchey_shy(x_coord, y_coord);
+local x=flr(rnd(120))+101
+local y=81
+local decision=rnd(100)
+local prop
+if decision<50 then
+prop=nectar_rind(x,y)
+elseif decision<80 then
+prop=orchey_shy(x,y)
 else
-prop = p0q(x_coord, y_coord);
+prop=p0q(x,y)
 end
-add(props, prop);
+add(props, prop)
 end
 function nectar_rind(x,y)
-local sprite;
-local x = x;
-local y = y;
-local x_flip = rnd(2)<1;
-local y_flip = rnd(2)<1;
+local sprite
+local x = x
+local y = y
+local x_flip = coinflip()
+local y_flip = coinflip()
 function animate()
-y+=1;
-local distance = (player.x_pos-x)^2 + (player.y_pos-y)^2;
+y+=1
+local distance = (player.x_pos-x)^2 + (player.y_pos-y)^2
 if distance < 30^2 then
-sprite = 173;
+sprite = 173
 else
-sprite = 172;
+sprite = 172
 end
 end
 function draw()
-spr(sprite, x, y, 1, 1, x_flip, y_flip);
+spr(sprite, x, y, 1, 1, x_flip, y_flip)
 end
-function x_coord() return x end;
-function y_coord() return y end;
+function x_coord() return x end
+function y_coord() return y end
 return {
 x_coord=x_coord,
 y_coord=y_coord,
 animate=animate,
 draw=draw,
-};
+}
 end
 function orchey_shy(x, y)
-local sprite;
-local x = x;
-local y = y;
-local x_flip = rnd(2)<1;
-local y_flip = rnd(2)<1;
+local sprite
+local x = x
+local y = y
+local x_flip = coinflip()
+local y_flip = coinflip()
 function animate()
-y+=1;
-local distance = (player.x_pos-x)^2 + (player.y_pos-y)^2;
+y+=1
+local distance = (player.x_pos-x)^2 + (player.y_pos-y)^2
 if distance < 225 then
-sprite = 190;
+sprite = 190
 elseif distance < 900 then
-sprite = 189;
+sprite = 189
 else
-sprite = 188;
+sprite = 188
 end
 end
 function draw()
-spr(sprite, x, y, 1, 1, x_flip, y_flip);
+spr(sprite, x, y, 1, 1, x_flip, y_flip)
 end
-function x_coord() return x end;
-function y_coord() return y end;
+function x_coord() return x end
+function y_coord() return y end
 return {
 x_coord=x_coord,
 y_coord=y_coord,
 animate=animate,
 draw=draw,
-};
+}
 end
 function p0q(x, y)
-local sprite = 140;
-local x = x;
-local y = y;
-local x_flip = rnd(2)<1;
-local y_flip = rnd(2)<1;
-local angle = 0;
-local parts = {};
+local sprite = 140
+local x = x
+local y = y
+local x_flip = coinflip()
+local y_flip = coinflip()
+local angle = 0
+local parts = {}
 local n = 30
-local initial_angle;
-local r2d = 3.14/180;
+local initial_angle
+local r2d = 3.14/180
 for i=1,n do
-initial_angle = 360*i/n;
-radius = ceil(rnd(12));
-add(parts,{radius=radius, angle=initial_angle});
+initial_angle = 360*i/n
+radius = ceil(rnd(12))
+add(parts,{radius=radius, angle=initial_angle})
 end
 function animate()
-y+=1;
-angle = (angle+.25)%360;
+y+=1
+angle = (angle+.25)%360
 end
 function draw()
-spr(sprite, x, y, 2, 2, x_flip, y_flip);
-local x_pos, y_pos;
+spr(sprite, x, y, 2, 2, x_flip, y_flip)
+local x_pos, y_pos
 for i=1,n do
-x_pos = ceil(parts[i].radius*cos((angle+parts[i].angle)*r2d));
-y_pos = ceil(parts[i].radius*sin((angle+parts[i].angle)*r2d));
-pset(x_pos+x+8, y_pos+y+8, 12);
+x_pos = ceil(parts[i].radius*cos((angle+parts[i].angle)*r2d))
+y_pos = ceil(parts[i].radius*sin((angle+parts[i].angle)*r2d))
+pset(x_pos+x+8, y_pos+y+8, 12)
 end
 end
-function x_coord() return x end;
-function y_coord() return y end;
+function x_coord() return x end
+function y_coord() return y end
 return {
 x_coord=x_coord,
 y_coord=y_coord,
 animate=animate,
 draw=draw,
-};
+}
 end
 function initialize_props()
-props = {};
+props = {}
 end
 function update_props()
 if #props>0 then
 for prop in all(props) do
-prop.animate();
+prop.animate()
 end
-local i=1;
+local i=1
 while #props>=i do
 if props[i].y_coord() >= 240 then
-deli(props, i);
+deli(props, i)
 else
-i+=1;
+i+=1
 end
 end
 end
 if rnd() < .02 then
-spawn_prop();
+spawn_prop()
 end
 end
 function draw_props()
 if #props>0 then
 for prop in all(props) do
-prop.draw();
+prop.draw()
 end
 end
 end
@@ -1695,7 +1698,7 @@ function new_resources()
 local list=new_entity_container()
 local function create(x,y)
 local sprite,sprites,hitbox,res_type,start_sprite
-local decision=rnd(1)
+local decision=rnd()
 if decision<resource_spawn_probs[1] then
 start_sprite=136
 hitbox={x={3,6},y={3,6}}
@@ -1714,8 +1717,8 @@ return {
 sprite=sprite,
 x=x,
 y=y,
-x_flip=rnd(2)<1,
-y_flip=rnd(2)<1,
+x_flip=coinflip(),
+y_flip=coinflip(),
 hitbox=hitbox,
 res_type=res_type,
 }
@@ -1727,7 +1730,7 @@ if list.get(i).y>=230 then
 list.deletei(i)
 end
 end
-if (rnd(1)<resource_spawn_rate) then
+if (rnd()<resource_spawn_rate) then
 list.add(create(flr(rnd(120))+101,81))
 end
 end
@@ -1782,6 +1785,8 @@ local x_good = a.x[1] > b.x[2] or a.x[2] < b.x[1];
 local y_good = a.y[1] > b.y[2] or a.y[2] < b.y[1];
 return not(x_good or y_good);
 end
+function coinflip() return rnd(2)<1 end
+function choose_one(list) return list[flr(rnd(#list))+1] end
 function get_cum_probs(ratios)
 local sum = 0;
 local probs = {};

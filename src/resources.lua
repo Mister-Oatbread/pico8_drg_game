@@ -6,7 +6,7 @@ function new_resources()
 
     local function create(x,y)
         local sprite,sprites,hitbox,res_type,start_sprite
-        local decision=rnd(1)
+        local decision=rnd()
         if decision<resource_spawn_probs[1] then
             -- red sugar
             start_sprite=136
@@ -28,8 +28,8 @@ function new_resources()
             sprite=sprite,
             x=x,
             y=y,
-            x_flip=rnd(2)<1,
-            y_flip=rnd(2)<1,
+            x_flip=coinflip(),
+            y_flip=coinflip(),
             hitbox=hitbox,
             res_type=res_type,
         }
@@ -42,7 +42,7 @@ function new_resources()
                 list.deletei(i)
             end
         end
-        if (rnd(1)<resource_spawn_rate) then
+        if (rnd()<resource_spawn_rate) then
             list.add(create(flr(rnd(120))+101,81))
         end
     end
