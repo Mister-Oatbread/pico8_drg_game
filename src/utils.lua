@@ -41,4 +41,16 @@ function get_cum_probs(ratios)
     return probs;
 end
 
+-- takes a entity container and removes all entities that have a x
+-- coordinate that is larger than 240
+function remove_bottom_entities(container,y_getter)
+    local entity
+    for i=container.size(),1,-1 do
+        entity=container.get(i)
+        if y_getter>=240 then
+            container.delete(entity)
+        end
+    end
+end
+
 

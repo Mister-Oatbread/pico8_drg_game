@@ -69,23 +69,6 @@
         false,
         false});
 
-    -- controls guide
-    x0 = 160;
-    y0 = 200;
-    add(obstacles, {
-        sprite=227,
-        x_coord=x0,
-        y_coord=y0,
-        size=2,
-        x_flip=false,
-        y_flip=false});
-    add(obstacles, {
-        sprite=229,
-        x_coord=x0+16,
-        y_coord=y0,
-        size=2,
-        x_flip=false,
-        y_flip=false});
 
     -- tutorial sprites
     add(resources, {sprite=65, x_coord=151, y_coord=170,

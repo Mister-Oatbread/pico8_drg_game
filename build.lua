@@ -839,6 +839,7 @@ projectiles=new_projectiles()
 resources=new_resources()
 map=new_map()
 hud=new_hud()
+title_screen=new_title_screen()
 game_logic=new_game_logic()
 performance_monitor=new_performance_monitor()
 end
@@ -847,7 +848,7 @@ difficulty=2
 coop=true
 points=0
 resource_spawn_rate=.01
-game_status="playing"
+game_status="title_screen"
 resource_spawn_ratios={
 1, 
 1, 
@@ -880,6 +881,7 @@ resources.draw()
 projectiles.draw()
 if coop then player_2.draw() end
 player_1.draw()
+title_screen.draw()
 map.draw_vines()
 map.draw_super_wall()
 hud.draw(player_1)
@@ -972,12 +974,7 @@ if terrain_piece.y>230 then
 terrain.deletei(i)
 end
 end
-for i=drilled_ground.size(),1,-1 do
-drilled_ground.get(i).y+=1
-if drilled_ground.get(i).y>=230 then
-drilled_ground.deletei(i)
-end
-end
+remove_bottom_entities(drilled_ground,drilled_ground.y)
 if rnd()<.8 then
 terrain.add(spawn_pebble())
 end
@@ -1073,6 +1070,7 @@ draw_drilled_ground=draw_drilled_ground,
 draw_obstacles=draw_obstacles,
 draw_vines=draw_vines,
 spawn_drilled_ground=spawn_drilled_ground,
+add_obstacle=obstacles.add,
 }
 end
 function new_performance_monitor()
@@ -1780,6 +1778,34 @@ get_hitbox=get_hitbox,
 get_resources=list_f,
 }
 end
+function new_title_screen()
+local function initialize()
+obstacles.add({sprite=101,x_coord=200,y_coord=160,
+size=2,x_flip=false,y_flip=false})
+obstacles.add({sprite=84,x_coord=200,y_coord=155,
+size=1,x_flip=false,y_flip=true})
+end
+local function draw_controls()
+local x0=160
+local y0=200
+spr(227,x0+16,y0,2,2)
+spr(229,x0,y0,2,2)
+obstacles.add({
+sprite=229,
+x=x0+16,
+y=y0,
+size=2,
+x_flip=false,
+y_flip=false})
+end
+local function draw()
+draw_controls()
+end
+return {
+initialize=initialize,
+draw=draw,
+}
+end
 function are_colliding(a, b)
 local x_good = a.x[1] > b.x[2] or a.x[2] < b.x[1];
 local y_good = a.y[1] > b.y[2] or a.y[2] < b.y[1];
@@ -1801,4 +1827,13 @@ for i=2,#probs do
 probs[i] += probs[i-1];
 end
 return probs;
+end
+function remove_bottom_entities(container,y_getter)
+local entity
+for i=container.size(),1,-1 do
+entity=container.get(i)
+if y_getter>=240 then
+container.delete(entity)
+end
+end
 end

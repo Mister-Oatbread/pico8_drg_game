@@ -106,12 +106,13 @@ function new_map()
                     terrain.deletei(i)
                 end
             end
-            for i=drilled_ground.size(),1,-1 do
-                drilled_ground.get(i).y+=1
-                if drilled_ground.get(i).y>=230 then
-                    drilled_ground.deletei(i)
-                end
-            end
+            remove_bottom_entities(drilled_ground,drilled_ground.y)
+            -- for i=drilled_ground.size(),1,-1 do
+            --     drilled_ground.get(i).y+=1
+            --     if drilled_ground.get(i).y>=230 then
+            --         drilled_ground.deletei(i)
+            --     end
+            -- end
             if rnd()<.8 then
                 terrain.add(spawn_pebble())
             end
@@ -214,6 +215,7 @@ function new_map()
         draw_obstacles=draw_obstacles,
         draw_vines=draw_vines,
         spawn_drilled_ground=spawn_drilled_ground,
+        add_obstacle=obstacles.add,
     }
 end
 

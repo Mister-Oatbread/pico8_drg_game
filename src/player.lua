@@ -236,7 +236,8 @@ function new_player(number)
         end
     end
 
-    -- takes in player and returns hitbox ready to be processed by are_colliding()
+    -- takes in player and returns hitbox ready to be processed by
+    -- are_colliding()
     local function get_hitbox()
         return {
             x={x+1,x+6},
@@ -244,8 +245,8 @@ function new_player(number)
         };
     end
 
-    -- takes in player and returns hitbox ready to be processed by are_colliding()
-    -- but for the drills instead of the player
+    -- takes in player and returns hitbox ready to be processed by
+    -- are_colliding(), but for the drills instead of the player
     local function get_drills_hitbox()
         return {
             x={x,x+7},

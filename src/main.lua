@@ -8,6 +8,7 @@ function _init()
     map=new_map()
     hud=new_hud()
 
+    title_screen=new_title_screen()
     game_logic=new_game_logic()
 
     performance_monitor=new_performance_monitor()
@@ -19,7 +20,7 @@ function _update()
     coop=true
     points=0
     resource_spawn_rate=.01
-    game_status="playing"
+    game_status="title_screen"
     resource_spawn_ratios={
         1, -- red_sugar
         1, -- nitra
@@ -60,6 +61,8 @@ function _draw()
     projectiles.draw()
     if coop then player_2.draw() end
     player_1.draw()
+    -- if game_status=="title_screen" then title_screen.draw() end
+    title_screen.draw()
     map.draw_vines()
     map.draw_super_wall()
     hud.draw(player_1)
