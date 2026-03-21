@@ -557,6 +557,57 @@ replace=replace_entity,
 }
 end
 function new_game_logic()
+local obstacle_ratios,resource_ratios,creature_ratios
+local function set_difficulty(difficulty)
+creature_ratios={
+2, 
+1, 
+10, 
+1, 
+2, 
+1, 
+}
+resource_ratios={
+1, 
+1, 
+1, 
+}
+obstacle_ratios={
+15, 
+1, 
+}
+creature_variety=6
+resource_variety=3
+obstacle_variety=2
+if difficulty==1 then
+obstacle_spawn_rate=.04
+resource_spawn_rate=.05
+creature_spawn_rate=.06
+creature_variety=4
+resource_variety=1
+elseif difficulty==2 then
+obstacle_spawn_rate=.2
+resource_spawn_rate=.01
+creature_spawn_rate=.04
+creatre_variety=5
+elseif difficulty==3 then
+obstacle_spawn_rate=.2
+resource_spawn_rate=.01
+creature_spawn_rate=.06
+elseif difficulty==4 then
+obstacle_spawn_rate=.2
+resource_spawn_rate=.01
+creature_spawn_rate=.06
+elseif difficulty==5 then
+obstacle_spawn_rate=.2
+resource_spawn_rate=.01
+creature_spawn_rate=.06
+resource_variety=2
+end
+get_cum_sum(creature_ratios,creature_variety)
+get_cum_sum(obstacle_ratios,obstacle_variety)
+get_cum_sum(resource_ratios,resource_variety)
+end
 local function mine_resources()
 local resource,colliding,drilling_1,drilling_2,res_hitbox
 local hitbox_drills_1=player_1.get_drills_hitbox()
@@ -588,7 +639,8 @@ local function update()
 mine_resources()
 end
 return {
-update=update
+update=update,
+set_difficulty=set_difficulty,
 }
 end
 function initialize_game()
@@ -605,101 +657,6 @@ difficulty = 3;
 creature_spawn_rate = 0;
 obstacle_spawn_rate = 0;
 resource_spawn_rage = 0;
-end
-function set_hazard_level()
-if difficulty == 1 then
-obstacle_spawn_rate = .04;
-resource_spawn_rate = .05;
-creature_spawn_rate = .06;
-creature_spawn_ratios = {
-8, 
-0, 
-8, 
-0, 
-0, 
-1, 
-};
-resource_spawn_ratios = {
-1, 
-0, 
-1, 
-};
-elseif difficulty == 2 then
-obstacle_spawn_rate = .2;
-resource_spawn_rate = .01;
-creature_spawn_rate = .04;
-creature_spawn_ratios = {
-3, 
-1, 
-12, 
-1, 
-0, 
-1, 
-};
-resource_spawn_ratios = {
-1, 
-1, 
-1, 
-};
-elseif difficulty == 3 then
-obstacle_spawn_rate = .2;
-resource_spawn_rate = .01;
-creature_spawn_rate = .06;
-creature_spawn_ratios = {
-3, 
-1, 
-10, 
-2, 
-1, 
-1, 
-};
-resource_spawn_ratios = {
-1, 
-1, 
-1, 
-};
-elseif difficulty == 4 then
-obstacle_spawn_rate = .2;
-resource_spawn_rate = .01;
-creature_spawn_rate = .06;
-creature_spawn_ratios = {
-3, 
-.3, 
-10, 
-2, 
-1, 
-1, 
-};
-resource_spawn_ratios = {
-1, 
-1, 
-1, 
-}
-elseif difficulty == 5 then
-obstacle_spawn_rate = .2;
-resource_spawn_rate = .01;
-creature_spawn_rate = .06;
-creature_spawn_ratios = {
-.5, 
-.3, 
-10, 
-3, 
-3, 
-2, 
-};
-resource_spawn_ratios = {
-0, 
-1, 
-0, 
-};
-end
-obstacle_spawn_ratios = {
-15, 
-1, 
-};
-creature_spawn_probs = get_cum_probs(creature_spawn_ratios);
-obstacle_spawn_probs = get_cum_probs(obstacle_spawn_ratios);
-resource_spawn_probs = get_cum_probs(resource_spawn_ratios);
 end
 function update_game()
 game_time += 1;
@@ -1780,9 +1737,9 @@ get_resources=list_f,
 end
 function new_title_screen()
 local function initialize()
-obstacles.add({sprite=101,x_coord=200,y_coord=160,
+map.add_obstacle({sprite=101,x_coord=200,y_coord=160,
 size=2,x_flip=false,y_flip=false})
-obstacles.add({sprite=84,x_coord=200,y_coord=155,
+map.add_obstacle({sprite=84,x_coord=200,y_coord=155,
 size=1,x_flip=false,y_flip=true})
 end
 local function draw_controls()
@@ -1790,7 +1747,7 @@ local x0=160
 local y0=200
 spr(227,x0+16,y0,2,2)
 spr(229,x0,y0,2,2)
-obstacles.add({
+map.add_obstacle({
 sprite=229,
 x=x0+16,
 y=y0,
@@ -1807,26 +1764,18 @@ draw=draw,
 }
 end
 function are_colliding(a, b)
-local x_good = a.x[1] > b.x[2] or a.x[2] < b.x[1];
-local y_good = a.y[1] > b.y[2] or a.y[2] < b.y[1];
-return not(x_good or y_good);
+local x_good = a.x[1]>b.x[2] or a.x[2]<b.x[1]
+local y_good = a.y[1]>b.y[2] or a.y[2]<b.y[1]
+return not(x_good or y_good)
 end
 function coinflip() return rnd(2)<1 end
 function choose_one(list) return list[flr(rnd(#list))+1] end
-function get_cum_probs(ratios)
-local sum = 0;
-local probs = {};
-for ratio in all(ratios) do
-add(probs, ratio);
-sum+=ratio;
+function get_cum_sum(ratios,variety)
+local sum=0
+for i=1,variety do
+sum+=ratios[i]
 end
-for i=1,#probs do
-probs[i] = probs[i]/sum;
-end
-for i=2,#probs do
-probs[i] += probs[i-1];
-end
-return probs;
+ratios[0]=sum
 end
 function remove_bottom_entities(container,y_getter)
 local entity

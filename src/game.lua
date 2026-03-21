@@ -19,111 +19,111 @@ function initialize_game()
     resource_spawn_rage = 0;
 end
 
--- takes care of setting all relevant spawn rates
-function set_hazard_level()
-    if difficulty == 1 then
-        obstacle_spawn_rate = .04;
-        resource_spawn_rate = .05;
-
-        creature_spawn_rate = .06;
-        creature_spawn_ratios = {
-            8, -- loot bug
-            0, -- cave angel
-            8, -- grunt
-            0, -- slasher
-            0, -- mactera
-            1, -- praetorian
-        };
-        resource_spawn_ratios = {
-            1, -- red_sugar
-            0, -- nitra
-            1, -- gold
-        };
-
-    elseif difficulty == 2 then
-        obstacle_spawn_rate = .2;
-        resource_spawn_rate = .01;
-
-        creature_spawn_rate = .04;
-        creature_spawn_ratios = {
-            3, -- loot bug
-            1, -- cave angel
-            12, -- grunt
-            1, -- slasher
-            0, -- mactera
-            1, -- praetorian
-        };
-        resource_spawn_ratios = {
-            1, -- red_sugar
-            1, -- nitra
-            1, -- gold
-        };
-
-    elseif difficulty == 3 then
-        obstacle_spawn_rate = .2;
-        resource_spawn_rate = .01;
-
-        creature_spawn_rate = .06;
-        creature_spawn_ratios = {
-            3, -- loot bug
-            1, -- cave angel
-            10, -- grunt
-            2, -- slasher
-            1, -- mactera
-            1, -- praetorian
-        };
-        resource_spawn_ratios = {
-            1, -- red_sugar
-            1, -- nitra
-            1, -- gold
-        };
-
-    elseif difficulty == 4 then
-        obstacle_spawn_rate = .2;
-        resource_spawn_rate = .01;
-
-        creature_spawn_rate = .06;
-        creature_spawn_ratios = {
-            3, -- loot bug
-            .3, -- cave angel
-            10, -- grunt
-            2, -- slasher
-            1, -- mactera
-            1, -- praetorian
-        };
-        resource_spawn_ratios = {
-            1, -- red_sugar
-            1, -- nitra
-            1, -- gold
-        }
-
-    elseif difficulty == 5 then
-        obstacle_spawn_rate = .2;
-        resource_spawn_rate = .01;
-
-        creature_spawn_rate = .06;
-        creature_spawn_ratios = {
-            .5, -- loot bug
-            .3, -- cave angel
-            10, -- grunt
-            3, -- slasher
-            3, -- mactera
-            2, -- praetorian
-        };
-        resource_spawn_ratios = {
-            0, -- red_sugar
-            1, -- nitra
-            0, -- gold
-        };
-    end
-    obstacle_spawn_ratios = {
-        15, -- small
-        1, -- big
-    };
-    creature_spawn_probs = get_cum_probs(creature_spawn_ratios);
-    obstacle_spawn_probs = get_cum_probs(obstacle_spawn_ratios);
-    resource_spawn_probs = get_cum_probs(resource_spawn_ratios);
-end
+-- -- takes care of setting all relevant spawn rates
+-- function set_hazard_level()
+--     if difficulty == 1 then
+--         obstacle_spawn_rate = .04;
+--         resource_spawn_rate = .05;
+--
+--         creature_spawn_rate = .06;
+--         creature_spawn_ratios = {
+--             8, -- loot bug
+--             0, -- cave angel
+--             8, -- grunt
+--             0, -- slasher
+--             0, -- mactera
+--             1, -- praetorian
+--         };
+--         resource_spawn_ratios = {
+--             1, -- red_sugar
+--             0, -- nitra
+--             1, -- gold
+--         };
+--
+--     elseif difficulty == 2 then
+--         obstacle_spawn_rate = .2;
+--         resource_spawn_rate = .01;
+--
+--         creature_spawn_rate = .04;
+--         creature_spawn_ratios = {
+--             3, -- loot bug
+--             1, -- cave angel
+--             12, -- grunt
+--             1, -- slasher
+--             0, -- mactera
+--             1, -- praetorian
+--         };
+--         resource_spawn_ratios = {
+--             1, -- red_sugar
+--             1, -- nitra
+--             1, -- gold
+--         };
+--
+--     elseif difficulty == 3 then
+--         obstacle_spawn_rate = .2;
+--         resource_spawn_rate = .01;
+--
+--         creature_spawn_rate = .06;
+--         creature_spawn_ratios = {
+--             3, -- loot bug
+--             1, -- cave angel
+--             10, -- grunt
+--             2, -- slasher
+--             1, -- mactera
+--             1, -- praetorian
+--         };
+--         resource_spawn_ratios = {
+--             1, -- red_sugar
+--             1, -- nitra
+--             1, -- gold
+--         };
+--
+--     elseif difficulty == 4 then
+--         obstacle_spawn_rate = .2;
+--         resource_spawn_rate = .01;
+--
+--         creature_spawn_rate = .06;
+--         creature_spawn_ratios = {
+--             3, -- loot bug
+--             .3, -- cave angel
+--             10, -- grunt
+--             2, -- slasher
+--             1, -- mactera
+--             1, -- praetorian
+--         };
+--         resource_spawn_ratios = {
+--             1, -- red_sugar
+--             1, -- nitra
+--             1, -- gold
+--         }
+--
+--     elseif difficulty == 5 then
+--         obstacle_spawn_rate = .2;
+--         resource_spawn_rate = .01;
+--
+--         creature_spawn_rate = .06;
+--         creature_spawn_ratios = {
+--             .5, -- loot bug
+--             .3, -- cave angel
+--             10, -- grunt
+--             3, -- slasher
+--             3, -- mactera
+--             2, -- praetorian
+--         };
+--         resource_spawn_ratios = {
+--             0, -- red_sugar
+--             1, -- nitra
+--             0, -- gold
+--         };
+--     end
+--     obstacle_spawn_ratios = {
+--         15, -- small
+--         1, -- big
+--     };
+--     creature_spawn_probs = get_cum_probs(creature_spawn_ratios);
+--     obstacle_spawn_probs = get_cum_probs(obstacle_spawn_ratios);
+--     resource_spawn_probs = get_cum_probs(resource_spawn_ratios);
+-- end
 
 function update_game()
     game_time += 1;

@@ -17,9 +17,9 @@ function new_title_screen()
         -- add(creatures, slasher(190, 120))
         -- add(creatures, praetorian(200, 120))
         -- add(creatures, mactera(218, 120))
-        obstacles.add({sprite=101,x_coord=200,y_coord=160,
+        map.add_obstacle({sprite=101,x_coord=200,y_coord=160,
             size=2,x_flip=false,y_flip=false})
-        obstacles.add({sprite=84,x_coord=200,y_coord=155,
+        map.add_obstacle({sprite=84,x_coord=200,y_coord=155,
             size=1,x_flip=false,y_flip=true})
     end
 
@@ -30,7 +30,7 @@ function new_title_screen()
         spr(227,x0+16,y0,2,2)
         spr(229,x0,y0,2,2)
 
-        obstacles.add({
+        map.add_obstacle({
             sprite=229,
             x=x0+16,
             y=y0,
