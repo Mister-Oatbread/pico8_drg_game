@@ -70,7 +70,8 @@ function new_map()
 
     local function spawn_obstacle(x,y)
         local sprite,sprites,size
-        if rnd()<obstacle_spawn_probs[1] then
+        local decision=choose_from_cum_prob(game_logic.obstacle_ratios())
+        if decision=="small" then
             sprites={68,69,70,71,84,85,86,87,100,101,116,117}
             size=1
         else

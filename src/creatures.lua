@@ -22,28 +22,13 @@ function new_creatures()
     -- handles spawning a creature with correspondig percentages, and
     -- adds it to creatures list
     local function spawn_creature()
+        local creature_ratios = game_logic.creature_ratios()
         local creature
         local x=sample_one(102,118)
         local y=81
-        local decision=rnd()
-        if decision<creature_spawn_probs[1] then
-            if rnd(1000)<1 then
-                creature=egg(x,y)
-            else
-                creature=loot_bug(x,y)
-            end
-        elseif decision<creature_spawn_probs[2] then
-            creature=cave_angel(x,y)
-        elseif decision<creature_spawn_probs[3] then
-            creature=grunt(x,y)
-        elseif decision<creature_spawn_probs[4] then
-            creature=slasher(x,y)
-        elseif decision<creature_spawn_probs[5] then
-            creature=mactera(x,y)
-        else
-            creature=praetorian(x,y)
-        end
-        creatures.add(creature)
+
+        local creature=choose_from_cum_prob(game_logic.creature_ratios())
+        creatures.add(creature(x,y))
     end
 
     local function update()

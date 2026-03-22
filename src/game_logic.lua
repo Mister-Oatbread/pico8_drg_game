@@ -6,21 +6,21 @@ function new_game_logic()
 
     local function set_difficulty(difficulty)
         creature_ratios={
-            2, -- loot bug
-            1, -- cave angel
-            10, -- grunt
-            1, -- praetorian
-            2, -- slasher
-            1, -- mactera
+            {2,loot_bug},
+            {1,cave_angel},
+            {10,grunt},
+            {1,praetorian},
+            {2,slasher},
+            {1,mactera},
         }
         resource_ratios={
-            1, -- gold
-            1, -- nitra
-            1, -- red_sugar
+            {1,"gold"},
+            {1,"nitra"},
+            {1,"red_sugar"},
         }
         obstacle_ratios={
-            15, -- small
-            1, -- big
+            {15,"small"},
+            {1,"big"},
         }
         creature_variety=6
         resource_variety=3
@@ -50,9 +50,9 @@ function new_game_logic()
             creature_spawn_rate=.06
             resource_variety=2
         end
-        get_cum_sum(creature_ratios,creature_variety)
-        get_cum_sum(obstacle_ratios,obstacle_variety)
-        get_cum_sum(resource_ratios,resource_variety)
+        creature_ratios=get_cum_sum(creature_ratios,creature_variety)
+        obstacle_ratios=get_cum_sum(obstacle_ratios,obstacle_variety)
+        resource_ratios=get_cum_sum(resource_ratios,resource_variety)
     end
 
     local function mine_resources()
@@ -97,9 +97,16 @@ function new_game_logic()
         end
     end
 
+    local function obstacle_ratios_f() return obstacle_ratios end
+    local function resource_ratios_f() return resource_ratios end
+    local function creature_ratios_f() return creature_ratios end
+
     return {
         update=update,
         set_difficulty=set_difficulty,
+        obstacle_ratios=obstacle_ratios_f,
+        resource_ratios=resource_ratios_f,
+        creature_ratios=creature_ratios_f,
     }
 end
 

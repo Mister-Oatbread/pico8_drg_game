@@ -4,8 +4,7 @@ function cave_angel(x,y)
     local frame=1
     local x=x
     local y=y
-    local damaged_since=0
-    local was_damaged=false
+    local damaged_since=60
     local x_flip=rnd(2)<1
     local health=20
     local alive=true
@@ -20,14 +19,13 @@ function cave_angel(x,y)
             if frame%10==0 then y+=1 end
         end
         wings_open=frame>45
-        was_damaged, damaged_since = handle_creature_being_damaged(
-            was_damaged, damaged_since)
+        damaged_since+=1
         frame=frame%60+1
     end
 
     local function damage(damage_received)
         sfx(33)
-        was_damaged=true
+        damaged_since=0
         health-=damage_received
         if health<=0 then
             alive=false
@@ -37,7 +35,7 @@ function cave_angel(x,y)
 
     local function draw()
         local sprite=11
-        if was_damaged then sprite+=2 end
+        if damaged_since<15 then sprite+=2 end
         if not wings_open then sprite+=1 end
         spr(sprite,x,y,1,1,x_flip,false)
     end

@@ -251,28 +251,12 @@ for x=106,220,9 do
 creatures.add(bottom_grunt(x,222))
 end
 local function spawn_creature()
+local creature_ratios = game_logic.creature_ratios()
 local creature
 local x=sample_one(102,118)
 local y=81
-local decision=rnd()
-if decision<creature_spawn_probs[1] then
-if rnd(1000)<1 then
-creature=egg(x,y)
-else
-creature=loot_bug(x,y)
-end
-elseif decision<creature_spawn_probs[2] then
-creature=cave_angel(x,y)
-elseif decision<creature_spawn_probs[3] then
-creature=grunt(x,y)
-elseif decision<creature_spawn_probs[4] then
-creature=slasher(x,y)
-elseif decision<creature_spawn_probs[5] then
-creature=mactera(x,y)
-else
-creature=praetorian(x,y)
-end
-creatures.add(creature)
+local creature=choose_from_cum_prob(game_logic.creature_ratios())
+creatures.add(creature(x,y))
 end
 local function update()
 local creature
@@ -559,21 +543,21 @@ function new_game_logic()
 local obstacle_ratios,resource_ratios,creature_ratios
 local function set_difficulty(difficulty)
 creature_ratios={
-2, 
-1, 
-10, 
-1, 
-2, 
-1, 
+{2,loot_bug},
+{1,cave_angel},
+{10,grunt},
+{1,praetorian},
+{2,slasher},
+{1,mactera},
 }
 resource_ratios={
-1, 
-1, 
-1, 
+{1,"gold"},
+{1,"nitra"},
+{1,"red_sugar"},
 }
 obstacle_ratios={
-15, 
-1, 
+{15,"small"},
+{1,"big"},
 }
 creature_variety=6
 resource_variety=3
@@ -603,9 +587,9 @@ resource_spawn_rate=.01
 creature_spawn_rate=.06
 resource_variety=2
 end
-get_cum_sum(creature_ratios,creature_variety)
-get_cum_sum(obstacle_ratios,obstacle_variety)
-get_cum_sum(resource_ratios,resource_variety)
+creature_ratios=get_cum_sum(creature_ratios,creature_variety)
+obstacle_ratios=get_cum_sum(obstacle_ratios,obstacle_variety)
+resource_ratios=get_cum_sum(resource_ratios,resource_variety)
 end
 local function mine_resources()
 local resource,colliding,drilling_1,drilling_2,res_hitbox
@@ -646,9 +630,15 @@ if rnd()<resource_spawn_rate then
 resources.spawn(sample_one(102,118),81)
 end
 end
+local function obstacle_ratios_f() return obstacle_ratios end
+local function resource_ratios_f() return resource_ratios end
+local function creature_ratios_f() return creature_ratios end
 return {
 update=update,
 set_difficulty=set_difficulty,
+obstacle_ratios=obstacle_ratios_f,
+resource_ratios=resource_ratios_f,
+creature_ratios=creature_ratios_f,
 }
 end
 function initialize_game()
@@ -896,7 +886,8 @@ drilled_ground.add({sprite=sprite,x=x,y=y})
 end
 local function spawn_obstacle(x,y)
 local sprite,sprites,size
-if rnd()<obstacle_spawn_probs[1] then
+local decision=choose_from_cum_prob(game_logic.obstacle_ratios())
+if decision=="small" then
 sprites={68,69,70,71,84,85,86,87,100,101,116,117}
 size=1
 else
@@ -1650,19 +1641,16 @@ function new_resources()
 local list=new_entity_container()
 local function spawn_resource(x,y)
 local sprite,sprites,hitbox,res_type,start_sprite
-local decision=rnd()
-if decision<resource_spawn_probs[1] then
+local res_type=choose_from_cum_prob(game_logic.resource_ratios())
+if res_type=="red_sugar" then
 start_sprite=136
 hitbox={x={3,6},y={3,6}}
-res_type="red_sugar"
-elseif decision<resource_spawn_probs[2] then
+elseif res_type=="nitra" then
 start_sprite=152
 hitbox={x={1,8},y={1,8}}
-res_type="nitra"
 else
 start_sprite=168
 hitbox={x={1,8},y={1,8}}
-res_type="gold"
 end
 sprite=start_sprite+flr(rnd(4))
 return {
@@ -1766,12 +1754,26 @@ end
 function coinflip() return rnd(2)<1 end
 function sample_one(first,last) return first+flr(rnd(last+1)) end
 function choose_one(list) return list[flr(rnd(#list))+1] end
+function choose_from_cum_prob(ratios)
+local decision=rnd(ratios.cum_sum)
+for i=1,ratios.variety do
+if decision<ratios.ratios[i][1] then
+decision-=ratios.ratios[i][1]
+else
+return ratios.ratios[i][2]
+end
+end
+end
 function get_cum_sum(ratios,variety)
 local sum=0
 for i=1,variety do
-sum+=ratios[i]
+sum+=ratios[i][1]
 end
-ratios[0]=sum
+local new_ratios={}
+new_ratios.ratios=ratios
+new_ratios.cum_sum=sum
+new_ratios.variety=variety
+return new_ratios
 end
 function remove_bottom_entities(container,y_getter)
 local entity

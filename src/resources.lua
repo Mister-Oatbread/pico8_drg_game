@@ -6,24 +6,19 @@ function new_resources()
 
     local function spawn_resource(x,y)
         local sprite,sprites,hitbox,res_type,start_sprite
-        local decision=rnd()
-        if decision<resource_spawn_probs[1] then
-            -- red sugar
+        local res_type=choose_from_cum_prob(game_logic.resource_ratios())
+        if res_type=="red_sugar" then
             start_sprite=136
             hitbox={x={3,6},y={3,6}}
-            res_type="red_sugar"
-        elseif decision<resource_spawn_probs[2] then
-            -- nitra
+        elseif res_type=="nitra" then
             start_sprite=152
             hitbox={x={1,8},y={1,8}}
-            res_type="nitra"
         else
-            -- gold
             start_sprite=168
             hitbox={x={1,8},y={1,8}}
-            res_type="gold"
         end
         sprite=start_sprite+flr(rnd(4))
+
         return {
             sprite=sprite,
             x=x,

@@ -15,18 +15,38 @@ function sample_one(first,last) return first+flr(rnd(last+1)) end
 
 function choose_one(list) return list[flr(rnd(#list))+1] end
 
+-- returns one index based on ratios of ratios table
+function choose_from_cum_prob(ratios)
+    -- take value at slot 0, which should contain the cum sum of the entire
+    -- ratios table
+    local decision=rnd(ratios.cum_sum)
+
+    -- compare until ratios is small enough, then return corresponding entry
+    for i=1,ratios.variety do
+        if decision<ratios.ratios[i][1] then
+            decision-=ratios.ratios[i][1]
+        else
+            return ratios.ratios[i][2]
+        end
+    end
+end
+
 -- -- TODO: check if you can generalize this to house most of the update loops
 -- function iterate(list,update_command)
 --     return false
 -- end
 
--- returns sum over all numerical values of table
+-- takes ratios value and
 function get_cum_sum(ratios,variety)
     local sum=0
     for i=1,variety do
-        sum+=ratios[i]
+        sum+=ratios[i][1]
     end
-    ratios[0]=sum
+    local new_ratios={}
+    new_ratios.ratios=ratios
+    new_ratios.cum_sum=sum
+    new_ratios.variety=variety
+    return new_ratios
 end
 
 -- -- calculate cumulative probability based on ratios up to variety
