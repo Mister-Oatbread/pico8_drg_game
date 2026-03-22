@@ -4,7 +4,7 @@
 function new_resources()
     local list=new_entity_container()
 
-    local function create(x,y)
+    local function spawn_resource(x,y)
         local sprite,sprites,hitbox,res_type,start_sprite
         local decision=rnd()
         if decision<resource_spawn_probs[1] then
@@ -41,9 +41,6 @@ function new_resources()
             if list.get(i).y>=230 then
                 list.deletei(i)
             end
-        end
-        if (rnd()<resource_spawn_rate) then
-            list.add(create(flr(rnd(120))+101,81))
         end
     end
 
@@ -97,6 +94,7 @@ function new_resources()
         draw=draw,
         get_hitbox=get_hitbox,
         get_resources=list_f,
+        spawn_resource=spawn_resource,
     }
 end
 

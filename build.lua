@@ -246,13 +246,13 @@ end
 return was_damaged, damaged_since
 end
 function new_creatures()
-creatures = new_entity_container()
+local creatures=new_entity_container()
 for x=106,220,9 do
 creatures.add(bottom_grunt(x,222))
 end
 local function spawn_creature()
 local creature
-local x=flr(rnd(120))+101
+local x=sample_one(102,118)
 local y=81
 local decision=rnd()
 if decision<creature_spawn_probs[1] then
@@ -277,15 +277,13 @@ end
 local function update()
 local creature
 for i=creatures.size(),1,-1 do
-creature=creatures.get(i).update()
+creature=creatures.get(i)
+creature.update()
 if creature.y()>=240 then
 creatures.delete(creature)
 elseif not creature.is_alive() then
 creatures.delete(creature)
 end
-end
-if rnd()<creature_spawn_rate then
-spawn_creature()
 end
 end
 local function draw()
@@ -301,6 +299,7 @@ local y2=hitbox.y[2]+y()-1;
 return {x={x1,x2},y={y1,y2}};
 end
 return {
+spawn=spawn_creature,
 update=update,
 draw=draw,
 get_hitbox=get_hitbox,
@@ -637,6 +636,15 @@ end
 end
 local function update()
 mine_resources()
+if rnd()<creature_spawn_rate then
+creatures.spawn()
+end
+if rnd()<obstacle_spawn_rate then
+map.spawn_obstacle(sample_one(100,120),81)
+end
+if rnd()<resource_spawn_rate then
+resources.spawn(sample_one(102,118),81)
+end
 end
 return {
 update=update,
@@ -798,32 +806,22 @@ map=new_map()
 hud=new_hud()
 title_screen=new_title_screen()
 game_logic=new_game_logic()
+creatures=new_creatures()
 performance_monitor=new_performance_monitor()
 end
 function _update()
 difficulty=2
+game_logic.set_difficulty(2)
 coop=true
 points=0
-resource_spawn_rate=.01
-game_status="title_screen"
-resource_spawn_ratios={
-1, 
-1, 
-1, 
-}
-obstacle_spawn_rate=.2
-obstacle_spawn_ratios={
-15, 
-1, 
-}
-obstacle_spawn_probs=get_cum_probs(obstacle_spawn_ratios)
-resource_spawn_probs=get_cum_probs(resource_spawn_ratios)
+game_status="playing"
 performance_monitor.reset_cpu_load()
 projectiles.update()
 resources.update()
 map.update()
 player_1.update()
 if coop then player_2.update() end
+creatures.update()
 game_logic.update()
 performance_monitor.register_load()
 end
@@ -835,6 +833,7 @@ map.draw_wall()
 map.draw_obstacles()
 map.draw_drilled_ground()
 resources.draw()
+creatures.draw()
 projectiles.draw()
 if coop then player_2.draw() end
 player_1.draw()
@@ -941,9 +940,6 @@ if obstacles.get(i).y>=230 then
 obstacles.deletei(i)
 end
 end
-if rnd()<obstacle_spawn_rate then
-obstacles.add(spawn_obstacle(flr(rnd(120))+101,81))
-end
 for i=vines.size(),1,-1 do
 vines.get(i).y+=1
 if vines.get(i).y>=230 then
@@ -1028,6 +1024,7 @@ draw_obstacles=draw_obstacles,
 draw_vines=draw_vines,
 spawn_drilled_ground=spawn_drilled_ground,
 add_obstacle=obstacles.add,
+spawn_obstacle=spawn_obstacle,
 }
 end
 function new_performance_monitor()
@@ -1651,7 +1648,7 @@ end
 end
 function new_resources()
 local list=new_entity_container()
-local function create(x,y)
+local function spawn_resource(x,y)
 local sprite,sprites,hitbox,res_type,start_sprite
 local decision=rnd()
 if decision<resource_spawn_probs[1] then
@@ -1684,9 +1681,6 @@ list.get(i).y+=1
 if list.get(i).y>=230 then
 list.deletei(i)
 end
-end
-if (rnd()<resource_spawn_rate) then
-list.add(create(flr(rnd(120))+101,81))
 end
 end
 local function mine(hitbox_drills)
@@ -1733,6 +1727,7 @@ update=update,
 draw=draw,
 get_hitbox=get_hitbox,
 get_resources=list_f,
+spawn_resource=spawn_resource,
 }
 end
 function new_title_screen()
@@ -1769,6 +1764,7 @@ local y_good = a.y[1]>b.y[2] or a.y[2]<b.y[1]
 return not(x_good or y_good)
 end
 function coinflip() return rnd(2)<1 end
+function sample_one(first,last) return first+flr(rnd(last+1)) end
 function choose_one(list) return list[flr(rnd(#list))+1] end
 function get_cum_sum(ratios,variety)
 local sum=0

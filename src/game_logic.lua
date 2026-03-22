@@ -85,6 +85,16 @@ function new_game_logic()
 
     local function update()
         mine_resources()
+
+        if rnd()<creature_spawn_rate then
+            creatures.spawn()
+        end
+        if rnd()<obstacle_spawn_rate then
+            map.spawn_obstacle(sample_one(100,120),81)
+        end
+        if rnd()<resource_spawn_rate then
+            resources.spawn(sample_one(102,118),81)
+        end
     end
 
     return {

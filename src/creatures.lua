@@ -13,7 +13,7 @@ function handle_creature_being_damaged(was_damaged, damaged_since)
 end
 
 function new_creatures()
-    creatures = new_entity_container()
+    local creatures=new_entity_container()
     -- add bottom grunts to the creatures.
     for x=106,220,9 do
         creatures.add(bottom_grunt(x,222))
@@ -23,7 +23,7 @@ function new_creatures()
     -- adds it to creatures list
     local function spawn_creature()
         local creature
-        local x=flr(rnd(120))+101
+        local x=sample_one(102,118)
         local y=81
         local decision=rnd()
         if decision<creature_spawn_probs[1] then
@@ -49,15 +49,13 @@ function new_creatures()
     local function update()
         local creature
         for i=creatures.size(),1,-1 do
-            creature=creatures.get(i).update()
+            creature=creatures.get(i)
+            creature.update()
             if creature.y()>=240 then
                 creatures.delete(creature)
             elseif not creature.is_alive() then
                 creatures.delete(creature)
             end
-        end
-        if rnd()<creature_spawn_rate then
-            spawn_creature()
         end
     end
 
@@ -78,6 +76,7 @@ function new_creatures()
     end
 
     return {
+        spawn=spawn_creature,
         update=update,
         draw=draw,
         get_hitbox=get_hitbox,

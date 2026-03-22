@@ -10,6 +10,7 @@ function _init()
 
     title_screen=new_title_screen()
     game_logic=new_game_logic()
+    creatures=new_creatures()
 
     performance_monitor=new_performance_monitor()
 end
@@ -17,25 +18,10 @@ end
 function _update()
     -- hacky stuff start
     difficulty=2
+    game_logic.set_difficulty(2)
     coop=true
     points=0
-    resource_spawn_rate=.01
-    game_status="title_screen"
-    resource_spawn_ratios={
-        1, -- red_sugar
-        1, -- nitra
-
-    -- activate secondary palette
-        1, -- gold
-    }
-    obstacle_spawn_rate=.2
-    obstacle_spawn_ratios={
-        15, -- small
-        1, -- big
-    }
-
-    obstacle_spawn_probs=get_cum_probs(obstacle_spawn_ratios)
-    resource_spawn_probs=get_cum_probs(resource_spawn_ratios)
+    game_status="playing"
     -- hacky stuff end
 
     performance_monitor.reset_cpu_load()
@@ -45,6 +31,7 @@ function _update()
     player_1.update()
     if coop then player_2.update() end
 
+    creatures.update()
     game_logic.update()
 
     performance_monitor.register_load()
@@ -58,6 +45,7 @@ function _draw()
     map.draw_obstacles()
     map.draw_drilled_ground()
     resources.draw()
+    creatures.draw()
     projectiles.draw()
     if coop then player_2.draw() end
     player_1.draw()

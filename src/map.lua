@@ -122,9 +122,6 @@ function new_map()
                     obstacles.deletei(i)
                 end
             end
-            if rnd()<obstacle_spawn_rate then
-                obstacles.add(spawn_obstacle(flr(rnd(120))+101,81))
-            end
             for i=vines.size(),1,-1 do
                 vines.get(i).y+=1
                 if vines.get(i).y>=230 then
@@ -216,6 +213,7 @@ function new_map()
         draw_vines=draw_vines,
         spawn_drilled_ground=spawn_drilled_ground,
         add_obstacle=obstacles.add,
+        spawn_obstacle=spawn_obstacle,
     }
 end
 
