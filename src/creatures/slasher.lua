@@ -4,9 +4,7 @@ function slasher(x,y)
     local frame=1
     local x=x
     local y=y
-    local damaged_since=0
-    local x_flip=false
-    local was_damaged=false
+    local damaged_since=60
     local health=50
     local alive=true
     local creature_damage=2
@@ -17,10 +15,8 @@ function slasher(x,y)
             y+=1
             if frame%4==0 then y+=1 end
         end
-        x_flip=frame>12
-        was_damaged,damaged_since=handle_creature_being_damaged(
-            was_damaged,damaged_since)
-        frame=frame%24+1
+        damaged_since+=1
+        frame=frame%8+1
     end
 
     local function damage(damage_received)
@@ -35,7 +31,8 @@ function slasher(x,y)
 
     local function draw()
         local sprite=17
-        if was_damaged then sprite+=1 end
+        local x_flip=frame%4==0
+        if damaged_since<15 then sprite+=1 end
         spr(sprite,x,y,1,1,x_flip,false)
     end
 

@@ -4,9 +4,7 @@ function praetorian(x,y)
     local frame=1
     local x=x
     local y=y
-    local damaged_since=0
-    local x_flip=false
-    local was_damaged=false
+    local damaged_since=60
     local health=80
     local alive=true
     local creature_damage=1
@@ -20,10 +18,9 @@ function praetorian(x,y)
             if not spitting and frame%20==0 then y+=1 end
         end
         if not spitting then x_flip=frame>20 end
-        was_damaged,damaged_since=handle_creature_being_damaged(
-            was_damaged,damaged_since)
+        damaged_since+=1
         frame=frame%40+1
-        if abs(x-player.x()-4)<20 and player.y()-y<20 then
+        if abs(x-player_1.x()-4)<20 and player_1.y()-y<20 then
             if not spitting then
                 add_spit("praet_spit",x,y+16)
                 spitting=true
@@ -45,7 +42,8 @@ function praetorian(x,y)
 
     local function draw()
         local sprite=3
-        if was_damaged then sprite+=2 end
+        local x_flip=frame%20==0
+        if damaged_since<15 then sprite+=2 end
         spr(sprite,x,y,2,2,x_flip,false)
     end
 

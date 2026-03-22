@@ -4,8 +4,7 @@ function mactera(x,y)
     local frame=1
     local x=x
     local y=y
-    local damaged_since=0
-    local was_damaged=false
+    local damaged_since=60
     local wings_open=false
     local health=20
     local alive=true
@@ -13,6 +12,8 @@ function mactera(x,y)
     local perform_spit=false
     local creature_damage=0
     local hitbox={x={2,7},y={1,7}}
+
+    -- TODO: rework this bozo
 
     local function update()
         if game_status=="playing" then
@@ -33,15 +34,14 @@ function mactera(x,y)
             end
             if frame%2==0 and not did_spit then x-=sgn(x-player.x_pos) end
         end
-        was_damaged,damaged_since=handle_creature_being_damaged(
-            was_damaged,damaged_since)
+        damaged_since+=1
         wings_open=frame>8
         frame=frame%16+1
     end
 
     local function damage(damage_received)
         sfx(33)
-        was_damaged=true
+        damaged_since=0
         health-=damage_received
         if health<=0 then
             alive=false
@@ -53,7 +53,7 @@ function mactera(x,y)
     local function draw()
         local sprite=27
         if wings_open then sprite+=1 end
-        if was_damaged then sprite+=2 end
+        if damaged_since<15 then sprite+=2 end
         spr(sprite,x,y)
     end
 

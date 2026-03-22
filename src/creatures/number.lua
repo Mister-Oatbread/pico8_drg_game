@@ -2,11 +2,11 @@
 
 function number(x,y,value)
     local value=value
-    local x = x
-    local y = y
-    local health = 1
-    local alive = true
-    local creature_damage = 0
+    local x=x
+    local y=y
+    local health=1
+    local alive=true
+    local creature_damage=0
     local hitbox={x={3,7},y={1,8}}
 
     local function update()

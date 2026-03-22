@@ -24,9 +24,9 @@ function choose_from_cum_prob(ratios)
     -- compare until ratios is small enough, then return corresponding entry
     for i=1,ratios.variety do
         if decision<ratios.ratios[i][1] then
-            decision-=ratios.ratios[i][1]
-        else
             return ratios.ratios[i][2]
+        else
+            decision-=ratios.ratios[i][1]
         end
     end
 end
@@ -46,6 +46,7 @@ function get_cum_sum(ratios,variety)
     new_ratios.ratios=ratios
     new_ratios.cum_sum=sum
     new_ratios.variety=variety
+    print(new_ratios)
     return new_ratios
 end
 

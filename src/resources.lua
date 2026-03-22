@@ -89,7 +89,7 @@ function new_resources()
         draw=draw,
         get_hitbox=get_hitbox,
         get_resources=list_f,
-        spawn_resource=spawn_resource,
+        spawn=spawn_resource,
     }
 end
 

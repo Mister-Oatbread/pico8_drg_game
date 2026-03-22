@@ -4,9 +4,7 @@ function loot_bug(x,y)
     local frame=1
     local x=x
     local y=y
-    local damaged_since=0
-    local was_damaged=false
-    local x_flip=false
+    local damaged_since=60
     local health=30
     local alive=true
     local creature_damage=0
@@ -15,17 +13,15 @@ function loot_bug(x,y)
     local function update()
         if game_status=="playing" then
             y+=1
-            if frame%27==26 then y+=1 end
+            if frame%30==0 then y+=1 end
         end
-        x_flip=frame>15
-        was_damaged,damaged_since=handle_creature_being_damaged(
-            was_damaged,damaged_since)
+        damaged_since+=1
         frame=frame%30+1
     end
 
     local function damage(damage_received)
         sfx(33)
-        was_damaged=true
+        damaged_since=0
         health-=damage_received
         if health<=0 then
             alive=false
@@ -37,7 +33,8 @@ function loot_bug(x,y)
 
     local function draw()
         local sprite=44
-        if was_damaged then sprite+=1 end
+        local x_flip=frame>30
+        if damaged_since<15 then sprite+=1 end
         spr(sprite,x,y,1,1,x_flip,false)
     end
 

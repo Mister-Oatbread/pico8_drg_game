@@ -38,8 +38,7 @@ function cave_angel(x,y)
 local frame=1
 local x=x
 local y=y
-local damaged_since=0
-local was_damaged=false
+local damaged_since=60
 local x_flip=rnd(2)<1
 local health=20
 local alive=true
@@ -50,16 +49,15 @@ local function update()
 if game_status=="playing" then
 y+=1
 if frame%45==0 then x+=sgn(x-player.x) end
-if frame%10==0 then y+=1 end
+if frame%15==0 then y+=1 end
 end
 wings_open=frame>45
-was_damaged, damaged_since = handle_creature_being_damaged(
-was_damaged, damaged_since)
+damaged_since+=1
 frame=frame%60+1
 end
 local function damage(damage_received)
 sfx(33)
-was_damaged=true
+damaged_since=0
 health-=damage_received
 if health<=0 then
 alive=false
@@ -68,7 +66,7 @@ end
 end
 local function draw()
 local sprite=11
-if was_damaged then sprite+=2 end
+if damaged_since<15 then sprite+=2 end
 if not wings_open then sprite+=1 end
 spr(sprite,x,y,1,1,x_flip,false)
 end
@@ -88,8 +86,7 @@ is_alive=is_alive,
 end
 function egg(x,y)
 local frame=1
-local damaged_since=0
-local was_damaged=false
+local damaged_since=60
 local x=x
 local y=y
 local display_alt=false
@@ -100,15 +97,14 @@ local hitbox={x={2,7},y={1,8}}
 local function update()
 y+=1
 if frame%5==0 then y-=1 end
-display_alt=frame>10
-was_damaged,damaged_since=handle_creature_being_damaged(
-was_damaged,damaged_since)
-frame = frame%20+1
+display_alt=frame>5
+damaged_since+=1
+frame=frame%10+1
 end
 local function damage(damage_received)
 sfx(32)
-was_damaged=true
 health-=damage_received
+damaged_since=0
 if health<=0 then
 give_ammo(.5)
 give_health(1)
@@ -120,8 +116,8 @@ end
 local function draw()
 local sprite=58
 if display_alt then sprite+=1 end
-if was_damaged then sprite+=2 end
-spr(sprite,x,y)
+if damaged_since<15 then sprite+=2 end
+spr(sprite,x,y,1,1,display_alt,false)
 end
 local function x_f() return x end
 local function y_f() return y end
@@ -141,9 +137,7 @@ function grunt(x,y)
 local frame=1
 local x=x
 local y=y
-local damaged_since=0
-local display_alt=false
-local was_damaged=false
+local damaged_since=60
 local health=40
 local alive=true
 local creature_damage=1
@@ -153,15 +147,14 @@ if game_status=="playing" then
 y+=1
 if frame%6==0 then y+=1 end
 end
-x_flip=frame>15
-was_damaged,damaged_since=handle_creature_being_damaged(
-was_damaged, damaged_since)
-frame=(frame+1)%30
+damaged_since+=1
+frame=frame%12+1
 end
 local function damage(damage_received)
 sfx(33)
-was_damaged=true
+damaged_since=0
 health-=damage_received
+x_flip=frame>6
 if health<=0 then
 alive=false
 player.points+=10
@@ -169,7 +162,8 @@ end
 end
 local function draw()
 local sprite=1
-if was_damaged then sprite+=1 end
+if damaged_since<15 then sprite+=1 end
+local x_flip=frame>6
 spr(sprite,x,y,1,1,x_flip,false)
 end
 local function x_f() return x end
@@ -190,9 +184,7 @@ function loot_bug(x,y)
 local frame=1
 local x=x
 local y=y
-local damaged_since=0
-local was_damaged=false
-local x_flip=false
+local damaged_since=60
 local health=30
 local alive=true
 local creature_damage=0
@@ -200,16 +192,14 @@ local hitbox={x={2,7},y={1,7}}
 local function update()
 if game_status=="playing" then
 y+=1
-if frame%27==26 then y+=1 end
+if frame%30==0 then y+=1 end
 end
-x_flip=frame>15
-was_damaged,damaged_since=handle_creature_being_damaged(
-was_damaged,damaged_since)
+damaged_since+=1
 frame=frame%30+1
 end
 local function damage(damage_received)
 sfx(33)
-was_damaged=true
+damaged_since=0
 health-=damage_received
 if health<=0 then
 alive=false
@@ -220,7 +210,8 @@ end
 end
 local function draw()
 local sprite=44
-if was_damaged then sprite+=1 end
+local x_flip=frame>30
+if damaged_since<15 then sprite+=1 end
 spr(sprite,x,y,1,1,x_flip,false)
 end
 local function x_f() return x end
@@ -237,21 +228,13 @@ hitbox=hitbox,
 is_alive=is_alive,
 }
 end
-function handle_creature_being_damaged(was_damaged, damaged_since)
-damaged_since += 1
-if damaged_since > damaged_sprite_duration then
-was_damaged = false
-damaged_since = 0
-end
-return was_damaged, damaged_since
-end
 function new_creatures()
 local creatures=new_entity_container()
 for x=106,220,9 do
 creatures.add(bottom_grunt(x,222))
 end
 local function spawn_creature()
-local creature_ratios = game_logic.creature_ratios()
+local creature_ratios=game_logic.creature_ratios()
 local creature
 local x=sample_one(102,118)
 local y=81
@@ -294,8 +277,7 @@ function mactera(x,y)
 local frame=1
 local x=x
 local y=y
-local damaged_since=0
-local was_damaged=false
+local damaged_since=60
 local wings_open=false
 local health=20
 local alive=true
@@ -322,14 +304,13 @@ if frame%2==0 then y+=1 end
 end
 if frame%2==0 and not did_spit then x-=sgn(x-player.x_pos) end
 end
-was_damaged,damaged_since=handle_creature_being_damaged(
-was_damaged,damaged_since)
+damaged_since+=1
 wings_open=frame>8
 frame=frame%16+1
 end
 local function damage(damage_received)
 sfx(33)
-was_damaged=true
+damaged_since=0
 health-=damage_received
 if health<=0 then
 alive=false
@@ -340,7 +321,7 @@ end
 local function draw()
 local sprite=27
 if wings_open then sprite+=1 end
-if was_damaged then sprite+=2 end
+if damaged_since<15 then sprite+=2 end
 spr(sprite,x,y)
 end
 local function x_f() return x end
@@ -359,11 +340,11 @@ is_alive=is_alive,
 end
 function number(x,y,value)
 local value=value
-local x = x
-local y = y
-local health = 1
-local alive = true
-local creature_damage = 0
+local x=x
+local y=y
+local health=1
+local alive=true
+local creature_damage=0
 local hitbox={x={3,7},y={1,8}}
 local function update()
 if game_status=="playing" then y+=1 end
@@ -406,9 +387,7 @@ function praetorian(x,y)
 local frame=1
 local x=x
 local y=y
-local damaged_since=0
-local x_flip=false
-local was_damaged=false
+local damaged_since=60
 local health=80
 local alive=true
 local creature_damage=1
@@ -421,10 +400,9 @@ y+=1
 if not spitting and frame%20==0 then y+=1 end
 end
 if not spitting then x_flip=frame>20 end
-was_damaged,damaged_since=handle_creature_being_damaged(
-was_damaged,damaged_since)
+damaged_since+=1
 frame=frame%40+1
-if abs(x-player.x()-4)<20 and player.y()-y<20 then
+if abs(x-player_1.x()-4)<20 and player_1.y()-y<20 then
 if not spitting then
 add_spit("praet_spit",x,y+16)
 spitting=true
@@ -444,7 +422,8 @@ end
 end
 local function draw()
 local sprite=3
-if was_damaged then sprite+=2 end
+local x_flip=frame%20==0
+if damaged_since<15 then sprite+=2 end
 spr(sprite,x,y,2,2,x_flip,false)
 end
 local function x_f() return x end
@@ -465,9 +444,7 @@ function slasher(x,y)
 local frame=1
 local x=x
 local y=y
-local damaged_since=0
-local x_flip=false
-local was_damaged=false
+local damaged_since=60
 local health=50
 local alive=true
 local creature_damage=2
@@ -477,10 +454,8 @@ if game_status=="playing" then
 y+=1
 if frame%4==0 then y+=1 end
 end
-x_flip=frame>12
-was_damaged,damaged_since=handle_creature_being_damaged(
-was_damaged,damaged_since)
-frame=frame%24+1
+damaged_since+=1
+frame=frame%8+1
 end
 local function damage(damage_received)
 sfx(33)
@@ -493,7 +468,8 @@ end
 end
 local function draw()
 local sprite=17
-if was_damaged then sprite+=1 end
+local x_flip=frame%4==0
+if damaged_since<15 then sprite+=1 end
 spr(sprite,x,y,1,1,x_flip,false)
 end
 local function x_f() return x end
@@ -1715,7 +1691,7 @@ update=update,
 draw=draw,
 get_hitbox=get_hitbox,
 get_resources=list_f,
-spawn_resource=spawn_resource,
+spawn=spawn_resource,
 }
 end
 function new_title_screen()
@@ -1758,9 +1734,9 @@ function choose_from_cum_prob(ratios)
 local decision=rnd(ratios.cum_sum)
 for i=1,ratios.variety do
 if decision<ratios.ratios[i][1] then
-decision-=ratios.ratios[i][1]
-else
 return ratios.ratios[i][2]
+else
+decision-=ratios.ratios[i][1]
 end
 end
 end
@@ -1773,6 +1749,7 @@ local new_ratios={}
 new_ratios.ratios=ratios
 new_ratios.cum_sum=sum
 new_ratios.variety=variety
+print(new_ratios)
 return new_ratios
 end
 function remove_bottom_entities(container,y_getter)

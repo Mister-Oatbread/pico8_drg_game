@@ -2,8 +2,7 @@
 
 function egg(x,y)
     local frame=1
-    local damaged_since=0
-    local was_damaged=false
+    local damaged_since=60
     local x=x
     local y=y
     local display_alt=false
@@ -15,16 +14,15 @@ function egg(x,y)
     local function update()
         y+=1
         if frame%5==0 then y-=1 end
-        display_alt=frame>10
-        was_damaged,damaged_since=handle_creature_being_damaged(
-            was_damaged,damaged_since)
-        frame = frame%20+1
+        display_alt=frame>5
+        damaged_since+=1
+        frame=frame%10+1
     end
 
     local function damage(damage_received)
         sfx(32)
-        was_damaged=true
         health-=damage_received
+        damaged_since=0
         if health<=0 then
             give_ammo(.5)
             give_health(1)
@@ -37,8 +35,8 @@ function egg(x,y)
     local function draw()
         local sprite=58
         if display_alt then sprite+=1 end
-        if was_damaged then sprite+=2 end
-        spr(sprite,x,y)
+        if damaged_since<15 then sprite+=2 end
+        spr(sprite,x,y,1,1,display_alt,false)
     end
 
     local function x_f() return x end

@@ -4,9 +4,7 @@ function grunt(x,y)
     local frame=1
     local x=x
     local y=y
-    local damaged_since=0
-    local display_alt=false
-    local was_damaged=false
+    local damaged_since=60
     local health=40
     local alive=true
     local creature_damage=1
@@ -17,16 +15,15 @@ function grunt(x,y)
             y+=1
             if frame%6==0 then y+=1 end
         end
-        x_flip=frame>15
-        was_damaged,damaged_since=handle_creature_being_damaged(
-            was_damaged, damaged_since)
-        frame=(frame+1)%30
+        damaged_since+=1
+        frame=frame%12+1
     end
 
     local function damage(damage_received)
         sfx(33)
-        was_damaged=true
+        damaged_since=0
         health-=damage_received
+        x_flip=frame>6
         if health<=0 then
             alive=false
             player.points+=10
@@ -35,7 +32,8 @@ function grunt(x,y)
 
     local function draw()
         local sprite=1
-        if was_damaged then sprite+=1 end
+        if damaged_since<15 then sprite+=1 end
+        local x_flip=frame>6
         spr(sprite,x,y,1,1,x_flip,false)
     end
 

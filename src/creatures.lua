@@ -2,15 +2,15 @@
 
 -- this file contains all information on enemies
 
--- this function takes care of handle being hit
-function handle_creature_being_damaged(was_damaged, damaged_since)
-    damaged_since += 1
-    if damaged_since > damaged_sprite_duration then
-        was_damaged = false
-        damaged_since = 0
-    end
-    return was_damaged, damaged_since
-end
+-- -- this function takes care of handle being hit
+-- function handle_creature_being_damaged(was_damaged, damaged_since)
+--     damaged_since += 1
+--     if damaged_since > damaged_sprite_duration then
+--         was_damaged = false
+--         damaged_since = 0
+--     end
+--     return was_damaged, damaged_since
+-- end
 
 function new_creatures()
     local creatures=new_entity_container()
@@ -22,7 +22,7 @@ function new_creatures()
     -- handles spawning a creature with correspondig percentages, and
     -- adds it to creatures list
     local function spawn_creature()
-        local creature_ratios = game_logic.creature_ratios()
+        local creature_ratios=game_logic.creature_ratios()
         local creature
         local x=sample_one(102,118)
         local y=81
