@@ -277,38 +277,39 @@ creatures_list=creatures_list,
 }
 end
 function mactera(x,y)
-local frame=1
+local frame=sample_one(1,60)
+local spit_countdown=sample_one(15,30)
 local x=x
 local y=y
 local damaged_since=60
-local wings_open=false
 local health=20
 local alive=true
 local did_spit=false
-local perform_spit=false
+local performing_spit=false
 local creature_damage=0
 local hitbox={x={2,7},y={1,7}}
+local tracked_player=choose_one(players)
 local function update()
-if game_status=="playing" then
-if (player_1.y()-y)<30 and not did_spit then
-perform_spit=true
-end
-if perform_spit then
-if frame==0 then
+if did_spit then
+y+=1
+if frame%2==0 then y+=1 end
+elseif performing_spit then
+if frame%2==0 then x-=sgn(x-tracked_player.x()) end
+spit_countdown-=1
+if spit_countdown==1 then
 did_spit=true
-add_spit("mactera_spit",x,y)
-end
-if did_spit and frame==0 then
-perform_spit=false
+performing_spit=false
+projectiles.spit_spit("mactera_spit",x,y)
 end
 else
 y+=1
-if frame%2==0 then y+=1 end
+if frame%2==0 then
+y+=1
+x-=sgn(x-tracked_player.x())
 end
-if frame%2==0 and not did_spit then x-=sgn(x-player_1.x()) end
+performing_spit=tracked_player.y()-y<30
 end
 damaged_since+=1
-wings_open=frame>8
 frame=frame%16+1
 end
 local function damage(damage_received,player)
@@ -323,7 +324,7 @@ end
 end
 local function draw()
 local sprite=17
-if wings_open then sprite+=1 end
+if frame>8 then sprite+=1 end
 if damaged_since<15 then pal(3,2) end
 spr(sprite,x,y)
 pal()
@@ -405,11 +406,13 @@ if not spitting and frame%20==0 then y+=1 end
 end
 if not spitting then x_flip=frame>20 end
 damaged_since+=1
-frame=frame%40+1
-if abs(x-player_1.x()-4)<20 and player_1.y()-y<20 then
+if not spitting then frame=frame%40+1 end
+for i=1,#players do
+if abs(x-players[i].x()-4)<20 and players[i].y()-y<20 then
 if not spitting then
-add_spit("praet_spit",x,y+16)
+projectiles.spit_spit("praet_spit",x,y+16)
 spitting=true
+end
 end
 end
 end
@@ -419,14 +422,14 @@ damaged_since=0
 health-=damage_received
 if health<=0 then
 alive=false
-add_spit("praet_cloud",x,y)
+projectiles.spit_spit("praet_cloud",x,y)
 del(spits,spit)
 player.give_points(100)
 end
 end
 local function draw()
 local sprite=3
-local x_flip=frame%20==0
+local x_flip=frame>20
 if damaged_since<15 then pal(3,2) end
 spr(sprite,x,y,2,2,x_flip,false)
 pal()
@@ -464,7 +467,7 @@ frame=frame%8+1
 end
 local function damage(damage_received,player)
 sfx(33)
-was_damaged=true
+damaged_since=0
 health-=damage_received
 if health<=0 then
 alive=false
@@ -473,7 +476,7 @@ end
 end
 local function draw()
 local sprite=2
-local x_flip=frame%4==0
+local x_flip=frame>4
 if damaged_since<15 then pal(4,2) end
 spr(sprite,x,y,1,1,x_flip,false)
 pal()
@@ -611,7 +614,7 @@ local player_box=player_1.get_hitbox()
 local creature_box,bullet_box,drills_box
 local creatures_list=creatures.creatures_list
 local bullets=projectiles.bullets_list
-local creature
+local creature,bullet
 if player_1.is_drilling() then
 drills_box=player_1.get_damaging_drills_hitbox()
 else
@@ -620,10 +623,14 @@ end
 for i=1,creatures_list.size() do
 creature=creatures_list.get(i)
 creature_box=get_hitbox(creature)
-for j=1,bullets.size() do
-bullet_box=projectiles.get_bullet_hitbox(bullets.get(j))
+for j=bullets.size(),1,-1 do
+bullet=bullets.get(j)
+bullet_box=projectiles.get_bullet_hitbox(bullet)
 if are_colliding(bullet_box, creature_box) then
-creature.damage(projectiles.bullet_damage,player_1)
+creature.damage(bullet.damage,player_1)
+if not bullet.piercing then
+bullets.deletei(j)
+end
 end
 end
 if are_colliding(creature_box,drills_box) then
@@ -760,8 +767,11 @@ draw=draw,
 }
 end
 function _init()
+coop=false
 player_1=new_player(1,"gunner")
 player_2=new_player(2)
+players={player_1}
+if coop then add(players,player_2) end
 projectiles=new_projectiles()
 resources=new_resources()
 map=new_map()
@@ -774,7 +784,6 @@ end
 function _update()
 difficulty=2
 game_logic.set_difficulty(2)
-coop=false
 points=0
 game_status="playing"
 performance_monitor.reset_cpu_load()
@@ -1306,6 +1315,7 @@ local function fuel_f() return fuel end
 local function points_f() return points end
 local function change_role(role) role=role end
 local function give_points(amount) points+=amount end
+local function get_role() return role end
 return {
 x=x_f,
 y=y_f,
@@ -1317,6 +1327,7 @@ give_points=give_points,
 get_hitbox=get_hitbox,
 get_drills_hitbox=get_drills_hitbox,
 get_damaging_drills_hitbox=get_damaging_drills_hitbox,
+get_role=get_role,
 is_drilling=drilling_f,
 is_shooting=shooting_f,
 is_rns=rns_f,
@@ -1335,7 +1346,6 @@ end
 function new_projectiles()
 local bullets=new_entity_container()
 local spits=new_entity_container()
-local bullet_damage=10
 local function update()
 for i=bullets.size(),1,-1 do
 bullets.get(i).y-=6
@@ -1352,9 +1362,15 @@ end
 end
 local function fire_bullet(number)
 local player=number==1 and player_1 or player_2
-bullets.add({x=player.x(),y=(player.y())-8,owner=player})
+bullets.add({
+x=player.x(),
+y=(player.y())-8,
+owner=player,
+damage=player.get_role()=="driller" and 10 or 5,
+piercing=player.get_role()=="driller" and false or true,
+})
 end
-local function spit(spit_type, x, y)
+local function new_spit(spit_type,x,y)
 local sprite,speed,size,hitbox,persists,damage
 local x_flip,y_flip=false,false
 local frame=0
@@ -1373,7 +1389,7 @@ hitbox={x={1,16},y={1,16}}
 persists=true
 damage=1
 elseif spit_type=="mactera_spit" then
-sprite=31
+sprite=28
 speed=2
 size=1
 hitbox={x={4,4},y={3,7}}
@@ -1441,6 +1457,10 @@ end
 end
 end
 end
+local function spit_spit(type,x,y)
+local spit=new_spit(type,x,y)
+spits.add(spit)
+end
 function get_bullet_hitbox(bullet)
 return {
 x={bullet.x+6,bullet.x+6},
@@ -1458,11 +1478,11 @@ return {
 update=update,
 draw=draw,
 fire_bullet=fire_bullet,
+spit_spit=spit_spit,
 spits_list=spits,
 bullets_list=bullets,
 get_bullet_hitbox=get_bullet_hitbox,
 get_spit_hitbox=get_spit_hitbox,
-bullet_damage=bullet_damage,
 }
 end
 function spawn_prop()

@@ -4,7 +4,6 @@
 function new_projectiles()
     local bullets=new_entity_container()
     local spits=new_entity_container()
-    local bullet_damage=10
 
     local function update()
         for i=bullets.size(),1,-1 do
@@ -24,12 +23,18 @@ function new_projectiles()
     -- sends a bullet out from the current location of the player
     local function fire_bullet(number)
         local player=number==1 and player_1 or player_2
-        bullets.add({x=player.x(),y=(player.y())-8,owner=player})
+        bullets.add({
+            x=player.x(),
+            y=(player.y())-8,
+            owner=player,
+            damage=player.get_role()=="driller" and 10 or 5,
+            piercing=player.get_role()=="driller" and false or true,
+        })
     end
 
     -- fires a general spit from a creature, which gets constructed differently
     -- depending on the type argument
-    local function spit(spit_type, x, y)
+    local function new_spit(spit_type,x,y)
         local sprite,speed,size,hitbox,persists,damage
         local x_flip,y_flip=false,false
         local frame=0
@@ -49,7 +54,7 @@ function new_projectiles()
             persists=true
             damage=1
         elseif spit_type=="mactera_spit" then
-            sprite=31
+            sprite=28
             speed=2
             size=1
             hitbox={x={4,4},y={3,7}}
@@ -134,6 +139,12 @@ function new_projectiles()
         end
     end
 
+    local function spit_spit(type,x,y)
+        local spit=new_spit(type,x,y)
+        spits.add(spit)
+    end
+
+
     -- takes in bullet and returns hitbox ready to be processed by are_colliding()
     function get_bullet_hitbox(bullet)
         return {
@@ -155,11 +166,11 @@ function new_projectiles()
         update=update,
         draw=draw,
         fire_bullet=fire_bullet,
+        spit_spit=spit_spit,
         spits_list=spits,
         bullets_list=bullets,
         get_bullet_hitbox=get_bullet_hitbox,
         get_spit_hitbox=get_spit_hitbox,
-        bullet_damage=bullet_damage,
     }
 end
 

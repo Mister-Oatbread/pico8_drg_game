@@ -21,7 +21,7 @@ function slasher(x,y)
 
     local function damage(damage_received,player)
         sfx(33)
-        was_damaged=true
+        damaged_since=0
         health-=damage_received
         if health<=0 then
             alive=false
@@ -31,7 +31,7 @@ function slasher(x,y)
 
     local function draw()
         local sprite=2
-        local x_flip=frame%4==0
+        local x_flip=frame>4
         if damaged_since<15 then pal(4,2) end
         spr(sprite,x,y,1,1,x_flip,false)
         pal()

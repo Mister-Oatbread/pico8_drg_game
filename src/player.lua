@@ -352,6 +352,7 @@ function new_player(number,role)
     local function points_f() return points end
     local function change_role(role) role=role end
     local function give_points(amount) points+=amount end
+    local function get_role() return role end
 
     return {
         x=x_f,
@@ -364,6 +365,7 @@ function new_player(number,role)
         get_hitbox=get_hitbox,
         get_drills_hitbox=get_drills_hitbox,
         get_damaging_drills_hitbox=get_damaging_drills_hitbox,
+        get_role=get_role,
         is_drilling=drilling_f,
         is_shooting=shooting_f,
         is_rns=rns_f,

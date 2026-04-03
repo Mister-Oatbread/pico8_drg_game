@@ -6,8 +6,12 @@ function _init()
     -- music(1)
     -- hacky stuff end
 
+    coop=false
+
     player_1=new_player(1,"gunner")
     player_2=new_player(2)
+    players={player_1}
+    if coop then add(players,player_2) end
     projectiles=new_projectiles()
     resources=new_resources()
     map=new_map()
@@ -24,7 +28,6 @@ function _update()
     -- hacky stuff start
     difficulty=2
     game_logic.set_difficulty(2)
-    coop=false
     points=0
     game_status="playing"
     -- hacky stuff end

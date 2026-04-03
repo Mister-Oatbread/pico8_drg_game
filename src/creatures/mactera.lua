@@ -1,41 +1,43 @@
 
 
 function mactera(x,y)
-    local frame=1
+    local frame=sample_one(1,60)
+    local spit_countdown=sample_one(15,30)
     local x=x
     local y=y
     local damaged_since=60
-    local wings_open=false
     local health=20
     local alive=true
     local did_spit=false
-    local perform_spit=false
+    local performing_spit=false
     local creature_damage=0
     local hitbox={x={2,7},y={1,7}}
-
-    -- TODO: rework this bozo
+    local tracked_player=choose_one(players)
 
     local function update()
-        if game_status=="playing" then
-            if (player_1.y()-y)<30 and not did_spit then
-                perform_spit=true
+        if did_spit then
+        -- did already spit, fly along
+            y+=1
+            if frame%2==0 then y+=1 end
+        elseif performing_spit then
+        -- currently spitting, perform spit animation
+            if frame%2==0 then x-=sgn(x-tracked_player.x()) end
+            spit_countdown-=1
+            if spit_countdown==1 then
+                did_spit=true
+                performing_spit=false
+                projectiles.spit_spit("mactera_spit",x,y)
             end
-            if perform_spit then
-                if frame==0 then
-                    did_spit=true
-                    add_spit("mactera_spit",x,y)
-                end
-                if did_spit and frame==0 then
-                    perform_spit=false
-                end
-            else
+        else
+        -- currently homing
+            y+=1
+            if frame%2==0 then
                 y+=1
-                if frame%2==0 then y+=1 end
+                x-=sgn(x-tracked_player.x())
             end
-            if frame%2==0 and not did_spit then x-=sgn(x-player_1.x()) end
+            performing_spit=tracked_player.y()-y<30
         end
         damaged_since+=1
-        wings_open=frame>8
         frame=frame%16+1
     end
 
@@ -52,7 +54,8 @@ function mactera(x,y)
 
     local function draw()
         local sprite=17
-        if wings_open then sprite+=1 end
+        -- change to wings closed sprite
+        if frame>8 then sprite+=1 end
         if damaged_since<15 then pal(3,2) end
         spr(sprite,x,y)
         pal()

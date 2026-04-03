@@ -94,7 +94,7 @@ function new_game_logic()
         local creature_box,bullet_box,drills_box
         local creatures_list=creatures.creatures_list
         local bullets=projectiles.bullets_list
-        local creature
+        local creature,bullet
 
         -- get drills hitbox if player is drilling, else assign meaningless
         -- hitbox that can never collide
@@ -107,10 +107,14 @@ function new_game_logic()
         for i=1,creatures_list.size() do
             creature=creatures_list.get(i)
             creature_box=get_hitbox(creature)
-            for j=1,bullets.size() do
-                bullet_box=projectiles.get_bullet_hitbox(bullets.get(j))
+            for j=bullets.size(),1,-1 do
+                bullet=bullets.get(j)
+                bullet_box=projectiles.get_bullet_hitbox(bullet)
                 if are_colliding(bullet_box, creature_box) then
-                    creature.damage(projectiles.bullet_damage,player_1)
+                    creature.damage(bullet.damage,player_1)
+                    if not bullet.piercing then
+                        bullets.deletei(j)
+                    end
                 end
             end
             if are_colliding(creature_box,drills_box) then

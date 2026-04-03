@@ -19,11 +19,14 @@ function praetorian(x,y)
         end
         if not spitting then x_flip=frame>20 end
         damaged_since+=1
-        frame=frame%40+1
-        if abs(x-player_1.x()-4)<20 and player_1.y()-y<20 then
-            if not spitting then
-                add_spit("praet_spit",x,y+16)
-                spitting=true
+        if not spitting then frame=frame%40+1 end
+
+        for i=1,#players do
+            if abs(x-players[i].x()-4)<20 and players[i].y()-y<20 then
+                if not spitting then
+                    projectiles.spit_spit("praet_spit",x,y+16)
+                    spitting=true
+                end
             end
         end
     end
@@ -34,7 +37,7 @@ function praetorian(x,y)
         health-=damage_received
         if health<=0 then
             alive=false
-            add_spit("praet_cloud",x,y)
+            projectiles.spit_spit("praet_cloud",x,y)
             del(spits,spit)
             player.give_points(100)
         end
@@ -42,7 +45,7 @@ function praetorian(x,y)
 
     local function draw()
         local sprite=3
-        local x_flip=frame%20==0
+        local x_flip=frame>20
         if damaged_since<15 then pal(3,2) end
         spr(sprite,x,y,2,2,x_flip,false)
         pal()
