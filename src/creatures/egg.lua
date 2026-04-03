@@ -33,7 +33,7 @@ function egg(x,y)
     end
 
     local function draw()
-        local sprite=58
+        local sprite=51
         if display_alt then sprite+=1 end
         if damaged_since<15 then sprite+=2 end
         spr(sprite,x,y,1,1,display_alt,false)

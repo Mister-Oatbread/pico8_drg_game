@@ -32,7 +32,7 @@ function loot_bug(x,y)
     end
 
     local function draw()
-        local sprite=44
+        local sprite=30
         local x_flip=frame>30
         if damaged_since<15 then sprite+=1 end
         spr(sprite,x,y,1,1,x_flip,false)

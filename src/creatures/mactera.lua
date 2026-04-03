@@ -51,7 +51,7 @@ function mactera(x,y)
     end
 
     local function draw()
-        local sprite=27
+        local sprite=17
         if wings_open then sprite+=1 end
         if damaged_since<15 then sprite+=2 end
         spr(sprite,x,y)

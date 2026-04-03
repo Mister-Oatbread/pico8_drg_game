@@ -34,7 +34,7 @@ function cave_angel(x,y)
     end
 
     local function draw()
-        local sprite=11
+        local sprite=14
         if damaged_since<15 then sprite+=2 end
         if not wings_open then sprite+=1 end
         spr(sprite,x,y,1,1,x_flip,false)

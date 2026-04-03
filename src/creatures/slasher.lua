@@ -30,7 +30,7 @@ function slasher(x,y)
     end
 
     local function draw()
-        local sprite=17
+        local sprite=2
         local x_flip=frame%4==0
         if damaged_since<15 then sprite+=1 end
         spr(sprite,x,y,1,1,x_flip,false)

@@ -65,7 +65,7 @@ no_cave_angels_killed=false
 end
 end
 local function draw()
-local sprite=11
+local sprite=14
 if damaged_since<15 then sprite+=2 end
 if not wings_open then sprite+=1 end
 spr(sprite,x,y,1,1,x_flip,false)
@@ -114,7 +114,7 @@ alive=false
 end
 end
 local function draw()
-local sprite=58
+local sprite=51
 if display_alt then sprite+=1 end
 if damaged_since<15 then sprite+=2 end
 spr(sprite,x,y,1,1,display_alt,false)
@@ -209,7 +209,7 @@ add_killed_lootbug_name()
 end
 end
 local function draw()
-local sprite=44
+local sprite=30
 local x_flip=frame>30
 if damaged_since<15 then sprite+=1 end
 spr(sprite,x,y,1,1,x_flip,false)
@@ -318,7 +318,7 @@ player.points+=30
 end
 end
 local function draw()
-local sprite=27
+local sprite=17
 if wings_open then sprite+=1 end
 if damaged_since<15 then sprite+=2 end
 spr(sprite,x,y)
@@ -466,7 +466,7 @@ player.points+=30
 end
 end
 local function draw()
-local sprite=17
+local sprite=2
 local x_flip=frame%4==0
 if damaged_since<15 then sprite+=1 end
 spr(sprite,x,y,1,1,x_flip,false)
