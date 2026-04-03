@@ -70,7 +70,7 @@ function new_map()
 
     local function spawn_obstacle(x,y)
         local sprite,sprites,size
-        local decision=choose_from_cum_prob(game_logic.obstacle_ratios())
+        local decision=pick_spawn(game_logic.obstacle_spawn_params())
         if decision=="small" then
             sprites={68,69,70,71,84,85,86,87,100,101,116,117}
             size=1
@@ -107,13 +107,13 @@ function new_map()
                     terrain.deletei(i)
                 end
             end
-            remove_bottom_entities(drilled_ground,drilled_ground.y)
-            -- for i=drilled_ground.size(),1,-1 do
-            --     drilled_ground.get(i).y+=1
-            --     if drilled_ground.get(i).y>=230 then
-            --         drilled_ground.deletei(i)
-            --     end
-            -- end
+            -- remove_bottom_entities(drilled_ground,y)
+            for i=drilled_ground.size(),1,-1 do
+                drilled_ground.get(i).y+=1
+                if drilled_ground.get(i).y>=230 then
+                    drilled_ground.deletei(i)
+                end
+            end
             if rnd()<.8 then
                 terrain.add(spawn_pebble())
             end

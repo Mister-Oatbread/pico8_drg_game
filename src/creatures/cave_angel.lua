@@ -15,7 +15,7 @@ function cave_angel(x,y)
     local function update()
         if game_status=="playing" then
             y+=1
-            if frame%45==0 then x+=sgn(x-player.x) end
+            if frame%45==0 then x+=sgn(x-player_1.x()) end
             if frame%15==0 then y+=1 end
         end
         wings_open=frame>45

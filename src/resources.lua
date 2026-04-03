@@ -6,7 +6,7 @@ function new_resources()
 
     local function spawn_resource(x,y)
         local sprite,sprites,hitbox,res_type,start_sprite
-        local res_type=choose_from_cum_prob(game_logic.resource_ratios())
+        local res_type=pick_spawn(game_logic.resource_spawn_params())
         if res_type=="red_sugar" then
             start_sprite=136
             hitbox={x={3,6},y={3,6}}

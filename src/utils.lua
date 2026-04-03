@@ -16,17 +16,20 @@ function sample_one(first,last) return first+flr(rnd(last+1)) end
 function choose_one(list) return list[flr(rnd(#list))+1] end
 
 -- returns one index based on ratios of ratios table
-function choose_from_cum_prob(ratios)
+-- entry 1 must contain the ratios, and entry 2 contains the thing that
+-- is returned
+function pick_spawn(spawn_params)
     -- take value at slot 0, which should contain the cum sum of the entire
     -- ratios table
-    local decision=rnd(ratios.cum_sum)
+    local decision=rnd(spawn_params.cum_sum)
 
-    -- compare until ratios is small enough, then return corresponding entry
-    for i=1,ratios.variety do
-        if decision<ratios.ratios[i][1] then
-            return ratios.ratios[i][2]
+    -- compare until spawn params is small enough,
+    -- then return corresponding entry
+    for i=1,spawn_params.variety do
+        if decision<spawn_params.ratios[i][1] then
+            return spawn_params.ratios[i][2]
         else
-            decision-=ratios.ratios[i][1]
+            decision-=spawn_params.ratios[i][1]
         end
     end
 end
@@ -36,8 +39,9 @@ end
 --     return false
 -- end
 
--- takes ratios value and
-function get_cum_sum(ratios,variety)
+-- takes ratios and variety (no of different spawns), and bundles everything
+-- into a table holding this information
+function generate_spawn_params(ratios,variety)
     local sum=0
     for i=1,variety do
         sum+=ratios[i][1]
@@ -74,16 +78,17 @@ end
 --     return probs
 -- end
 
--- takes a entity container and removes all entities that have a x
--- coordinate that is larger than 240
-function remove_bottom_entities(container,y_getter)
-    local entity
-    for i=container.size(),1,-1 do
-        entity=container.get(i)
-        if y_getter>=240 then
-            container.delete(entity)
-        end
-    end
-end
+-- CURRENTLY OUT OF ORDER
+-- -- takes a entity container and removes all entities that have a x
+-- -- coordinate that is larger than 240
+-- function remove_bottom_entities(container,y_getter)
+--     local entity
+--     for i=container.size(),1,-1 do
+--         entity=container.get(i)
+--         if entity.y>=240 then
+--             container.delete(entity)
+--         end
+--     end
+-- end
 
 

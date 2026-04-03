@@ -13,40 +13,39 @@
 -- end
 
 function new_creatures()
-    local creatures=new_entity_container()
+    local creatures_list=new_entity_container()
     -- add bottom grunts to the creatures.
     for x=106,220,9 do
-        creatures.add(bottom_grunt(x,222))
+        creatures_list.add(bottom_grunt(x,222))
     end
 
     -- handles spawning a creature with correspondig percentages, and
     -- adds it to creatures list
     local function spawn_creature()
-        local creature_ratios=game_logic.creature_ratios()
         local creature
         local x=sample_one(102,118)
         local y=81
 
-        local creature=choose_from_cum_prob(game_logic.creature_ratios())
-        creatures.add(creature(x,y))
+        creature=pick_spawn(game_logic.creature_spawn_params())
+        creatures_list.add(creature(x,y))
     end
 
     local function update()
         local creature
-        for i=creatures.size(),1,-1 do
-            creature=creatures.get(i)
+        for i=creatures_list.size(),1,-1 do
+            creature=creatures_list.get(i)
             creature.update()
             if creature.y()>=240 then
-                creatures.delete(creature)
+                creatures_list.delete(creature)
             elseif not creature.is_alive() then
-                creatures.delete(creature)
+                creatures_list.delete(creature)
             end
         end
     end
 
     local function draw()
-        for i=1,#creatures do
-            creatures[i].draw()
+        for i=1,creatures_list.size() do
+            creatures_list.get(i).draw()
         end
     end
 
@@ -65,7 +64,7 @@ function new_creatures()
         update=update,
         draw=draw,
         get_hitbox=get_hitbox,
-        creatures=creatures,
+        get_creatures=creatures_list,
     }
 end
 

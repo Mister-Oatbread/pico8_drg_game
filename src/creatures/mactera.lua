@@ -17,7 +17,7 @@ function mactera(x,y)
 
     local function update()
         if game_status=="playing" then
-            if (player.y_pos-y)<30 and not did_spit then
+            if (player_1.y()-y)<30 and not did_spit then
                 perform_spit=true
             end
             if perform_spit then
@@ -32,7 +32,7 @@ function mactera(x,y)
                 y+=1
                 if frame%2==0 then y+=1 end
             end
-            if frame%2==0 and not did_spit then x-=sgn(x-player.x_pos) end
+            if frame%2==0 and not did_spit then x-=sgn(x-player_1.x()) end
         end
         damaged_since+=1
         wings_open=frame>8

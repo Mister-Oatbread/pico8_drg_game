@@ -1,6 +1,11 @@
 
 
 function _init()
+    -- hacky stuff start
+    music(-1)
+    music(1)
+    -- hacky stuff end
+
     player_1=new_player(1)
     player_2=new_player(2)
     projectiles=new_projectiles()
@@ -19,7 +24,7 @@ function _update()
     -- hacky stuff start
     difficulty=2
     game_logic.set_difficulty(2)
-    coop=true
+    coop=false
     points=0
     game_status="playing"
     -- hacky stuff end
@@ -40,7 +45,7 @@ end
 function _draw()
     cls(1)
     camera(101,101)
-    map.draw_terrain()
+    -- map.draw_terrain()
     map.draw_wall()
     map.draw_obstacles()
     map.draw_drilled_ground()
@@ -50,11 +55,12 @@ function _draw()
     if coop then player_2.draw() end
     player_1.draw()
     -- if game_status=="title_screen" then title_screen.draw() end
-    title_screen.draw()
-    map.draw_vines()
+    -- title_screen.draw()
+    -- map.draw_vines()
     map.draw_super_wall()
     hud.draw(player_1)
     if coop then hud.draw(player_2) end
+    print(creatures.get_creatures.size())
 
     performance_monitor.register_load()
     performance_monitor.print_current()

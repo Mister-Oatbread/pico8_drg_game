@@ -26,9 +26,9 @@ function new_game_logic()
         resource_variety=3
         obstacle_variety=2
         if difficulty==1 then
-            obstacle_spawn_rate=.04
+            obstacle_spawn_rate=.08
             resource_spawn_rate=.05
-            creature_spawn_rate=.06
+            creature_spawn_rate=.04
             creature_variety=4
             resource_variety=1
         elseif difficulty==2 then
@@ -50,9 +50,15 @@ function new_game_logic()
             creature_spawn_rate=.06
             resource_variety=2
         end
-        creature_ratios=get_cum_sum(creature_ratios,creature_variety)
-        obstacle_ratios=get_cum_sum(obstacle_ratios,obstacle_variety)
-        resource_ratios=get_cum_sum(resource_ratios,resource_variety)
+        creature_spawn_params=generate_spawn_params(
+            creature_ratios,creature_variety
+        )
+        obstacle_spawn_params=generate_spawn_params(
+            obstacle_ratios,obstacle_variety
+        )
+        resource_spawn_params=generate_spawn_params(
+            resource_ratios,resource_variety
+        )
     end
 
     local function mine_resources()
@@ -97,16 +103,16 @@ function new_game_logic()
         end
     end
 
-    local function obstacle_ratios_f() return obstacle_ratios end
-    local function resource_ratios_f() return resource_ratios end
-    local function creature_ratios_f() return creature_ratios end
+    local function obstacle_spawn_params_f() return obstacle_spawn_params end
+    local function resource_spawn_params_f() return resource_spawn_params end
+    local function creature_spawn_params_f() return creature_spawn_params end
 
     return {
         update=update,
         set_difficulty=set_difficulty,
-        obstacle_ratios=obstacle_ratios_f,
-        resource_ratios=resource_ratios_f,
-        creature_ratios=creature_ratios_f,
+        obstacle_spawn_params=obstacle_spawn_params_f,
+        resource_spawn_params=resource_spawn_params_f,
+        creature_spawn_params=creature_spawn_params_f,
     }
 end
 

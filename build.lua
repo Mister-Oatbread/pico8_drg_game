@@ -48,7 +48,7 @@ local wings_open
 local function update()
 if game_status=="playing" then
 y+=1
-if frame%45==0 then x+=sgn(x-player.x) end
+if frame%45==0 then x+=sgn(x-player_1.x()) end
 if frame%15==0 then y+=1 end
 end
 wings_open=frame>45
@@ -229,33 +229,32 @@ is_alive=is_alive,
 }
 end
 function new_creatures()
-local creatures=new_entity_container()
+local creatures_list=new_entity_container()
 for x=106,220,9 do
-creatures.add(bottom_grunt(x,222))
+creatures_list.add(bottom_grunt(x,222))
 end
 local function spawn_creature()
-local creature_ratios=game_logic.creature_ratios()
 local creature
 local x=sample_one(102,118)
 local y=81
-local creature=choose_from_cum_prob(game_logic.creature_ratios())
-creatures.add(creature(x,y))
+creature=pick_spawn(game_logic.creature_spawn_params())
+creatures_list.add(creature(x,y))
 end
 local function update()
 local creature
-for i=creatures.size(),1,-1 do
-creature=creatures.get(i)
+for i=creatures_list.size(),1,-1 do
+creature=creatures_list.get(i)
 creature.update()
 if creature.y()>=240 then
-creatures.delete(creature)
+creatures_list.delete(creature)
 elseif not creature.is_alive() then
-creatures.delete(creature)
+creatures_list.delete(creature)
 end
 end
 end
 local function draw()
-for i=1,#creatures do
-creatures[i].draw()
+for i=1,creatures_list.size() do
+creatures_list.get(i).draw()
 end
 end
 function get_hitbox()
@@ -270,7 +269,7 @@ spawn=spawn_creature,
 update=update,
 draw=draw,
 get_hitbox=get_hitbox,
-creatures=creatures,
+get_creatures=creatures_list,
 }
 end
 function mactera(x,y)
@@ -287,7 +286,7 @@ local creature_damage=0
 local hitbox={x={2,7},y={1,7}}
 local function update()
 if game_status=="playing" then
-if (player.y_pos-y)<30 and not did_spit then
+if (player_1.y()-y)<30 and not did_spit then
 perform_spit=true
 end
 if perform_spit then
@@ -302,7 +301,7 @@ else
 y+=1
 if frame%2==0 then y+=1 end
 end
-if frame%2==0 and not did_spit then x-=sgn(x-player.x_pos) end
+if frame%2==0 and not did_spit then x-=sgn(x-player_1.x()) end
 end
 damaged_since+=1
 wings_open=frame>8
@@ -539,9 +538,9 @@ creature_variety=6
 resource_variety=3
 obstacle_variety=2
 if difficulty==1 then
-obstacle_spawn_rate=.04
+obstacle_spawn_rate=.08
 resource_spawn_rate=.05
-creature_spawn_rate=.06
+creature_spawn_rate=.04
 creature_variety=4
 resource_variety=1
 elseif difficulty==2 then
@@ -563,9 +562,15 @@ resource_spawn_rate=.01
 creature_spawn_rate=.06
 resource_variety=2
 end
-creature_ratios=get_cum_sum(creature_ratios,creature_variety)
-obstacle_ratios=get_cum_sum(obstacle_ratios,obstacle_variety)
-resource_ratios=get_cum_sum(resource_ratios,resource_variety)
+creature_spawn_params=generate_spawn_params(
+creature_ratios,creature_variety
+)
+obstacle_spawn_params=generate_spawn_params(
+obstacle_ratios,obstacle_variety
+)
+resource_spawn_params=generate_spawn_params(
+resource_ratios,resource_variety
+)
 end
 local function mine_resources()
 local resource,colliding,drilling_1,drilling_2,res_hitbox
@@ -606,15 +611,15 @@ if rnd()<resource_spawn_rate then
 resources.spawn(sample_one(102,118),81)
 end
 end
-local function obstacle_ratios_f() return obstacle_ratios end
-local function resource_ratios_f() return resource_ratios end
-local function creature_ratios_f() return creature_ratios end
+local function obstacle_spawn_params_f() return obstacle_spawn_params end
+local function resource_spawn_params_f() return resource_spawn_params end
+local function creature_spawn_params_f() return creature_spawn_params end
 return {
 update=update,
 set_difficulty=set_difficulty,
-obstacle_ratios=obstacle_ratios_f,
-resource_ratios=resource_ratios_f,
-creature_ratios=creature_ratios_f,
+obstacle_spawn_params=obstacle_spawn_params_f,
+resource_spawn_params=resource_spawn_params_f,
+creature_spawn_params=creature_spawn_params_f,
 }
 end
 function initialize_game()
@@ -685,48 +690,6 @@ probs[i] += probs[i-1];
 end
 return probs;
 end
-function are_colliding(a, b)
-local x_good=a.x[1]>b.x[2] or a.x[2]<b.x[1];
-local y_good=a.y[1]>b.y[2] or a.y[2]<b.y[1];
-return not(x_good or y_good);
-end
-function get_player_hitbox(player)
-return {
-x={player.x+1, player.x+6},
-y={player.y, player.y+7},
-};
-end
-function get_bullet_hitbox(bullet)
-return {
-x={bullet.x+6,bullet.x+6},
-y={bullet.y+5,bullet.y+15},
-};
-end
-function get_spit_hitbox(spit)
-local x1=spit.hitbox.x[1]+spit.x()-1;
-local x2=spit.hitbox.x[2]+spit.x()-1;
-local y1=spit.hitbox.y[1]+spit.y()-1;
-local y2=spit.hitbox.y[2]+spit.y()-1;
-return {x={x1,x2}, y={y1,y2}};
-end
-function get_drills_hitbox(player)
-return {
-x={player.x,player.x+7},
-y={player.y-1,player.y+3},
-};
-end
-function get_damaging_drills_hitbox(player)
-return {
-x={player.x,player.x+7},
-y={player.y-3,player.y+3},
-};
-end
-function draw_hitbox(hitbox)
-pset(hitbox.x[1],hitbox.y[1],8);
-pset(hitbox.x[2],hitbox.y[1],8);
-pset(hitbox.x[1],hitbox.y[2],8);
-pset(hitbox.x[2],hitbox.y[2],8);
-end
 function new_hud()
 local function draw_prog_bar(percentage,x,y)
 local green_pixels=flr(percentage*12)
@@ -764,6 +727,8 @@ draw=draw,
 }
 end
 function _init()
+music(-1)
+music(1)
 player_1=new_player(1)
 player_2=new_player(2)
 projectiles=new_projectiles()
@@ -778,7 +743,7 @@ end
 function _update()
 difficulty=2
 game_logic.set_difficulty(2)
-coop=true
+coop=false
 points=0
 game_status="playing"
 performance_monitor.reset_cpu_load()
@@ -794,7 +759,6 @@ end
 function _draw()
 cls(1)
 camera(101,101)
-map.draw_terrain()
 map.draw_wall()
 map.draw_obstacles()
 map.draw_drilled_ground()
@@ -803,11 +767,10 @@ creatures.draw()
 projectiles.draw()
 if coop then player_2.draw() end
 player_1.draw()
-title_screen.draw()
-map.draw_vines()
 map.draw_super_wall()
 hud.draw(player_1)
 if coop then hud.draw(player_2) end
+print(creatures.get_creatures.size())
 performance_monitor.register_load()
 performance_monitor.print_current()
 end
@@ -862,7 +825,7 @@ drilled_ground.add({sprite=sprite,x=x,y=y})
 end
 local function spawn_obstacle(x,y)
 local sprite,sprites,size
-local decision=choose_from_cum_prob(game_logic.obstacle_ratios())
+local decision=pick_spawn(game_logic.obstacle_spawn_params())
 if decision=="small" then
 sprites={68,69,70,71,84,85,86,87,100,101,116,117}
 size=1
@@ -897,7 +860,12 @@ if terrain_piece.y>230 then
 terrain.deletei(i)
 end
 end
-remove_bottom_entities(drilled_ground,drilled_ground.y)
+for i=drilled_ground.size(),1,-1 do
+drilled_ground.get(i).y+=1
+if drilled_ground.get(i).y>=230 then
+drilled_ground.deletei(i)
+end
+end
 if rnd()<.8 then
 terrain.add(spawn_pebble())
 end
@@ -1617,7 +1585,7 @@ function new_resources()
 local list=new_entity_container()
 local function spawn_resource(x,y)
 local sprite,sprites,hitbox,res_type,start_sprite
-local res_type=choose_from_cum_prob(game_logic.resource_ratios())
+local res_type=pick_spawn(game_logic.resource_spawn_params())
 if res_type=="red_sugar" then
 start_sprite=136
 hitbox={x={3,6},y={3,6}}
@@ -1730,17 +1698,17 @@ end
 function coinflip() return rnd(2)<1 end
 function sample_one(first,last) return first+flr(rnd(last+1)) end
 function choose_one(list) return list[flr(rnd(#list))+1] end
-function choose_from_cum_prob(ratios)
-local decision=rnd(ratios.cum_sum)
-for i=1,ratios.variety do
-if decision<ratios.ratios[i][1] then
-return ratios.ratios[i][2]
+function pick_spawn(spawn_params)
+local decision=rnd(spawn_params.cum_sum)
+for i=1,spawn_params.variety do
+if decision<spawn_params.ratios[i][1] then
+return spawn_params.ratios[i][2]
 else
-decision-=ratios.ratios[i][1]
+decision-=spawn_params.ratios[i][1]
 end
 end
 end
-function get_cum_sum(ratios,variety)
+function generate_spawn_params(ratios,variety)
 local sum=0
 for i=1,variety do
 sum+=ratios[i][1]
@@ -1751,13 +1719,4 @@ new_ratios.cum_sum=sum
 new_ratios.variety=variety
 print(new_ratios)
 return new_ratios
-end
-function remove_bottom_entities(container,y_getter)
-local entity
-for i=container.size(),1,-1 do
-entity=container.get(i)
-if y_getter>=240 then
-container.delete(entity)
-end
-end
 end
