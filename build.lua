@@ -15,7 +15,7 @@ y=y0+sgn(up_down_frame-up_down_cap/2)
 frame=frame%30+1
 up_down_frame=(up_down_frame+1)%up_down_cap
 end
-local function damage(damage_received)
+local function damage(damage_received,player)
 end
 local function draw()
 spr(1,x,y,1,1,display_alt,true)
@@ -55,7 +55,7 @@ wings_open=frame>45
 damaged_since+=1
 frame=frame%60+1
 end
-local function damage(damage_received)
+local function damage(damage_received,player)
 sfx(33)
 damaged_since=0
 health-=damage_received
@@ -66,9 +66,10 @@ end
 end
 local function draw()
 local sprite=14
-if damaged_since<15 then sprite+=2 end
+if damaged_since<15 then pal(12,2) end
 if not wings_open then sprite+=1 end
 spr(sprite,x,y,1,1,x_flip,false)
+pal()
 end
 local function x_f() return x end
 local function y_f() return y end
@@ -101,14 +102,14 @@ display_alt=frame>5
 damaged_since+=1
 frame=frame%10+1
 end
-local function damage(damage_received)
+local function damage(damage_received,player)
 sfx(32)
 health-=damage_received
 damaged_since=0
 if health<=0 then
-give_ammo(.5)
-give_health(1)
-player.points+=50
+player.give_ammo(.5)
+player.give_health(1)
+player.give_points(50)
 no_scout_killed=false
 alive=false
 end
@@ -116,8 +117,9 @@ end
 local function draw()
 local sprite=51
 if display_alt then sprite+=1 end
-if damaged_since<15 then sprite+=2 end
+if damaged_since<15 then pal(12,2) end
 spr(sprite,x,y,1,1,display_alt,false)
+pal()
 end
 local function x_f() return x end
 local function y_f() return y end
@@ -150,21 +152,22 @@ end
 damaged_since+=1
 frame=frame%12+1
 end
-local function damage(damage_received)
+local function damage(damage_received,player)
 sfx(33)
 damaged_since=0
 health-=damage_received
 x_flip=frame>6
 if health<=0 then
 alive=false
-player.points+=10
+player.give_points(10)
 end
 end
 local function draw()
 local sprite=1
-if damaged_since<15 then sprite+=1 end
+if damaged_since<15 then pal(4,2) end
 local x_flip=frame>6
 spr(sprite,x,y,1,1,x_flip,false)
+pal()
 end
 local function x_f() return x end
 local function y_f() return y end
@@ -197,13 +200,13 @@ end
 damaged_since+=1
 frame=frame%30+1
 end
-local function damage(damage_received)
+local function damage(damage_received,player)
 sfx(33)
 damaged_since=0
 health-=damage_received
 if health<=0 then
 alive=false
-give_ammo(.2)
+player.give_ammo(.2)
 no_lootbugs_killed=false
 add_killed_lootbug_name()
 end
@@ -211,8 +214,9 @@ end
 local function draw()
 local sprite=30
 local x_flip=frame>30
-if damaged_since<15 then sprite+=1 end
+if damaged_since<15 then pal(15,2) end
 spr(sprite,x,y,1,1,x_flip,false)
+pal()
 end
 local function x_f() return x end
 local function y_f() return y end
@@ -257,11 +261,11 @@ for i=1,creatures_list.size() do
 creatures_list.get(i).draw()
 end
 end
-function get_hitbox()
-local x1=hitbox.x[1]+x()-1;
-local x2=hitbox.x[2]+x()-1;
-local y1=hitbox.y[1]+y()-1;
-local y2=hitbox.y[2]+y()-1;
+function get_hitbox(creature)
+local x1=creature.hitbox.x[1]+creature.x()-1;
+local x2=creature.hitbox.x[2]+creature.x()-1;
+local y1=creature.hitbox.y[1]+creature.y()-1;
+local y2=creature.hitbox.y[2]+creature.y()-1;
 return {x={x1,x2},y={y1,y2}};
 end
 return {
@@ -269,7 +273,7 @@ spawn=spawn_creature,
 update=update,
 draw=draw,
 get_hitbox=get_hitbox,
-get_creatures=creatures_list,
+creatures_list=creatures_list,
 }
 end
 function mactera(x,y)
@@ -307,21 +311,22 @@ damaged_since+=1
 wings_open=frame>8
 frame=frame%16+1
 end
-local function damage(damage_received)
+local function damage(damage_received,player)
 sfx(33)
 damaged_since=0
 health-=damage_received
 if health<=0 then
 alive=false
 no_cave_angels_killed=false
-player.points+=30
+player.give_points(30)
 end
 end
 local function draw()
 local sprite=17
 if wings_open then sprite+=1 end
-if damaged_since<15 then sprite+=2 end
+if damaged_since<15 then pal(3,2) end
 spr(sprite,x,y)
+pal()
 end
 local function x_f() return x end
 local function y_f() return y end
@@ -408,22 +413,23 @@ spitting=true
 end
 end
 end
-local function damage(damage_received)
+local function damage(damage_received,player)
 sfx(33)
-was_damaged=true
+damaged_since=0
 health-=damage_received
 if health<=0 then
 alive=false
 add_spit("praet_cloud",x,y)
 del(spits,spit)
-player.points+=100
+player.give_points(100)
 end
 end
 local function draw()
 local sprite=3
 local x_flip=frame%20==0
-if damaged_since<15 then sprite+=2 end
+if damaged_since<15 then pal(3,2) end
 spr(sprite,x,y,2,2,x_flip,false)
+pal()
 end
 local function x_f() return x end
 local function y_f() return y end
@@ -456,20 +462,21 @@ end
 damaged_since+=1
 frame=frame%8+1
 end
-local function damage(damage_received)
+local function damage(damage_received,player)
 sfx(33)
 was_damaged=true
 health-=damage_received
 if health<=0 then
 alive=false
-player.points+=30
+player.give_points(30)
 end
 end
 local function draw()
 local sprite=2
 local x_flip=frame%4==0
-if damaged_since<15 then sprite+=1 end
+if damaged_since<15 then pal(4,2) end
 spr(sprite,x,y,1,1,x_flip,false)
+pal()
 end
 local function x_f() return x end
 local function y_f() return y end
@@ -599,8 +606,34 @@ end
 end
 end
 end
+local function damage_creatures()
+local player_box=player_1.get_hitbox()
+local creature_box,bullet_box,drills_box
+local creatures_list=creatures.creatures_list
+local bullets=projectiles.bullets_list
+local creature
+if player_1.is_drilling() then
+drills_box=player_1.get_damaging_drills_hitbox()
+else
+drills_box={x={3,4},y={3,4}}
+end
+for i=1,creatures_list.size() do
+creature=creatures_list.get(i)
+creature_box=get_hitbox(creature)
+for j=1,bullets.size() do
+bullet_box=projectiles.get_bullet_hitbox(bullets.get(j))
+if are_colliding(bullet_box, creature_box) then
+creature.damage(projectiles.bullet_damage,player_1)
+end
+end
+if are_colliding(creature_box,drills_box) then
+creature.damage(player_1.drills_damage,player_1)
+end
+end
+end
 local function update()
 mine_resources()
+damage_creatures()
 if rnd()<creature_spawn_rate then
 creatures.spawn()
 end
@@ -720,16 +753,14 @@ spr(47,x,200)
 draw_prog_bar(player.fuel()/player.max_fuel,x+9,202)
 end
 spr(62,x,210)
-print(points,x+10,211,7)
+print(player.points(),x+10,211,7)
 end
 return {
 draw=draw,
 }
 end
 function _init()
-music(-1)
-music(1)
-player_1=new_player(1)
+player_1=new_player(1,"gunner")
 player_2=new_player(2)
 projectiles=new_projectiles()
 resources=new_resources()
@@ -770,7 +801,6 @@ player_1.draw()
 map.draw_super_wall()
 hud.draw(player_1)
 if coop then hud.draw(player_2) end
-print(creatures.get_creatures.size())
 performance_monitor.register_load()
 performance_monitor.print_current()
 end
@@ -834,14 +864,14 @@ sprites={72,74,102,104,106}
 size=2
 end
 sprite=choose_one(sprites)
-return {
+obstacles.add({
 sprite=sprite,
 x=x,
 y=y,
 size=size,
 x_flip=coinflip(),
 y_flip=coinflip(),
-}
+})
 end
 local function update()
 local wall,terrain_piece
@@ -989,9 +1019,11 @@ print_current = print_current,
 reset_cpu_load = reset_cpu_load,
 };
 end
-function new_player(number)
+function new_player(number,role)
 local x=148
 local y=200
+local number=number
+local role=role
 local is={
 moving={up,down,left,right},
 shooting=false,
@@ -999,17 +1031,18 @@ drilling=false,
 mining=false,
 rns=false}
 local was_mining=false
+local drills_damage=4
 local mined_since=0
 local playing={drill_sound=false,gun_sound=false}
 local moving_frame=0
 local points=0
-local ammo=number==1 and 25 or 100
-local fuel=number==1 and 150 or 0
-local max_ammo=number==1 and 25 or 100
-local max_fuel=number==1 and 150 or 0
+local ammo=role=="driller" and 25 or 100
+local fuel=role=="driller" and 150 or 0
+local max_ammo=role=="driller" and 25 or 100
+local max_fuel=role=="driller" and 150 or 0
 local shots_fired=false
 local shot_delay_counter=0
-local max_shot_delay=number==1 and 3 or 1
+local max_shot_delay=role=="driller" and 3 or 1
 local health=3
 local max_health=3
 local is_hit=false
@@ -1018,7 +1051,6 @@ local has_invuln=false
 local invuln_duration=30
 local collision_points={left={},right={},top={}}
 local has_collision={left=false,right=false,top=false}
-local number=number
 for i=1,8 do
 add(collision_points.left,{x=0,y=0})
 add(collision_points.right,{x=0,y=0})
@@ -1104,11 +1136,11 @@ local function shoot()
 if ammo > 0 then
 projectiles.fire_bullet(number)
 ammo-=1
-if not playing.gun_sound and number==2 then
+if role=="gunner" and not playing.gun_sound then
 sfx(-1,number)
 sfx(36,number)
 playing.gun_sound=true
-elseif number==1 then
+elseif role=="driller" then
 sfx(-1,number)
 sfx(34,number)
 end
@@ -1128,7 +1160,6 @@ local function give_health(amount)
 health+=amount
 if health>max_health then health=max_health end
 end
-local function give_points(amount) points+=amount end
 local function move_player()
 if is.moving.up and not has_collision.top then
 if y>102 then
@@ -1203,24 +1234,6 @@ x={x,x+7},
 y={y-3,y+3},
 };
 end
-local function check_if_hit_by_creature()
-local player_box = get_player_hitbox(player)
-local creature_box
-local no_creatures = #creatures
-if no_creatures>0 and not player.is_drilling then
-for i=1,no_creatures do
-creature_box = get_creature_hitbox(creatures[i])
-if are_colliding(player_box, creature_box) then
-if creatures[i].creature_damage>0 and not player.has_invuln then
-player.health -= creatures[i].creature_damage
-player.is_hit = true
-player.hit_since = 0
-player.has_invuln = true
-end
-end
-end
-end
-end
 local function handle_being_hit()
 if player.is_hit and player.hit_since>player.invuln_duration then
 player.hit_since = 0
@@ -1235,15 +1248,15 @@ end
 if player.health <= 0 then game_status = "end_screen" end
 end
 local function draw_gun()
-pset(x+6,y,5)
-pset(x+6,y+1,5)
-if number==2 then
-pset(x+5,y,5)
-pset(x+7,y,5)
-pset(x+7,y+1,5)
-pset(x+7,y+2,5)
-pset(x+7,y+3,5)
-pset(x+7,y+4,5)
+pset(x+6,y,6)
+pset(x+6,y+1,6)
+if role=="gunner" then
+pset(x+5,y,6)
+pset(x+7,y,6)
+pset(x+7,y+1,6)
+pset(x+7,y+2,6)
+pset(x+7,y+3,6)
+pset(x+7,y+4,6)
 end
 end
 local function draw_drills()
@@ -1268,7 +1281,7 @@ elseif game_status=="title_screen" then
 moving=(is.moving.down or is.moving.up
 or is.moving.left or is.moving.right)
 end
-local sprite=number==1 and 48 or 32
+local sprite=role=="driller" and 48 or 32
 local speed=1
 if game_status=="playing" and is.moving.up then speed=2 end
 if moving then sprite+=1 end
@@ -1290,6 +1303,9 @@ local function hit_f() return is_hit end
 local function health_f() return health end
 local function ammo_f() return ammo end
 local function fuel_f() return fuel end
+local function points_f() return points end
+local function change_role(role) role=role end
+local function give_points(amount) points+=amount end
 return {
 x=x_f,
 y=y_f,
@@ -1309,13 +1325,17 @@ health=health_f,
 number=number,
 ammo=ammo_f,
 fuel=fuel_f,
+points=points_f,
+change_role=change_role,
 max_ammo=max_ammo,
 max_fuel=max_fuel,
+drills_damage=drills_damage,
 }
 end
 function new_projectiles()
 local bullets=new_entity_container()
 local spits=new_entity_container()
+local bullet_damage=10
 local function update()
 for i=bullets.size(),1,-1 do
 bullets.get(i).y-=6
@@ -1331,8 +1351,8 @@ end
 end
 end
 local function fire_bullet(number)
-player=number==1 and player_1 or player_2
-bullets.add({x=player.x(),y=(player.y())-8})
+local player=number==1 and player_1 or player_2
+bullets.add({x=player.x(),y=(player.y())-8,owner=player})
 end
 local function spit(spit_type, x, y)
 local sprite,speed,size,hitbox,persists,damage
@@ -1399,24 +1419,6 @@ for i=1,spits.size() do
 spits.get(i).draw()
 end
 end
-local function check_bullet_collision()
-local no_creatures = #creatures
-local no_bullets = #bullets
-if no_creatures>0 and no_bullets>0 then
-local creature_box, bullet_box
-for i=no_creatures,1,-1 do
-creature_box = get_creature_hitbox(creatures[i])
-no_bullets = #bullets
-for j=no_bullets,1,-1 do
-bullet_box = get_bullet_hitbox(bullets[j])
-if are_colliding(bullet_box, creature_box) then
-deli(bullets,j)
-creatures[i].damage(10)
-end
-end
-end
-end
-end
 local function check_spit_collision()
 local no_spits = #spits
 local player_box = get_player_hitbox(player)
@@ -1439,10 +1441,28 @@ end
 end
 end
 end
+function get_bullet_hitbox(bullet)
+return {
+x={bullet.x+6,bullet.x+6},
+y={bullet.y+5,bullet.y+15},
+};
+end
+function get_spit_hitbox(spit)
+local x1=spit.hitbox.x[1]+spit.x()-1;
+local x2=spit.hitbox.x[2]+spit.x()-1;
+local y1=spit.hitbox.y[1]+spit.y()-1;
+local y2=spit.hitbox.y[2]+spit.y()-1;
+return {x={x1,x2}, y={y1,y2}};
+end
 return {
 update=update,
 draw=draw,
 fire_bullet=fire_bullet,
+spits_list=spits,
+bullets_list=bullets,
+get_bullet_hitbox=get_bullet_hitbox,
+get_spit_hitbox=get_spit_hitbox,
+bullet_damage=bullet_damage,
 }
 end
 function spawn_prop()

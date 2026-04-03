@@ -28,23 +28,24 @@ function praetorian(x,y)
         end
     end
 
-    local function damage(damage_received)
+    local function damage(damage_received,player)
         sfx(33)
-        was_damaged=true
+        damaged_since=0
         health-=damage_received
         if health<=0 then
             alive=false
             add_spit("praet_cloud",x,y)
             del(spits,spit)
-            player.points+=100
+            player.give_points(100)
         end
     end
 
     local function draw()
         local sprite=3
         local x_flip=frame%20==0
-        if damaged_since<15 then sprite+=2 end
+        if damaged_since<15 then pal(3,2) end
         spr(sprite,x,y,2,2,x_flip,false)
+        pal()
     end
 
     local function x_f() return x end

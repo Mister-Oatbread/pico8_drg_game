@@ -19,14 +19,14 @@ function egg(x,y)
         frame=frame%10+1
     end
 
-    local function damage(damage_received)
+    local function damage(damage_received,player)
         sfx(32)
         health-=damage_received
         damaged_since=0
         if health<=0 then
-            give_ammo(.5)
-            give_health(1)
-            player.points+=50
+            player.give_ammo(.5)
+            player.give_health(1)
+            player.give_points(50)
             no_scout_killed=false
             alive=false
         end
@@ -35,8 +35,9 @@ function egg(x,y)
     local function draw()
         local sprite=51
         if display_alt then sprite+=1 end
-        if damaged_since<15 then sprite+=2 end
+        if damaged_since<15 then pal(12,2) end
         spr(sprite,x,y,1,1,display_alt,false)
+        pal()
     end
 
     local function x_f() return x end

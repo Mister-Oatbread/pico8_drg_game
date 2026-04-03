@@ -39,22 +39,23 @@ function mactera(x,y)
         frame=frame%16+1
     end
 
-    local function damage(damage_received)
+    local function damage(damage_received,player)
         sfx(33)
         damaged_since=0
         health-=damage_received
         if health<=0 then
             alive=false
             no_cave_angels_killed=false
-            player.points+=30
+            player.give_points(30)
         end
     end
 
     local function draw()
         local sprite=17
         if wings_open then sprite+=1 end
-        if damaged_since<15 then sprite+=2 end
+        if damaged_since<15 then pal(3,2) end
         spr(sprite,x,y)
+        pal()
     end
 
     local function x_f() return x end

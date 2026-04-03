@@ -4,6 +4,7 @@
 function new_projectiles()
     local bullets=new_entity_container()
     local spits=new_entity_container()
+    local bullet_damage=10
 
     local function update()
         for i=bullets.size(),1,-1 do
@@ -22,8 +23,8 @@ function new_projectiles()
 
     -- sends a bullet out from the current location of the player
     local function fire_bullet(number)
-        player=number==1 and player_1 or player_2
-        bullets.add({x=player.x(),y=(player.y())-8})
+        local player=number==1 and player_1 or player_2
+        bullets.add({x=player.x(),y=(player.y())-8,owner=player})
     end
 
     -- fires a general spit from a creature, which gets constructed differently
@@ -105,26 +106,6 @@ function new_projectiles()
     end
 
     -- try to collide all bullets with all creatures
-    local function check_bullet_collision()
-        local no_creatures = #creatures
-        local no_bullets = #bullets
-        if no_creatures>0 and no_bullets>0 then
-            local creature_box, bullet_box
-
-            for i=no_creatures,1,-1 do
-                creature_box = get_creature_hitbox(creatures[i])
-                no_bullets = #bullets
-                for j=no_bullets,1,-1 do
-                    bullet_box = get_bullet_hitbox(bullets[j])
-
-                    if are_colliding(bullet_box, creature_box) then
-                        deli(bullets,j)
-                        creatures[i].damage(10)
-                    end
-                end
-            end
-        end
-    end
 
     -- checks if one of the spits is currently colliding with the player
     local function check_spit_collision()
@@ -153,10 +134,32 @@ function new_projectiles()
         end
     end
 
+    -- takes in bullet and returns hitbox ready to be processed by are_colliding()
+    function get_bullet_hitbox(bullet)
+        return {
+            x={bullet.x+6,bullet.x+6},
+            y={bullet.y+5,bullet.y+15},
+        };
+    end
+
+    -- takes spit and returns the corresponding hitbox
+    function get_spit_hitbox(spit)
+        local x1=spit.hitbox.x[1]+spit.x()-1;
+        local x2=spit.hitbox.x[2]+spit.x()-1;
+        local y1=spit.hitbox.y[1]+spit.y()-1;
+        local y2=spit.hitbox.y[2]+spit.y()-1;
+        return {x={x1,x2}, y={y1,y2}};
+    end
+
     return {
         update=update,
         draw=draw,
         fire_bullet=fire_bullet,
+        spits_list=spits,
+        bullets_list=bullets,
+        get_bullet_hitbox=get_bullet_hitbox,
+        get_spit_hitbox=get_spit_hitbox,
+        bullet_damage=bullet_damage,
     }
 end
 

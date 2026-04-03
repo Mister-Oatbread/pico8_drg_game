@@ -36,7 +36,7 @@ function new_hud()
             draw_prog_bar(player.fuel()/player.max_fuel,x+9,202)
         end
         spr(62,x,210)
-        print(points,x+10,211,7)
+        print(player.points(),x+10,211,7)
     end
 
     return {

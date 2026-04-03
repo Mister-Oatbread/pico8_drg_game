@@ -79,14 +79,14 @@ function new_map()
             size=2
         end
         sprite=choose_one(sprites)
-        return {
+        obstacles.add({
             sprite=sprite,
             x=x,
             y=y,
             size=size,
             x_flip=coinflip(),
             y_flip=coinflip(),
-        }
+        })
     end
 
     -- slides the floor one frame to the bottom, and realigns the floor if needed

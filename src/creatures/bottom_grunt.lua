@@ -21,7 +21,8 @@ function bottom_grunt(x,y)
         up_down_frame=(up_down_frame+1)%up_down_cap
     end
 
-    local function damage(damage_received)
+    local function damage(damage_received,player)
+        -- nothing ever happens here HAAA
     end
 
     local function draw()

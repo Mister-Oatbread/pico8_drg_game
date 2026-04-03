@@ -89,8 +89,61 @@ function new_game_logic()
         end
     end
 
+    local function damage_creatures()
+        local player_box=player_1.get_hitbox()
+        local creature_box,bullet_box,drills_box
+        local creatures_list=creatures.creatures_list
+        local bullets=projectiles.bullets_list
+        local creature
+
+        -- get drills hitbox if player is drilling, else assign meaningless
+        -- hitbox that can never collide
+        if player_1.is_drilling() then
+            drills_box=player_1.get_damaging_drills_hitbox()
+        else
+            drills_box={x={3,4},y={3,4}}
+        end
+
+        for i=1,creatures_list.size() do
+            creature=creatures_list.get(i)
+            creature_box=get_hitbox(creature)
+            for j=1,bullets.size() do
+                bullet_box=projectiles.get_bullet_hitbox(bullets.get(j))
+                if are_colliding(bullet_box, creature_box) then
+                    creature.damage(projectiles.bullet_damage,player_1)
+                end
+            end
+            if are_colliding(creature_box,drills_box) then
+                creature.damage(player_1.drills_damage,player_1)
+            end
+        end
+
+    --     local function check_bullet_collision()
+    --         local no_creatures = #creatures
+    --         local no_bullets = #bullets
+    --         if no_creatures>0 and no_bullets>0 then
+    --             local creature_box, bullet_box
+    --
+    --             for i=no_creatures,1,-1 do
+    --                 creature_box = get_creature_hitbox(creatures[i])
+    --                 no_bullets = #bullets
+    --                 for j=no_bullets,1,-1 do
+    --                     bullet_box = get_bullet_hitbox(bullets[j])
+    --
+    --                     if are_colliding(bullet_box, creature_box) then
+    --                         deli(bullets,j)
+    --                         creatures[i].damage(10)
+    --                     end
+    --                 end
+    --             end
+    --         end
+    --     end
+    end
+
     local function update()
         mine_resources()
+
+        damage_creatures()
 
         if rnd()<creature_spawn_rate then
             creatures.spawn()

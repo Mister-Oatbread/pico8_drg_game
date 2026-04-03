@@ -19,22 +19,23 @@ function grunt(x,y)
         frame=frame%12+1
     end
 
-    local function damage(damage_received)
+    local function damage(damage_received,player)
         sfx(33)
         damaged_since=0
         health-=damage_received
         x_flip=frame>6
         if health<=0 then
             alive=false
-            player.points+=10
+            player.give_points(10)
         end
     end
 
     local function draw()
         local sprite=1
-        if damaged_since<15 then sprite+=1 end
+        if damaged_since<15 then pal(4,2) end
         local x_flip=frame>6
         spr(sprite,x,y,1,1,x_flip,false)
+        pal()
     end
 
     local function x_f() return x end

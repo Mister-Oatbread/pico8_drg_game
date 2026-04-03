@@ -19,21 +19,22 @@ function slasher(x,y)
         frame=frame%8+1
     end
 
-    local function damage(damage_received)
+    local function damage(damage_received,player)
         sfx(33)
         was_damaged=true
         health-=damage_received
         if health<=0 then
             alive=false
-            player.points+=30
+            player.give_points(30)
         end
     end
 
     local function draw()
         local sprite=2
         local x_flip=frame%4==0
-        if damaged_since<15 then sprite+=1 end
+        if damaged_since<15 then pal(4,2) end
         spr(sprite,x,y,1,1,x_flip,false)
+        pal()
     end
 
     local function x_f() return x end

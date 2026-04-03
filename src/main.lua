@@ -2,11 +2,11 @@
 
 function _init()
     -- hacky stuff start
-    music(-1)
-    music(1)
+    -- music(-1)
+    -- music(1)
     -- hacky stuff end
 
-    player_1=new_player(1)
+    player_1=new_player(1,"gunner")
     player_2=new_player(2)
     projectiles=new_projectiles()
     resources=new_resources()

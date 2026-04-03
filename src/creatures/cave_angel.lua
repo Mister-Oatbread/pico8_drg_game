@@ -23,7 +23,7 @@ function cave_angel(x,y)
         frame=frame%60+1
     end
 
-    local function damage(damage_received)
+    local function damage(damage_received,player)
         sfx(33)
         damaged_since=0
         health-=damage_received
@@ -35,9 +35,10 @@ function cave_angel(x,y)
 
     local function draw()
         local sprite=14
-        if damaged_since<15 then sprite+=2 end
+        if damaged_since<15 then pal(12,2) end
         if not wings_open then sprite+=1 end
         spr(sprite,x,y,1,1,x_flip,false)
+        pal()
     end
 
     local function x_f() return x end

@@ -51,11 +51,11 @@ function new_creatures()
 
     -- takes in creature and returns hitbox ready to be
     -- processed by are_colliding()
-    function get_hitbox()
-        local x1=hitbox.x[1]+x()-1;
-        local x2=hitbox.x[2]+x()-1;
-        local y1=hitbox.y[1]+y()-1;
-        local y2=hitbox.y[2]+y()-1;
+    function get_hitbox(creature)
+        local x1=creature.hitbox.x[1]+creature.x()-1;
+        local x2=creature.hitbox.x[2]+creature.x()-1;
+        local y1=creature.hitbox.y[1]+creature.y()-1;
+        local y2=creature.hitbox.y[2]+creature.y()-1;
         return {x={x1,x2},y={y1,y2}};
     end
 
@@ -64,7 +64,7 @@ function new_creatures()
         update=update,
         draw=draw,
         get_hitbox=get_hitbox,
-        get_creatures=creatures_list,
+        creatures_list=creatures_list,
     }
 end
 

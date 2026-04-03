@@ -19,13 +19,13 @@ function loot_bug(x,y)
         frame=frame%30+1
     end
 
-    local function damage(damage_received)
+    local function damage(damage_received,player)
         sfx(33)
         damaged_since=0
         health-=damage_received
         if health<=0 then
             alive=false
-            give_ammo(.2)
+            player.give_ammo(.2)
             no_lootbugs_killed=false
             add_killed_lootbug_name()
         end
@@ -34,8 +34,9 @@ function loot_bug(x,y)
     local function draw()
         local sprite=30
         local x_flip=frame>30
-        if damaged_since<15 then sprite+=1 end
+        if damaged_since<15 then pal(15,2) end
         spr(sprite,x,y,1,1,x_flip,false)
+        pal()
     end
 
     local function x_f() return x end

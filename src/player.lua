@@ -3,9 +3,11 @@
 -- this file contains the logic for the player character
 
 -- initialize player
-function new_player(number)
+function new_player(number,role)
     local x=148
     local y=200
+    local number=number
+    local role=role
     local is={
         moving={up,down,left,right},
         shooting=false,
@@ -13,17 +15,18 @@ function new_player(number)
         mining=false,
         rns=false}
     local was_mining=false
+    local drills_damage=4
     local mined_since=0
     local playing={drill_sound=false,gun_sound=false}
     local moving_frame=0
     local points=0
-    local ammo=number==1 and 25 or 100
-    local fuel=number==1 and 150 or 0
-    local max_ammo=number==1 and 25 or 100
-    local max_fuel=number==1 and 150 or 0
+    local ammo=role=="driller" and 25 or 100
+    local fuel=role=="driller" and 150 or 0
+    local max_ammo=role=="driller" and 25 or 100
+    local max_fuel=role=="driller" and 150 or 0
     local shots_fired=false
     local shot_delay_counter=0
-    local max_shot_delay=number==1 and 3 or 1
+    local max_shot_delay=role=="driller" and 3 or 1
     local health=3
     local max_health=3
     local is_hit=false
@@ -32,7 +35,6 @@ function new_player(number)
     local invuln_duration=30
     local collision_points={left={},right={},top={}}
     local has_collision={left=false,right=false,top=false}
-    local number=number
     for i=1,8 do
         add(collision_points.left,{x=0,y=0})
         add(collision_points.right,{x=0,y=0})
@@ -40,6 +42,7 @@ function new_player(number)
     end
 
     -- checks inputs and writes them to the state of the player
+    -- can be done for both players
     local function fetch_inputs()
         local p=number-1
         is.moving.up=btn(2,p)
@@ -109,6 +112,8 @@ function new_player(number)
         end
     end
 
+    -- places mined ground under the player, even though
+    -- "drilled_ground" is called
     local function mine()
         map.spawn_drilled_ground(53,x,y-2)
         sfx(-1,number)
@@ -141,11 +146,11 @@ function new_player(number)
         if ammo > 0 then
             projectiles.fire_bullet(number)
             ammo-=1
-            if not playing.gun_sound and number==2 then
+            if role=="gunner" and not playing.gun_sound then
                 sfx(-1,number)
                 sfx(36,number)
                 playing.gun_sound=true
-            elseif number==1 then
+            elseif role=="driller" then
                 sfx(-1,number)
                 sfx(34,number)
             end
@@ -172,8 +177,8 @@ function new_player(number)
         if health>max_health then health=max_health end
     end
 
-    local function give_points(amount) points+=amount end
-
+    -- move the player normally, except if a gunner is currently shooting,
+    -- then move with half the speed
     local function move_player()
         if is.moving.up and not has_collision.top then
             if y>102 then
@@ -262,26 +267,6 @@ function new_player(number)
         };
     end
 
-    -- checks if any hostile creature is currently touching the player
-    local function check_if_hit_by_creature()
-        local player_box = get_player_hitbox(player)
-        local creature_box
-        local no_creatures = #creatures
-
-        if no_creatures>0 and not player.is_drilling then
-            for i=1,no_creatures do
-                creature_box = get_creature_hitbox(creatures[i])
-                if are_colliding(player_box, creature_box) then
-                    if creatures[i].creature_damage>0 and not player.has_invuln then
-                        player.health -= creatures[i].creature_damage
-                        player.is_hit = true
-                        player.hit_since = 0
-                        player.has_invuln = true
-                    end
-                end
-            end
-        end
-    end
 
     local function handle_being_hit()
         if player.is_hit and player.hit_since>player.invuln_duration then
@@ -300,15 +285,15 @@ function new_player(number)
     end
 
     local function draw_gun()
-        pset(x+6,y,5)
-        pset(x+6,y+1,5)
-        if number==2 then
-            pset(x+5,y,5)
-            pset(x+7,y,5)
-            pset(x+7,y+1,5)
-            pset(x+7,y+2,5)
-            pset(x+7,y+3,5)
-            pset(x+7,y+4,5)
+        pset(x+6,y,6)
+        pset(x+6,y+1,6)
+        if role=="gunner" then
+            pset(x+5,y,6)
+            pset(x+7,y,6)
+            pset(x+7,y+1,6)
+            pset(x+7,y+2,6)
+            pset(x+7,y+3,6)
+            pset(x+7,y+4,6)
         end
     end
 
@@ -338,7 +323,7 @@ function new_player(number)
             moving=(is.moving.down or is.moving.up
                 or is.moving.left or is.moving.right)
         end
-        local sprite=number==1 and 48 or 32
+        local sprite=role=="driller" and 48 or 32
         local speed=1
         if game_status=="playing" and is.moving.up then speed=2 end
 
@@ -364,6 +349,9 @@ function new_player(number)
     local function health_f() return health end
     local function ammo_f() return ammo end
     local function fuel_f() return fuel end
+    local function points_f() return points end
+    local function change_role(role) role=role end
+    local function give_points(amount) points+=amount end
 
     return {
         x=x_f,
@@ -384,8 +372,11 @@ function new_player(number)
         number=number,
         ammo=ammo_f,
         fuel=fuel_f,
+        points=points_f,
+        change_role=change_role,
         max_ammo=max_ammo,
         max_fuel=max_fuel,
+        drills_damage=drills_damage,
     }
 end
 
