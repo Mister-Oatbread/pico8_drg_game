@@ -18,10 +18,10 @@ function mactera(x,y)
         if did_spit then
         -- did already spit, fly along
             y+=1
-            if frame%2==0 then y+=1 end
+            if frame%2==1 then y+=1 end
         elseif performing_spit then
         -- currently spitting, perform spit animation
-            if frame%2==0 then x-=sgn(x-tracked_player.x()) end
+            if frame%2==1 then x-=sgn(x-tracked_player.x()) end
             spit_countdown-=1
             if spit_countdown==1 then
                 did_spit=true
@@ -31,7 +31,7 @@ function mactera(x,y)
         else
         -- currently homing
             y+=1
-            if frame%2==0 then
+            if frame%2==1 then
                 y+=1
                 x-=sgn(x-tracked_player.x())
             end

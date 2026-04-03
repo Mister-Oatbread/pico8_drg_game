@@ -48,8 +48,8 @@ local wings_open
 local function update()
 if game_status=="playing" then
 y+=1
-if frame%45==0 then x+=sgn(x-player_1.x()) end
-if frame%15==0 then y+=1 end
+if frame%45==1 then x+=sgn(x-player_1.x()) end
+if frame%30==1 then y+=1 end
 end
 wings_open=frame>45
 damaged_since+=1
@@ -90,15 +90,13 @@ local frame=1
 local damaged_since=60
 local x=x
 local y=y
-local display_alt=false
 local health=30
 local alive=true
 local creature_damage=0
 local hitbox={x={2,7},y={1,8}}
 local function update()
 y+=1
-if frame%5==0 then y-=1 end
-display_alt=frame>5
+if frame%5==1 then y-=1 end
 damaged_since+=1
 frame=frame%10+1
 end
@@ -115,10 +113,9 @@ alive=false
 end
 end
 local function draw()
-local sprite=51
-if display_alt then sprite+=1 end
+local x_flip=frame>5
 if damaged_since<15 then pal(12,2) end
-spr(sprite,x,y,1,1,display_alt,false)
+spr(51,x,y,1,1,x_flip,false)
 pal()
 end
 local function x_f() return x end
@@ -147,7 +144,7 @@ local hitbox={x={1,8},y={1,8}}
 local function update()
 if game_status=="playing" then
 y+=1
-if frame%6==0 then y+=1 end
+if frame%6==1 then y+=1 end
 end
 damaged_since+=1
 frame=frame%12+1
@@ -156,17 +153,15 @@ local function damage(damage_received,player)
 sfx(33)
 damaged_since=0
 health-=damage_received
-x_flip=frame>6
 if health<=0 then
 alive=false
 player.give_points(10)
 end
 end
 local function draw()
-local sprite=1
 if damaged_since<15 then pal(4,2) end
 local x_flip=frame>6
-spr(sprite,x,y,1,1,x_flip,false)
+spr(1,x,y,1,1,x_flip,false)
 pal()
 end
 local function x_f() return x end
@@ -195,10 +190,10 @@ local hitbox={x={2,7},y={1,7}}
 local function update()
 if game_status=="playing" then
 y+=1
-if frame%30==0 then y+=1 end
+if frame%30==1 then y+=1 end
 end
 damaged_since+=1
-frame=frame%30+1
+frame=frame%60+1
 end
 local function damage(damage_received,player)
 sfx(33)
@@ -292,9 +287,9 @@ local tracked_player=choose_one(players)
 local function update()
 if did_spit then
 y+=1
-if frame%2==0 then y+=1 end
+if frame%2==1 then y+=1 end
 elseif performing_spit then
-if frame%2==0 then x-=sgn(x-tracked_player.x()) end
+if frame%2==1 then x-=sgn(x-tracked_player.x()) end
 spit_countdown-=1
 if spit_countdown==1 then
 did_spit=true
@@ -303,7 +298,7 @@ projectiles.spit_spit("mactera_spit",x,y)
 end
 else
 y+=1
-if frame%2==0 then
+if frame%2==1 then
 y+=1
 x-=sgn(x-tracked_player.x())
 end
@@ -327,6 +322,72 @@ local sprite=17
 if frame>8 then sprite+=1 end
 if damaged_since<15 then pal(3,2) end
 spr(sprite,x,y)
+pal()
+end
+local function x_f() return x end
+local function y_f() return y end
+local function is_alive() return alive end
+return {
+x=x_f,
+y=y_f,
+update=update,
+damage=damage,
+creature_damage=creature_damage,
+draw=draw,
+hitbox=hitbox,
+is_alive=is_alive,
+}
+end
+function menace(x,y)
+local frame=0
+local x=x
+local y=y
+local x_flip=false
+local y_flip=false
+local damaged_since=60
+local health=60
+local alive=true
+local creature_damage=0
+local hitbox={x={1,8},y={1,8}}
+local tracked_player=choose_one(players)
+local function update()
+if game_status=="playing" then
+y+=1
+end
+x_flip=tracked_player.x()-x>0
+y_flip=tracked_player.y()-y>0
+if frame%10==1 then
+local x_shot_position=x_flip and x+8 or x
+local y_shot_position=y_flip and y+8 or y
+local angle=atan2(
+tracked_player.x()-x_shot_position,
+tracked_player.y()-y_shot_position
+)
+local x_vel=cos(angle)
+local y_vel=sin(angle)
+projectiles.add_menace_spit(
+x_shot_position,
+y_shot_position,
+x_vel,
+y_vel
+)
+end
+frame=frame%10+1
+damaged_since+=1
+end
+local function damage(damage_received,player)
+sfx(33)
+damaged_since=0
+health-=damage_received
+x_flip=frame>6
+if health<=0 then
+alive=false
+player.give_points(10)
+end
+end
+local function draw()
+if damaged_since<15 then pal(12,2) end
+spr(11,x,y,1,1,x_flip,y_flip)
 pal()
 end
 local function x_f() return x end
@@ -388,6 +449,40 @@ hitbox=hitbox,
 is_alive=is_alive,
 }
 end
+function oppressor(x,y)
+local frame=1
+local x=x
+local y=y
+local alive=true
+local creature_damage=1
+local hitbox={x={2,15},y={1,14}}
+local function update()
+if game_status=="playing" then
+y+=1
+if frame%30==1 then y+=1 end
+end
+frame=frame%60+1
+end
+local function damage(damage_received,player)
+end
+local function draw()
+local x_flip=frame>30
+spr(5,x,y,2,2,x_flip,false)
+end
+local function x_f() return x end
+local function y_f() return y end
+local function is_alive() return alive end
+return {
+x=x_f,
+y=y_f,
+update=update,
+damage=damage,
+creature_damage=creature_damage,
+draw=draw,
+hitbox=hitbox,
+is_alive=is_alive,
+}
+end
 function praetorian(x,y)
 local frame=1
 local x=x
@@ -402,7 +497,7 @@ local spit
 local function update()
 if game_status=="playing" then
 y+=1
-if not spitting and frame%20==0 then y+=1 end
+if not spitting and frame%20==1 then y+=1 end
 end
 if not spitting then x_flip=frame>20 end
 damaged_since+=1
@@ -428,10 +523,9 @@ player.give_points(100)
 end
 end
 local function draw()
-local sprite=3
 local x_flip=frame>20
 if damaged_since<15 then pal(3,2) end
-spr(sprite,x,y,2,2,x_flip,false)
+spr(3,x,y,2,2,x_flip,false)
 pal()
 end
 local function x_f() return x end
@@ -460,7 +554,7 @@ local hitbox={x={1,8},y={1,8}}
 local function update()
 if game_status=="playing" then
 y+=1
-if frame%4==0 then y+=1 end
+if frame%4==1 then y+=1 end
 end
 damaged_since+=1
 frame=frame%8+1
@@ -475,10 +569,9 @@ player.give_points(30)
 end
 end
 local function draw()
-local sprite=2
 local x_flip=frame>4
 if damaged_since<15 then pal(4,2) end
-spr(sprite,x,y,1,1,x_flip,false)
+spr(2,x,y,1,1,x_flip,false)
 pal()
 end
 local function x_f() return x end
@@ -534,6 +627,8 @@ creature_ratios={
 {1,praetorian},
 {2,slasher},
 {1,mactera},
+{1,menace},
+{1,oppressor},
 }
 resource_ratios={
 {1,"gold"},
@@ -544,7 +639,7 @@ obstacle_ratios={
 {15,"small"},
 {1,"big"},
 }
-creature_variety=6
+creature_variety=8
 resource_variety=3
 obstacle_variety=2
 if difficulty==1 then
@@ -1346,20 +1441,7 @@ end
 function new_projectiles()
 local bullets=new_entity_container()
 local spits=new_entity_container()
-local function update()
-for i=bullets.size(),1,-1 do
-bullets.get(i).y-=6
-if bullets.get(i).y<=91 then
-bullets.deletei(i)
-end
-end
-for i=spits.size(),1,-1 do
-spits.get(i).update()
-if spits.get(i).y()>=240 then
-spits.deletei(i)
-end
-end
-end
+local menace_spits=new_entity_container()
 local function fire_bullet(number)
 local player=number==1 and player_1 or player_2
 bullets.add({
@@ -1424,8 +1506,34 @@ damage=damage,
 hitbox=hitbox,
 }
 end
-local function add_spit(spit_type,x,y)
-add(spits,spit(spit_type,x,y))
+local function spit_spit(spit_type,x,y)
+spits.add(new_spit(spit_type,x,y))
+end
+local function add_menace_spit(x,y,x_vel,y_vel)
+menace_spits.add({x=x,y=y,x_vel=x_vel,y_vel=y_vel})
+end
+local function update()
+for i=bullets.size(),1,-1 do
+bullets.get(i).y-=6
+if bullets.get(i).y<=91 then
+bullets.deletei(i)
+end
+end
+for i=spits.size(),1,-1 do
+spits.get(i).update()
+if spits.get(i).y()>=240 then
+spits.deletei(i)
+end
+end
+local spit
+for i=menace_spits.size(),1,-1 do
+spit=menace_spits.get(i)
+spit.x+=spit.x_vel
+spit.y+=spit.y_vel
+if spit.x<99 or spit.x>230 or spit.y<99 or spit.y>230 then
+menace_spits.deletei(i)
+end
+end
 end
 local function draw()
 for i=1,bullets.size() do
@@ -1433,6 +1541,12 @@ spr(29,bullets.get(i).x, bullets.get(i).y)
 end
 for i=1,spits.size() do
 spits.get(i).draw()
+end
+local x,y
+for i=1,menace_spits.size() do
+x=flr(menace_spits.get(i).x)
+y=flr(menace_spits.get(i).y)
+pset(x,y,12)
 end
 end
 local function check_spit_collision()
@@ -1457,10 +1571,6 @@ end
 end
 end
 end
-local function spit_spit(type,x,y)
-local spit=new_spit(type,x,y)
-spits.add(spit)
-end
 function get_bullet_hitbox(bullet)
 return {
 x={bullet.x+6,bullet.x+6},
@@ -1479,6 +1589,7 @@ update=update,
 draw=draw,
 fire_bullet=fire_bullet,
 spit_spit=spit_spit,
+add_menace_spit=add_menace_spit,
 spits_list=spits,
 bullets_list=bullets,
 get_bullet_hitbox=get_bullet_hitbox,

@@ -4,21 +4,7 @@
 function new_projectiles()
     local bullets=new_entity_container()
     local spits=new_entity_container()
-
-    local function update()
-        for i=bullets.size(),1,-1 do
-            bullets.get(i).y-=6
-            if bullets.get(i).y<=91 then
-                bullets.deletei(i)
-            end
-        end
-        for i=spits.size(),1,-1 do
-            spits.get(i).update()
-            if spits.get(i).y()>=240 then
-                spits.deletei(i)
-            end
-        end
-    end
+    local menace_spits=new_entity_container()
 
     -- sends a bullet out from the current location of the player
     local function fire_bullet(number)
@@ -97,8 +83,36 @@ function new_projectiles()
     end
 
     -- adds a spit to the spits list
-    local function add_spit(spit_type,x,y)
-        add(spits,spit(spit_type,x,y))
+    local function spit_spit(spit_type,x,y)
+        spits.add(new_spit(spit_type,x,y))
+    end
+
+    local function add_menace_spit(x,y,x_vel,y_vel)
+        menace_spits.add({x=x,y=y,x_vel=x_vel,y_vel=y_vel})
+    end
+
+    local function update()
+        for i=bullets.size(),1,-1 do
+            bullets.get(i).y-=6
+            if bullets.get(i).y<=91 then
+                bullets.deletei(i)
+            end
+        end
+        for i=spits.size(),1,-1 do
+            spits.get(i).update()
+            if spits.get(i).y()>=240 then
+                spits.deletei(i)
+            end
+        end
+        local spit
+        for i=menace_spits.size(),1,-1 do
+            spit=menace_spits.get(i)
+            spit.x+=spit.x_vel
+            spit.y+=spit.y_vel
+            if spit.x<99 or spit.x>230 or spit.y<99 or spit.y>230 then
+                menace_spits.deletei(i)
+            end
+        end
     end
 
     local function draw()
@@ -108,9 +122,13 @@ function new_projectiles()
         for i=1,spits.size() do
             spits.get(i).draw()
         end
+        local x,y
+        for i=1,menace_spits.size() do
+            x=flr(menace_spits.get(i).x)
+            y=flr(menace_spits.get(i).y)
+            pset(x,y,12)
+        end
     end
-
-    -- try to collide all bullets with all creatures
 
     -- checks if one of the spits is currently colliding with the player
     local function check_spit_collision()
@@ -139,12 +157,6 @@ function new_projectiles()
         end
     end
 
-    local function spit_spit(type,x,y)
-        local spit=new_spit(type,x,y)
-        spits.add(spit)
-    end
-
-
     -- takes in bullet and returns hitbox ready to be processed by are_colliding()
     function get_bullet_hitbox(bullet)
         return {
@@ -167,6 +179,7 @@ function new_projectiles()
         draw=draw,
         fire_bullet=fire_bullet,
         spit_spit=spit_spit,
+        add_menace_spit=add_menace_spit,
         spits_list=spits,
         bullets_list=bullets,
         get_bullet_hitbox=get_bullet_hitbox,

@@ -15,7 +15,7 @@ function praetorian(x,y)
     local function update()
         if game_status=="playing" then
             y+=1
-            if not spitting and frame%20==0 then y+=1 end
+            if not spitting and frame%20==1 then y+=1 end
         end
         if not spitting then x_flip=frame>20 end
         damaged_since+=1
@@ -44,10 +44,9 @@ function praetorian(x,y)
     end
 
     local function draw()
-        local sprite=3
         local x_flip=frame>20
         if damaged_since<15 then pal(3,2) end
-        spr(sprite,x,y,2,2,x_flip,false)
+        spr(3,x,y,2,2,x_flip,false)
         pal()
     end
 

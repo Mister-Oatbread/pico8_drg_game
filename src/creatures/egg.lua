@@ -5,7 +5,6 @@ function egg(x,y)
     local damaged_since=60
     local x=x
     local y=y
-    local display_alt=false
     local health=30
     local alive=true
     local creature_damage=0
@@ -13,8 +12,7 @@ function egg(x,y)
 
     local function update()
         y+=1
-        if frame%5==0 then y-=1 end
-        display_alt=frame>5
+        if frame%5==1 then y-=1 end
         damaged_since+=1
         frame=frame%10+1
     end
@@ -33,10 +31,9 @@ function egg(x,y)
     end
 
     local function draw()
-        local sprite=51
-        if display_alt then sprite+=1 end
+        local x_flip=frame>5
         if damaged_since<15 then pal(12,2) end
-        spr(sprite,x,y,1,1,display_alt,false)
+        spr(51,x,y,1,1,x_flip,false)
         pal()
     end
 

@@ -13,7 +13,7 @@ function slasher(x,y)
     local function update()
         if game_status=="playing" then
             y+=1
-            if frame%4==0 then y+=1 end
+            if frame%4==1 then y+=1 end
         end
         damaged_since+=1
         frame=frame%8+1
@@ -30,10 +30,9 @@ function slasher(x,y)
     end
 
     local function draw()
-        local sprite=2
         local x_flip=frame>4
         if damaged_since<15 then pal(4,2) end
-        spr(sprite,x,y,1,1,x_flip,false)
+        spr(2,x,y,1,1,x_flip,false)
         pal()
     end
 

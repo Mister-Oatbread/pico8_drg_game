@@ -13,7 +13,7 @@ function grunt(x,y)
     local function update()
         if game_status=="playing" then
             y+=1
-            if frame%6==0 then y+=1 end
+            if frame%6==1 then y+=1 end
         end
         damaged_since+=1
         frame=frame%12+1
@@ -23,7 +23,6 @@ function grunt(x,y)
         sfx(33)
         damaged_since=0
         health-=damage_received
-        x_flip=frame>6
         if health<=0 then
             alive=false
             player.give_points(10)
@@ -31,10 +30,9 @@ function grunt(x,y)
     end
 
     local function draw()
-        local sprite=1
         if damaged_since<15 then pal(4,2) end
         local x_flip=frame>6
-        spr(sprite,x,y,1,1,x_flip,false)
+        spr(1,x,y,1,1,x_flip,false)
         pal()
     end
 

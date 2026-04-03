@@ -12,6 +12,8 @@ function new_game_logic()
             {1,praetorian},
             {2,slasher},
             {1,mactera},
+            {1,menace},
+            {1,oppressor},
         }
         resource_ratios={
             {1,"gold"},
@@ -22,7 +24,7 @@ function new_game_logic()
             {15,"small"},
             {1,"big"},
         }
-        creature_variety=6
+        creature_variety=8
         resource_variety=3
         obstacle_variety=2
         if difficulty==1 then
