@@ -60,7 +60,6 @@ function _draw()
     map.draw_super_wall()
     hud.draw(player_1)
     if coop then hud.draw(player_2) end
-    print(creatures.get_creatures.size())
 
     performance_monitor.register_load()
     performance_monitor.print_current()
