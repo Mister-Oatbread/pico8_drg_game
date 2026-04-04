@@ -160,7 +160,7 @@ function new_player(number,role)
 
     -- give ammo based on max capacity and cap it
     local function give_ammo(percentage)
-        ammo=min(ammo_max_ammo*percentage,max_ammo)
+        ammo=min(ammo+max_ammo*percentage,max_ammo)
         fuel=min(fuel+max_fuel*percentage,max_fuel)
     end
 
@@ -226,27 +226,18 @@ function new_player(number,role)
     -- takes in player and returns hitbox ready to be processed by
     -- are_colliding()
     local function get_hitbox()
-        return {
-            x={x+1,x+6},
-            y={y,y+7},
-        };
+        return {x={x+1,x+6},y={y,y+7}}
     end
 
     -- takes in player and returns hitbox ready to be processed by
     -- are_colliding(), but for the drills instead of the player
-    local function get_drills_hitbox()
-        return {
-            x={x,x+7},
-            y={y-1,y+3},
-        };
+    local function get_mining_hitbox()
+        return {x={x,x+7},y={y-1,y+3}}
     end
 
     -- hitbox for hitting creatures
-    local function get_damaging_drills_hitbox()
-        return {
-            x={x,x+7},
-            y={y-3,y+3},
-        };
+    local function get_damaging_hitbox()
+        return {x={x,x+7},y={y-3,y+3}}
     end
 
 
@@ -328,6 +319,7 @@ function new_player(number,role)
     local function y_f() return y end
     local function drilling_f() return is.drilling or is.mining end
     local function shooting_f() return is.shooting end
+    local function mining_f() return mining_since<2 end
     local function rns_f() return is.rns end
     local function hit_f() return is_hit end
     local function health_f() return health end
@@ -347,11 +339,12 @@ function new_player(number,role)
         give_health=give_health,
         give_points=give_points,
         get_hitbox=get_hitbox,
-        get_drills_hitbox=get_drills_hitbox,
-        get_damaging_drills_hitbox=get_damaging_drills_hitbox,
+        get_mining_hitbox=get_mining_hitbox,
+        get_damaging_hitbox=get_damaging_hitbox,
         get_role=get_role,
         is_drilling=drilling_f,
         is_shooting=shooting_f,
+        is_mining=mining_f,
         is_rns=rns_f,
         is_hit=hit_f,
         health=health_f,

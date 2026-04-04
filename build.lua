@@ -678,28 +678,27 @@ resource_ratios,resource_variety
 )
 end
 local function mine_resources()
-local resource,colliding,drilling_1,drilling_2,res_hitbox
-local hitbox_drills_1=player_1.get_drills_hitbox()
-local hitbox_drills_2=player_2.get_drills_hitbox()
-drilling_1=player_1.is_drilling()
-drilling_2=player_2.is_drilling()
-if drilling_1 or drilling_2 then
+local resource,res_hitbox,player,mining_hitbox
+for p=1,#players do
+player=players[p]
+if player.is_drilling() or player.is_mining() then
+mining_hitbox=player.get_mining_hitbox()
 for i=resources.get_resources().size(),1,-1 do
 resource=resources.get_resources().get(i)
 res_hitbox=resources.get_hitbox(resource)
-colliding_1=are_colliding(res_hitbox,hitbox_drills)
-if colliding then
+if are_colliding(res_hitbox,mining_hitbox) then
 local res_type=resource.res_type
 if res_type=="red_sugar" then
-player_1.give_health(1)
+player.give_health(1)
 elseif res_type=="nitra" then
-player_1.give_ammo(.5)
+player.give_ammo(.5)
 elseif res_type=="gold" then
-points+=100
+player.give_points(100)
 end
 resources.get_resources().deletei(i)
 sfx(-1,3)
 sfx(38,3)
+end
 end
 end
 end
@@ -711,7 +710,7 @@ local creatures_list=creatures.creatures_list
 local bullets=projectiles.bullets_list
 local creature,bullet
 if player_1.is_drilling() then
-drills_box=player_1.get_damaging_drills_hitbox()
+drills_box=player_1.get_damaging_hitbox()
 else
 drills_box={x={3,4},y={3,4}}
 end
@@ -1264,7 +1263,7 @@ sfx(35,number)
 end
 end
 local function give_ammo(percentage)
-ammo=min(ammo_max_ammo*percentage,max_ammo)
+ammo=min(ammo+max_ammo*percentage,max_ammo)
 fuel=min(fuel+max_fuel*percentage,max_fuel)
 end
 local function give_health(amount)
@@ -1320,22 +1319,13 @@ shot_since+=1
 frame+=1
 end
 local function get_hitbox()
-return {
-x={x+1,x+6},
-y={y,y+7},
-};
+return {x={x+1,x+6},y={y,y+7}}
 end
-local function get_drills_hitbox()
-return {
-x={x,x+7},
-y={y-1,y+3},
-};
+local function get_mining_hitbox()
+return {x={x,x+7},y={y-1,y+3}}
 end
-local function get_damaging_drills_hitbox()
-return {
-x={x,x+7},
-y={y-3,y+3},
-};
+local function get_damaging_hitbox()
+return {x={x,x+7},y={y-3,y+3}}
 end
 local function handle_being_hit()
 if player.is_hit and player.hit_since>player.invuln_duration then
@@ -1401,6 +1391,7 @@ local function x_f() return x end
 local function y_f() return y end
 local function drilling_f() return is.drilling or is.mining end
 local function shooting_f() return is.shooting end
+local function mining_f() return mining_since<2 end
 local function rns_f() return is.rns end
 local function hit_f() return is_hit end
 local function health_f() return health end
@@ -1419,11 +1410,12 @@ give_ammo=give_ammo,
 give_health=give_health,
 give_points=give_points,
 get_hitbox=get_hitbox,
-get_drills_hitbox=get_drills_hitbox,
-get_damaging_drills_hitbox=get_damaging_drills_hitbox,
+get_mining_hitbox=get_mining_hitbox,
+get_damaging_hitbox=get_damaging_hitbox,
 get_role=get_role,
 is_drilling=drilling_f,
 is_shooting=shooting_f,
+is_mining=mining_f,
 is_rns=rns_f,
 is_hit=hit_f,
 health=health_f,
@@ -1751,7 +1743,7 @@ start_sprite=168
 hitbox={x={1,8},y={1,8}}
 end
 sprite=start_sprite+flr(rnd(4))
-return {
+list.add({
 sprite=sprite,
 x=x,
 y=y,
@@ -1759,7 +1751,7 @@ x_flip=coinflip(),
 y_flip=coinflip(),
 hitbox=hitbox,
 res_type=res_type,
-}
+})
 end
 local function update()
 for i=list.size(),1,-1 do
