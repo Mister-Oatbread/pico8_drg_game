@@ -13,7 +13,7 @@ function grunt(x,y)
     local function update()
         if game_status=="playing" then
             y+=1
-            if frame%6==1 then y+=1 end
+            if frame%6==0 then y+=1 end
         end
         damaged_since+=1
         frame=frame%12+1

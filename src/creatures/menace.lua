@@ -28,8 +28,8 @@ function menace(x,y)
                 tracked_player.x()-x_shot_position,
                 tracked_player.y()-y_shot_position
             )
-            local x_vel=cos(angle)
-            local y_vel=sin(angle)
+            local x_vel=2*cos(angle)
+            local y_vel=2*sin(angle)+1
             projectiles.add_menace_spit(
                 x_shot_position,
                 y_shot_position,

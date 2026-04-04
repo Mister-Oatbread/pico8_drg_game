@@ -11,7 +11,7 @@ function oppressor(x,y)
     local function update()
         if game_status=="playing" then
             y+=1
-            if frame%30==1 then y+=1 end
+            if frame%30==0 then y+=1 end
         end
         frame=frame%60+1
     end

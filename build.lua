@@ -48,8 +48,8 @@ local wings_open
 local function update()
 if game_status=="playing" then
 y+=1
-if frame%45==1 then x+=sgn(x-player_1.x()) end
-if frame%30==1 then y+=1 end
+if frame%45==0 then x+=sgn(x-player_1.x()) end
+if frame%30==0 then y+=1 end
 end
 wings_open=frame>45
 damaged_since+=1
@@ -96,7 +96,7 @@ local creature_damage=0
 local hitbox={x={2,7},y={1,8}}
 local function update()
 y+=1
-if frame%5==1 then y-=1 end
+if frame%5==0 then y-=1 end
 damaged_since+=1
 frame=frame%10+1
 end
@@ -144,7 +144,7 @@ local hitbox={x={1,8},y={1,8}}
 local function update()
 if game_status=="playing" then
 y+=1
-if frame%6==1 then y+=1 end
+if frame%6==0 then y+=1 end
 end
 damaged_since+=1
 frame=frame%12+1
@@ -190,7 +190,7 @@ local hitbox={x={2,7},y={1,7}}
 local function update()
 if game_status=="playing" then
 y+=1
-if frame%30==1 then y+=1 end
+if frame%30==0 then y+=1 end
 end
 damaged_since+=1
 frame=frame%60+1
@@ -287,9 +287,9 @@ local tracked_player=choose_one(players)
 local function update()
 if did_spit then
 y+=1
-if frame%2==1 then y+=1 end
+if frame%2==0 then y+=1 end
 elseif performing_spit then
-if frame%2==1 then x-=sgn(x-tracked_player.x()) end
+if frame%2==0 then x-=sgn(x-tracked_player.x()) end
 spit_countdown-=1
 if spit_countdown==1 then
 did_spit=true
@@ -298,7 +298,7 @@ projectiles.spit_spit("mactera_spit",x,y)
 end
 else
 y+=1
-if frame%2==1 then
+if frame%2==0 then
 y+=1
 x-=sgn(x-tracked_player.x())
 end
@@ -363,8 +363,8 @@ local angle=atan2(
 tracked_player.x()-x_shot_position,
 tracked_player.y()-y_shot_position
 )
-local x_vel=cos(angle)
-local y_vel=sin(angle)
+local x_vel=2*cos(angle)
+local y_vel=2*sin(angle)+1
 projectiles.add_menace_spit(
 x_shot_position,
 y_shot_position,
@@ -459,7 +459,7 @@ local hitbox={x={2,15},y={1,14}}
 local function update()
 if game_status=="playing" then
 y+=1
-if frame%30==1 then y+=1 end
+if frame%30==0 then y+=1 end
 end
 frame=frame%60+1
 end
@@ -497,7 +497,7 @@ local spit
 local function update()
 if game_status=="playing" then
 y+=1
-if not spitting and frame%20==1 then y+=1 end
+if not spitting and frame%20==0 then y+=1 end
 end
 if not spitting then x_flip=frame>20 end
 damaged_since+=1
@@ -554,7 +554,7 @@ local hitbox={x={1,8},y={1,8}}
 local function update()
 if game_status=="playing" then
 y+=1
-if frame%4==1 then y+=1 end
+if frame%4==0 then y+=1 end
 end
 damaged_since+=1
 frame=frame%8+1
@@ -1124,8 +1124,9 @@ reset_cpu_load = reset_cpu_load,
 };
 end
 function new_player(number,role)
-local x=148
+local x=140+8*number
 local y=200
+local frame=0
 local number=number
 local role=role
 local is={
@@ -1136,23 +1137,19 @@ mining=false,
 rns=false}
 local was_mining=false
 local drills_damage=4
-local mined_since=0
 local playing={drill_sound=false,gun_sound=false}
-local moving_frame=0
 local points=0
-local ammo=role=="driller" and 25 or 100
-local fuel=role=="driller" and 150 or 0
 local max_ammo=role=="driller" and 25 or 100
+local ammo=max_ammo
 local max_fuel=role=="driller" and 150 or 0
-local shots_fired=false
-local shot_delay_counter=0
-local max_shot_delay=role=="driller" and 3 or 1
+local fuel=max_fuel
 local health=3
 local max_health=3
-local is_hit=false
-local hit_since=0
-local has_invuln=false
-local invuln_duration=30
+local mining_since=60
+local mining_delay=10
+local hit_since=60
+local shot_since=60
+local shot_delay=role=="driller" and 3 or 1
 local collision_points={left={},right={},top={}}
 local has_collision={left=false,right=false,top=false}
 for i=1,8 do
@@ -1162,19 +1159,26 @@ add(collision_points.top,{x=0,y=0})
 end
 local function fetch_inputs()
 local p=number-1
+is.shooting=btn(5,p) and not btn(4,p)
+if role=="gunner" and is.shooting then
+is.moving.up=false
+is.moving.left=false
+is.moving.right=false
+is.moving.down=true
+else
 is.moving.up=btn(2,p)
 is.moving.down=btn(3,p)
 is.moving.left=btn(0,p)
 is.moving.right=btn(1,p)
-is.shooting=btn(5,p) and not btn(4,p)
-local drilling_button=btn(4,p) and not btn(5,p)
+end
 is.rns=btn(3,p) and btn(4,p) and btn(5,p)
-is.drilling=drilling_button and fuel>0
-local mining_button=drilling_button and fuel<=0
-is.mining=mining_button and not was_mining
-if is.mining then mined_since=0 end
-was_mining=mining_button or mined_since<5
-mined_since+=1
+if btn(4,p) and not btn(5,p) then
+is.drilling=fuel>0
+is.mining=not is.drilling
+else
+is.drilling=false
+is.mining=false
+end
 end
 local function update_player_collision_points()
 for i=1,6 do
@@ -1221,9 +1225,12 @@ end
 end
 end
 local function mine()
+if mining_since>mining_delay then
 map.spawn_drilled_ground(53,x,y-2)
 sfx(-1,number)
 sfx(31,number)
+mining_since=0
+end
 end
 local function drill()
 if fuel>0 then
@@ -1237,7 +1244,9 @@ end
 end
 end
 local function shoot()
-if ammo > 0 then
+if ammo>0 then
+if shot_since>shot_delay then
+shot_since=0
 projectiles.fire_bullet(number)
 ammo-=1
 if role=="gunner" and not playing.gun_sound then
@@ -1248,21 +1257,18 @@ elseif role=="driller" then
 sfx(-1,number)
 sfx(34,number)
 end
+end
 else
 sfx(-1,number)
 sfx(35,number)
 end
-shots_fired=true
 end
 local function give_ammo(percentage)
-ammo+=ceil(max_ammo*percentage)
-fuel+=ceil(max_fuel*percentage)
-if ammo>max_ammo then ammo=max_ammo end
-if fuel>max_fuel then fuel=max_fuel end
+ammo=min(ammo_max_ammo*percentage,max_ammo)
+fuel=min(fuel+max_fuel*percentage,max_fuel)
 end
 local function give_health(amount)
-health+=amount
-if health>max_health then health=max_health end
+health=min(health+amount,max_health)
 end
 local function move_player()
 if is.moving.up and not has_collision.top then
@@ -1298,27 +1304,20 @@ find_terrain_collision()
 move_player()
 if is.drilling then
 drill()
-else
-if playing.drill_sound then
+elseif playing.drill_sound then
 sfx(-1,number)
 playing.drill_sound=false
 end
-end
 if is.mining then mine() end
-if shots_fired and shot_delay_counter<max_shot_delay then
-shot_delay_counter+=1
-else
-shots_fired=false
-shot_delay_counter=0
 if is.shooting then
 shoot()
-else
-if playing.gun_sound then
+elseif playing.gun_sound then
 sfx(-1,number)
 playing.gun_sound=false
 end
-end
-end
+mining_since+=1
+shot_since+=1
+frame+=1
 end
 local function get_hitbox()
 return {
@@ -1389,14 +1388,14 @@ local sprite=role=="driller" and 48 or 32
 local speed=1
 if game_status=="playing" and is.moving.up then speed=2 end
 if moving then sprite+=1 end
-x_flip=moving_frame>=8
-moving_frame=(moving_frame+speed)%16
+x_flip=frame>=8
+frame=(frame+speed)%16
 if is_hit then pal(8,10) end
 spr(sprite,x,y,1,1,x_flip,false)
 pal()
 if is.shooting then draw_gun() end
 if is.drilling then draw_drills() end
-if is.mining or was_mining then draw_pickaxe() end
+if mining_since<mining_delay*.7 then draw_pickaxe() end
 end
 local function x_f() return x end
 local function y_f() return y end
@@ -1474,7 +1473,7 @@ elseif spit_type=="mactera_spit" then
 sprite=28
 speed=2
 size=1
-hitbox={x={4,4},y={3,7}}
+hitbox={x={5,5},y={6,8}}
 persists=false
 damage=1
 end
@@ -1571,18 +1570,21 @@ end
 end
 end
 end
-function get_bullet_hitbox(bullet)
+local function get_bullet_hitbox(bullet)
 return {
 x={bullet.x+6,bullet.x+6},
 y={bullet.y+5,bullet.y+15},
-};
+}
 end
-function get_spit_hitbox(spit)
-local x1=spit.hitbox.x[1]+spit.x()-1;
-local x2=spit.hitbox.x[2]+spit.x()-1;
-local y1=spit.hitbox.y[1]+spit.y()-1;
-local y2=spit.hitbox.y[2]+spit.y()-1;
-return {x={x1,x2}, y={y1,y2}};
+local function get_spit_hitbox(spit)
+local x1=spit.hitbox.x[1]+spit.x()-1
+local x2=spit.hitbox.x[2]+spit.x()-1
+local y1=spit.hitbox.y[1]+spit.y()-1
+local y2=spit.hitbox.y[2]+spit.y()-1
+return {x={x1,x2}, y={y1,y2}}
+end
+local function get_menace_spit_hitbox(spit)
+return {x={flr(spit.x),flr(spit.x)},y={flr(spit.y),flr(spit.y)}}
 end
 return {
 update=update,
@@ -1594,6 +1596,7 @@ spits_list=spits,
 bullets_list=bullets,
 get_bullet_hitbox=get_bullet_hitbox,
 get_spit_hitbox=get_spit_hitbox,
+get_menace_spit_hitbox=get_menace_spit_hitbox,
 }
 end
 function spawn_prop()

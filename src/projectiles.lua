@@ -43,7 +43,7 @@ function new_projectiles()
             sprite=28
             speed=2
             size=1
-            hitbox={x={4,4},y={3,7}}
+            hitbox={x={5,5},y={6,8}}
             persists=false
             damage=1
         end
@@ -158,20 +158,24 @@ function new_projectiles()
     end
 
     -- takes in bullet and returns hitbox ready to be processed by are_colliding()
-    function get_bullet_hitbox(bullet)
+    local function get_bullet_hitbox(bullet)
         return {
             x={bullet.x+6,bullet.x+6},
             y={bullet.y+5,bullet.y+15},
-        };
+        }
     end
 
     -- takes spit and returns the corresponding hitbox
-    function get_spit_hitbox(spit)
-        local x1=spit.hitbox.x[1]+spit.x()-1;
-        local x2=spit.hitbox.x[2]+spit.x()-1;
-        local y1=spit.hitbox.y[1]+spit.y()-1;
-        local y2=spit.hitbox.y[2]+spit.y()-1;
-        return {x={x1,x2}, y={y1,y2}};
+    local function get_spit_hitbox(spit)
+        local x1=spit.hitbox.x[1]+spit.x()-1
+        local x2=spit.hitbox.x[2]+spit.x()-1
+        local y1=spit.hitbox.y[1]+spit.y()-1
+        local y2=spit.hitbox.y[2]+spit.y()-1
+        return {x={x1,x2}, y={y1,y2}}
+    end
+
+    local function get_menace_spit_hitbox(spit)
+        return {x={flr(spit.x),flr(spit.x)},y={flr(spit.y),flr(spit.y)}}
     end
 
     return {
@@ -184,6 +188,7 @@ function new_projectiles()
         bullets_list=bullets,
         get_bullet_hitbox=get_bullet_hitbox,
         get_spit_hitbox=get_spit_hitbox,
+        get_menace_spit_hitbox=get_menace_spit_hitbox,
     }
 end
 

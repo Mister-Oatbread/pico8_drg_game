@@ -15,7 +15,7 @@ function praetorian(x,y)
     local function update()
         if game_status=="playing" then
             y+=1
-            if not spitting and frame%20==1 then y+=1 end
+            if not spitting and frame%20==0 then y+=1 end
         end
         if not spitting then x_flip=frame>20 end
         damaged_since+=1
