@@ -19,7 +19,7 @@ function new_resources()
         end
         sprite=start_sprite+flr(rnd(4))
 
-        return {
+        list.add({
             sprite=sprite,
             x=x,
             y=y,
@@ -27,7 +27,7 @@ function new_resources()
             y_flip=coinflip(),
             hitbox=hitbox,
             res_type=res_type,
-        }
+        })
     end
 
     local function update()
