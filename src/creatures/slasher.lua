@@ -11,7 +11,7 @@ function slasher(x,y)
     local hitbox={x={1,8},y={1,8}}
 
     local function update()
-        if game_status=="playing" then
+        if playing then
             y+=1
             if frame%4==0 then y+=1 end
         end

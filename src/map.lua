@@ -92,7 +92,7 @@ function new_map()
     -- slides the floor one frame to the bottom, and realigns the floor if needed
     local function update()
         local wall,terrain_piece
-        if game_status=="playing" then
+        if playing then
             for i=1,walls.size() do
                 wall=walls.get(i)
                 wall.y+=1

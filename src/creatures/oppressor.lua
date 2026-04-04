@@ -9,7 +9,7 @@ function oppressor(x,y)
     local hitbox={x={2,15},y={1,14}}
 
     local function update()
-        if game_status=="playing" then
+        if playing then
             y+=1
             if frame%30==0 then y+=1 end
         end

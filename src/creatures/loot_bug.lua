@@ -11,7 +11,7 @@ function loot_bug(x,y)
     local hitbox={x={2,7},y={1,7}}
 
     local function update()
-        if game_status=="playing" then
+        if playing then
             y+=1
             if frame%30==0 then y+=1 end
         end
@@ -27,7 +27,7 @@ function loot_bug(x,y)
             alive=false
             player.give_ammo(.2)
             no_lootbugs_killed=false
-            add_killed_lootbug_name()
+            -- add_killed_lootbug_name()
         end
     end
 

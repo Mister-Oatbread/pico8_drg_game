@@ -14,7 +14,7 @@ function menace(x,y)
     local tracked_player=choose_one(players)
 
     local function update()
-        if game_status=="playing" then
+        if playing then
             y+=1
         end
         -- flip menace based on relative player position

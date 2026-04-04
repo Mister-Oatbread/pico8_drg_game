@@ -17,7 +17,7 @@ function new_player(number,role)
         rns=false}
     local was_mining=false
     local drills_damage=4
-    local playing={drill_sound=false,gun_sound=false}
+    local playing_sound_of={drill=false,gun=false}
     local points=0
     local max_ammo=role=="driller" and 25 or 100
     local ammo=max_ammo
@@ -129,32 +129,32 @@ function new_player(number,role)
         if fuel>0 then
             map.spawn_drilled_ground(52,x,y-2)
             fuel-=1
-            if not playing.drill_sound then
+            if not playing_sound_of.drill then
                 sfx(-1,number)
                 sfx(30,number)
-                playing.drill_sound=true
+                playing_sound_of.drill=true
             end
         end
     end
 
     local function shoot()
-        if ammo>0 then
-            if shot_since>shot_delay then
-                shot_since=0
+        if shot_since>shot_delay then
+            if ammo>0 then
                 projectiles.fire_bullet(number)
                 ammo-=1
-                if role=="gunner" and not playing.gun_sound then
+                if role=="gunner" and not playing_sound_of.gun then
                     sfx(-1,number)
                     sfx(36,number)
-                    playing.gun_sound=true
+                    playing_sound_of.gun=true
                 elseif role=="driller" then
                     sfx(-1,number)
                     sfx(34,number)
                 end
+            else
+                sfx(-1,number)
+                sfx(35,number)
             end
-        else
-            sfx(-1,number)
-            sfx(35,number)
+            shot_since=0
         end
     end
 
@@ -207,16 +207,16 @@ function new_player(number,role)
         move_player()
         if is.drilling then
             drill()
-        elseif playing.drill_sound then
+        elseif playing_sound_of.drill then
             sfx(-1,number)
-            playing.drill_sound=false
+            playing_sound_of.drill=false
         end
         if is.mining then mine() end
         if is.shooting then
             shoot()
-        elseif playing.gun_sound then
+        elseif playing_sound_of.gun then
             sfx(-1,number)
-            playing.gun_sound=false
+            playing_sound_of.gun=false
         end
         mining_since+=1
         shot_since+=1
@@ -288,19 +288,20 @@ function new_player(number,role)
     -- draws player based on current state
     local function draw()
         local moving,x_flip
-        if game_status=="playing" then
+        local speed=1
+        if playing then
             moving=(not is.moving.down
                 or is.moving.left or is.moving.right)
+            if playing and is.moving.up then speed=2 end
+
         -- only run if in playing mode, otherwise just default
-        elseif game_status=="title_screen" then
+        elseif at_title_screen then
             moving=(is.moving.down or is.moving.up
                 or is.moving.left or is.moving.right)
         end
         local sprite=role=="driller" and 48 or 32
 
         -- determine how fast legs should switch
-        local speed=1
-        if game_status=="playing" and is.moving.up then speed=2 end
 
         if moving then sprite+=1 end
 

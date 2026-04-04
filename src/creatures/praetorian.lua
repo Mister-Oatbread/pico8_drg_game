@@ -13,7 +13,7 @@ function praetorian(x,y)
     local spit
 
     local function update()
-        if game_status=="playing" then
+        if playing then
             y+=1
             if not spitting and frame%20==0 then y+=1 end
         end

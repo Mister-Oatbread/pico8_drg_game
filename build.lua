@@ -46,7 +46,7 @@ local creature_damage=0
 local hitbox={x={2,7},y={1,7}}
 local wings_open
 local function update()
-if game_status=="playing" then
+if playing then
 y+=1
 if frame%45==0 then x+=sgn(x-player_1.x()) end
 if frame%30==0 then y+=1 end
@@ -142,7 +142,7 @@ local alive=true
 local creature_damage=1
 local hitbox={x={1,8},y={1,8}}
 local function update()
-if game_status=="playing" then
+if playing then
 y+=1
 if frame%6==0 then y+=1 end
 end
@@ -188,7 +188,7 @@ local alive=true
 local creature_damage=0
 local hitbox={x={2,7},y={1,7}}
 local function update()
-if game_status=="playing" then
+if playing then
 y+=1
 if frame%30==0 then y+=1 end
 end
@@ -203,7 +203,6 @@ if health<=0 then
 alive=false
 player.give_ammo(.2)
 no_lootbugs_killed=false
-add_killed_lootbug_name()
 end
 end
 local function draw()
@@ -351,7 +350,7 @@ local creature_damage=0
 local hitbox={x={1,8},y={1,8}}
 local tracked_player=choose_one(players)
 local function update()
-if game_status=="playing" then
+if playing then
 y+=1
 end
 x_flip=tracked_player.x()-x>0
@@ -457,7 +456,7 @@ local alive=true
 local creature_damage=1
 local hitbox={x={2,15},y={1,14}}
 local function update()
-if game_status=="playing" then
+if playing then
 y+=1
 if frame%30==0 then y+=1 end
 end
@@ -495,7 +494,7 @@ local hitbox={x={4,12},y={2,14}}
 local spitting=false
 local spit
 local function update()
-if game_status=="playing" then
+if playing then
 y+=1
 if not spitting and frame%20==0 then y+=1 end
 end
@@ -552,7 +551,7 @@ local alive=true
 local creature_damage=2
 local hitbox={x={1,8},y={1,8}}
 local function update()
-if game_status=="playing" then
+if playing then
 y+=1
 if frame%4==0 then y+=1 end
 end
@@ -586,6 +585,93 @@ creature_damage=creature_damage,
 draw=draw,
 hitbox=hitbox,
 is_alive=is_alive,
+}
+end
+function new_death_screen()
+local loot_bug_names={
+"steeve",
+"jimini",
+"jebediah",
+"david",
+"eva",
+"lloyd",
+"molly",
+"randy",
+"jimothy",
+"geoff",
+"emilia",
+"olliver",
+"matilda",
+"benjamin",
+"elodie",
+"julien",
+"amelia",
+"sebby",
+"charlie",
+"rosalie",
+"freddie",
+"isabelle",
+"tobias",
+"lucien",
+"henry",
+"maxime",
+"oliver",
+"samuel",
+"august",
+"finnley",
+"steevie",
+}
+local killed_loot_bugs=new_entity_container()
+local function initialize()
+end
+local function report_killed_lootbug()
+killed_loot_bugs.add(choose_one(loot_bug_names))
+end
+local function draw()
+sfx(-1,0)
+sfx(-1,1)
+sfx(-1,2)
+sfx(-1,3)
+player.x_pos=130
+player.y_pos=182
+print("awards:", 111,126,7)
+print("",113,126,7)
+if no_lootbugs_killed then
+print("-no lootbugs")
+print(" killed (+100)")
+end
+if no_cave_angels_killed then
+print("-no cave angels")
+print(" killed (+100)")
+end
+if no_scout_killed then
+print("-you spared")
+print(" the scouts (+100)")
+end
+if in_tutorial then
+print("-died during the")
+print(" tutorial (+500)")
+end
+if not no_lootbugs_killed then
+print("killed",190,130,7)
+print("loot")
+print("bugs:")
+local y = 148
+for name in all(killed_loot_bugs) do
+print(name,192,y)
+y+=6
+end
+end
+local points_total=0
+for i=1,#players do points_total+=players[i].points() end
+print("game over!", 120, 105, 7)
+print("score: "..points_total)
+print("distance travelled: "..game_time)
+end
+return {
+initialize=initialize,
+report_killed_lootbug=report_killed_lootbug,
+draw=draw,
 }
 end
 function new_entity_container()
@@ -676,6 +762,8 @@ obstacle_ratios,obstacle_variety
 resource_spawn_params=generate_spawn_params(
 resource_ratios,resource_variety
 )
+at_title_screen=false
+playing=true
 end
 local function mine_resources()
 local resource,res_hitbox,player,mining_hitbox
@@ -735,6 +823,7 @@ end
 local function update()
 mine_resources()
 damage_creatures()
+if playing then
 if rnd()<creature_spawn_rate then
 creatures.spawn()
 end
@@ -743,6 +832,7 @@ map.spawn_obstacle(sample_one(100,120),81)
 end
 if rnd()<resource_spawn_rate then
 resources.spawn(sample_one(102,118),81)
+end
 end
 end
 local function obstacle_spawn_params_f() return obstacle_spawn_params end
@@ -862,25 +952,29 @@ draw=draw,
 end
 function _init()
 coop=false
-player_1=new_player(1,"gunner")
+player_1=new_player(1,"driller")
 player_2=new_player(2)
 players={player_1}
 if coop then add(players,player_2) end
 projectiles=new_projectiles()
 resources=new_resources()
+creatures=new_creatures()
 map=new_map()
 hud=new_hud()
 title_screen=new_title_screen()
+death_screen=new_death_screen()
 game_logic=new_game_logic()
-creatures=new_creatures()
 performance_monitor=new_performance_monitor()
+timer=0
+at_title_screen=true
+playing=false
+at_death_screen=false
 end
 function _update()
-difficulty=2
-game_logic.set_difficulty(2)
-points=0
-game_status="playing"
+timer+=1
+if timer>300 then game_logic.set_difficulty(2) end
 performance_monitor.reset_cpu_load()
+if not at_death_screen then
 projectiles.update()
 resources.update()
 map.update()
@@ -888,11 +982,13 @@ player_1.update()
 if coop then player_2.update() end
 creatures.update()
 game_logic.update()
+end
 performance_monitor.register_load()
 end
 function _draw()
 cls(1)
 camera(101,101)
+map.draw_terrain()
 map.draw_wall()
 map.draw_obstacles()
 map.draw_drilled_ground()
@@ -901,9 +997,13 @@ creatures.draw()
 projectiles.draw()
 if coop then player_2.draw() end
 player_1.draw()
+map.draw_vines()
 map.draw_super_wall()
 hud.draw(player_1)
 if coop then hud.draw(player_2) end
+pset(223,101,at_title_screen and 11 or 8)
+pset(224,101,playing and 11 or 8)
+pset(225,101,at_death_screen and 11 or 8)
 performance_monitor.register_load()
 performance_monitor.print_current()
 end
@@ -978,7 +1078,7 @@ y_flip=coinflip(),
 end
 local function update()
 local wall,terrain_piece
-if game_status=="playing" then
+if playing then
 for i=1,walls.size() do
 wall=walls.get(i)
 wall.y+=1
@@ -1136,7 +1236,7 @@ mining=false,
 rns=false}
 local was_mining=false
 local drills_damage=4
-local playing={drill_sound=false,gun_sound=false}
+local playing_sound_of={drill=false,gun=false}
 local points=0
 local max_ammo=role=="driller" and 25 or 100
 local ammo=max_ammo
@@ -1235,31 +1335,31 @@ local function drill()
 if fuel>0 then
 map.spawn_drilled_ground(52,x,y-2)
 fuel-=1
-if not playing.drill_sound then
+if not playing_sound_of.drill then
 sfx(-1,number)
 sfx(30,number)
-playing.drill_sound=true
+playing_sound_of.drill=true
 end
 end
 end
 local function shoot()
-if ammo>0 then
 if shot_since>shot_delay then
-shot_since=0
+if ammo>0 then
 projectiles.fire_bullet(number)
 ammo-=1
-if role=="gunner" and not playing.gun_sound then
+if role=="gunner" and not playing_sound_of.gun then
 sfx(-1,number)
 sfx(36,number)
-playing.gun_sound=true
+playing_sound_of.gun=true
 elseif role=="driller" then
 sfx(-1,number)
 sfx(34,number)
 end
-end
 else
 sfx(-1,number)
 sfx(35,number)
+end
+shot_since=0
 end
 end
 local function give_ammo(percentage)
@@ -1303,16 +1403,16 @@ find_terrain_collision()
 move_player()
 if is.drilling then
 drill()
-elseif playing.drill_sound then
+elseif playing_sound_of.drill then
 sfx(-1,number)
-playing.drill_sound=false
+playing_sound_of.drill=false
 end
 if is.mining then mine() end
 if is.shooting then
 shoot()
-elseif playing.gun_sound then
+elseif playing_sound_of.gun then
 sfx(-1,number)
-playing.gun_sound=false
+playing_sound_of.gun=false
 end
 mining_since+=1
 shot_since+=1
@@ -1367,16 +1467,16 @@ pset(x+6,y+2,4)
 end
 local function draw()
 local moving,x_flip
-if game_status=="playing" then
+local speed=1
+if playing then
 moving=(not is.moving.down
 or is.moving.left or is.moving.right)
-elseif game_status=="title_screen" then
+if playing and is.moving.up then speed=2 end
+elseif at_title_screen then
 moving=(is.moving.down or is.moving.up
 or is.moving.left or is.moving.right)
 end
 local sprite=role=="driller" and 48 or 32
-local speed=1
-if game_status=="playing" and is.moving.up then speed=2 end
 if moving then sprite+=1 end
 x_flip=frame>=8
 frame=(frame+speed)%16
@@ -1754,29 +1854,12 @@ res_type=res_type,
 })
 end
 local function update()
+if playing then
 for i=list.size(),1,-1 do
 list.get(i).y+=1
 if list.get(i).y>=230 then
 list.deletei(i)
 end
-end
-end
-local function mine(hitbox_drills)
-local resource
-for i=resources.size(),1,-1 do
-resource=list.get(i)
-if are_colliding(get_hitbox(resource),hitbox_drills) then
-local res_type=resource.res_type
-if res_type=="red_sugar" then
-player.give_health(1)
-elseif res_type=="nitra" then
-player.give_ammo(.5)
-elseif res_type=="gold" then
-points+=100
-end
-list.deletei(i)
-sfx(-1,3)
-sfx(38,3)
 end
 end
 end
@@ -1809,32 +1892,78 @@ spawn=spawn_resource,
 }
 end
 function new_title_screen()
-local function initialize()
-map.add_obstacle({sprite=101,x_coord=200,y_coord=160,
+map.add_obstacle({sprite=101,x=200,y=160,
 size=2,x_flip=false,y_flip=false})
-map.add_obstacle({sprite=84,x_coord=200,y_coord=155,
+map.add_obstacle({sprite=84,x=200,y=155,
 size=1,x_flip=false,y_flip=true})
-end
-local function draw_controls()
 local x0=160
 local y0=200
-spr(227,x0+16,y0,2,2)
-spr(229,x0,y0,2,2)
+map.add_obstacle({
+sprite=227,
+x=x0,
+y=y0,
+size=2,
+x_flip=false,
+y_flip=false,
+})
 map.add_obstacle({
 sprite=229,
 x=x0+16,
 y=y0,
 size=2,
 x_flip=false,
-y_flip=false})
-end
-local function draw()
-draw_controls()
-end
-return {
-initialize=initialize,
-draw=draw,
-}
+y_flip=false,
+})
+x0=105
+y0=105
+map.add_obstacle({
+sprite=199,
+x=x0,
+y=y0,
+size=4,
+x_flip=false,
+y_flip=false,
+})
+map.add_obstacle({
+sprite=203,
+x=x0+32,
+y=y0,
+size=4,
+x_flip=false,
+y_flip=false,
+})
+map.add_obstacle({
+sprite=207,
+x=x0+64,
+y=y0,
+size=1,
+x_flip=false,
+y_flip=false,
+})
+map.add_obstacle({
+sprite=223,
+x=x0+64,
+y=y0+8,
+size=1,
+x_flip=false,
+y_flip=false,
+})
+map.add_obstacle({
+sprite=239,
+x=x0+64,
+y=y0+16,
+size=1,
+x_flip=false,
+y_flip=false,
+})
+map.add_obstacle({
+sprite=255,
+x=x0+64,
+y=y0+24,
+size=1,
+x_flip=false,
+y_flip=false,
+})
 end
 function are_colliding(a, b)
 local x_good = a.x[1]>b.x[2] or a.x[2]<b.x[1]

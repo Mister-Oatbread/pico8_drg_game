@@ -61,6 +61,8 @@ function new_game_logic()
         resource_spawn_params=generate_spawn_params(
             resource_ratios,resource_variety
         )
+        at_title_screen=false
+        playing=true
     end
 
     local function mine_resources()
@@ -150,14 +152,16 @@ function new_game_logic()
 
         damage_creatures()
 
-        if rnd()<creature_spawn_rate then
-            creatures.spawn()
-        end
-        if rnd()<obstacle_spawn_rate then
-            map.spawn_obstacle(sample_one(100,120),81)
-        end
-        if rnd()<resource_spawn_rate then
-            resources.spawn(sample_one(102,118),81)
+        if playing then
+            if rnd()<creature_spawn_rate then
+                creatures.spawn()
+            end
+            if rnd()<obstacle_spawn_rate then
+                map.spawn_obstacle(sample_one(100,120),81)
+            end
+            if rnd()<resource_spawn_rate then
+                resources.spawn(sample_one(102,118),81)
+            end
         end
     end
 
