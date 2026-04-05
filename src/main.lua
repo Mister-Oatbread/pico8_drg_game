@@ -6,7 +6,7 @@ function _init()
     -- music(56)
     -- hacky stuff end
 
-    coop=true
+    coop=false
 
     player_1=new_player(1,"driller")
     player_2=new_player(2,"gunner")

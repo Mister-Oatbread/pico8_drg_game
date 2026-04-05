@@ -191,7 +191,7 @@ health-=damage_received
 if health<=0 then
 alive=false
 player.give_ammo(.2)
-no_lootbugs_killed=false
+death_screen.report_killed_loot_bug()
 end
 end
 local function draw()
@@ -219,7 +219,7 @@ creatures_list.add(bottom_grunt(x,222))
 end
 local function spawn_creature()
 local creature
-local x=sample_one(102,118)
+local x=sample_one(101,220)
 local y=81
 creature=pick_spawn(game_logic.creature_spawn_params())
 creatures_list.add(creature(x,y))
@@ -516,6 +516,7 @@ end
 function new_death_screen()
 local loot_bug_names={
 "steeve",
+"steevie",
 "jimini",
 "jebediah",
 "david",
@@ -526,34 +527,15 @@ local loot_bug_names={
 "jimothy",
 "geoff",
 "thorben",
-"emilia",
-"olliver",
-"matilda",
-"benjamin",
-"elodie",
-"julien",
-"amelia",
-"sebby",
-"charlie",
-"rosalie",
-"freddie",
-"isabelle",
-"tobias",
-"lucien",
-"henry",
-"maxime",
-"oliver",
-"samuel",
-"august",
-"finnley",
-"steevie",
+"nil",
+"lisa",
 }
 local killed_loot_bugs=new_entity_container()
 local no_cave_angels_killed=true
 local no_eggs_killed=true
 local function draw()
 local points_total=0
-local no_lootbugs_killed=killed_loot_bugs.size()==0
+local no_loot_bugs_killed=killed_loot_bugs.size()==0
 sfx(-1,0)
 sfx(-1,1)
 sfx(-1,2)
@@ -564,8 +546,11 @@ points_total+=player.points()
 end
 print("awards:", 111,126,7)
 print("",113,126,7)
-if no_lootbugs_killed then
-print("-no lootbugs")
+print("-distance bonus")
+print(" (+"..game_logic.get_distance()..")")
+points_total+=game_logic.get_distance()
+if no_loot_bugs_killed then
+print("-no loot_bugs")
 print(" killed (+100)")
 points_total+=100
 end
@@ -574,9 +559,9 @@ print("-no cave angels")
 print(" killed (+100)")
 points_total+=100
 end
-if no_scout_killed then
-print("-you spared")
-print(" the scouts (+100)")
+if no_eggs_killed then
+print("-you spared the")
+print(" scouts (+100)")
 points_total+=100
 end
 if at_title_screen then
@@ -584,24 +569,24 @@ print("-died during the")
 print(" tutorial (+500)")
 points_total+=500
 end
-if not no_lootbugs_killed then
+if not no_loot_bugs_killed then
 print("killed",190,130,7)
 print("loot")
 print("bugs:")
 local y = 148
 for i=1,killed_loot_bugs.size() do
-print(killed_loot_bugs[i],192,y)
+print(killed_loot_bugs.get(i),192,y)
 y+=6
 end
 end
 print("game over!", 120, 105, 7)
 print("score: "..points_total)
 end
-local function report_killed_lootbug()
-killed_loot_bugs.add(choose_one(loot_bug_names))
+local function report_killed_loot_bug()
+killed_loot_bugs.add(loot_bug_names[sample_one(1,#loot_bug_names)])
 end
 return {
-report_killed_lootbug=report_killed_lootbug,
+report_killed_loot_bug=report_killed_loot_bug,
 report_killed_cave_angel=function() no_cave_angels_killed=false end,
 report_killed_egg=function() no_eggs_killed=false end,
 draw=draw,
@@ -626,6 +611,7 @@ local function set_difficulty(difficulty)
 if at_title_screen then
 creature_ratios={
 {2,loot_bug},
+{.1,egg},
 {1,cave_angel},
 {10,grunt},
 {1,praetorian},
@@ -643,7 +629,7 @@ obstacle_ratios={
 {15,"small"},
 {1,"big"},
 }
-creature_variety=8
+creature_variety=9
 resource_variety=3
 obstacle_variety=2
 if difficulty==1 then
@@ -788,10 +774,10 @@ if rnd()<creature_spawn_rate then
 creatures.spawn()
 end
 if rnd()<obstacle_spawn_rate then
-map.spawn_obstacle(sample_one(100,120),81)
+map.spawn_obstacle(sample_one(100,220),81)
 end
 if rnd()<resource_spawn_rate then
-resources.spawn(sample_one(102,118),81)
+resources.spawn(sample_one(102,220),81)
 end
 end
 for player in all(players) do
@@ -805,6 +791,7 @@ end
 return {
 update=update,
 set_difficulty=set_difficulty,
+get_distance=function() return flr(timer/5) end,
 obstacle_spawn_params=function() return obstacle_spawn_params end,
 resource_spawn_params=function() return resource_spawn_params end,
 creature_spawn_params=function() return creature_spawn_params end,
@@ -847,7 +834,7 @@ draw=draw,
 }
 end
 function _init()
-coop=true
+coop=false
 player_1=new_player(1,"driller")
 player_2=new_player(2,"gunner")
 players={player_1}
@@ -1411,7 +1398,7 @@ local bullets=new_entity_container()
 local spits=new_entity_container()
 local menace_spits=new_entity_container()
 local function fire_bullet(number)
-local player=number()==1 and players[1] or players[2]
+local player=number==1 and players[1] or players[2]
 bullets.add({
 x=player.x(),
 y=(player.y())-8,
@@ -1845,7 +1832,7 @@ local y_good = a.y[1]>b.y[2] or a.y[2]<b.y[1]
 return not(x_good or y_good)
 end
 function coinflip() return rnd(2)<1 end
-function sample_one(first,last) return first+flr(rnd(last+1)) end
+function sample_one(first,last) return first+flr(rnd(last-first+1)) end
 function choose_one(list) return list[flr(rnd(#list))+1] end
 function pick_spawn(spawn_params)
 local decision=rnd(spawn_params.cum_sum)

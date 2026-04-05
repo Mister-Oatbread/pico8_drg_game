@@ -10,6 +10,7 @@ function new_game_logic()
         if at_title_screen then
             creature_ratios={
                 {2,loot_bug},
+                {.1,egg},
                 {1,cave_angel},
                 {10,grunt},
                 {1,praetorian},
@@ -27,7 +28,7 @@ function new_game_logic()
                 {15,"small"},
                 {1,"big"},
             }
-            creature_variety=8
+            creature_variety=9
             resource_variety=3
             obstacle_variety=2
             if difficulty==1 then
@@ -185,10 +186,10 @@ function new_game_logic()
                 creatures.spawn()
             end
             if rnd()<obstacle_spawn_rate then
-                map.spawn_obstacle(sample_one(100,120),81)
+                map.spawn_obstacle(sample_one(100,220),81)
             end
             if rnd()<resource_spawn_rate then
-                resources.spawn(sample_one(102,118),81)
+                resources.spawn(sample_one(102,220),81)
             end
         end
         for player in all(players) do
@@ -203,6 +204,7 @@ function new_game_logic()
     return {
         update=update,
         set_difficulty=set_difficulty,
+        get_distance=function() return flr(timer/5) end,
         obstacle_spawn_params=function() return obstacle_spawn_params end,
         resource_spawn_params=function() return resource_spawn_params end,
         creature_spawn_params=function() return creature_spawn_params end,

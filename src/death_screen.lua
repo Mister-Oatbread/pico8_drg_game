@@ -4,6 +4,7 @@
 function new_death_screen()
     local loot_bug_names={
         "steeve",
+        "steevie",
         "jimini",
         "jebediah",
         "david",
@@ -14,29 +15,31 @@ function new_death_screen()
         "jimothy",
         "geoff",
         "thorben",
+        "nil",
+        "lisa",
 
-        "emilia",
-        "olliver",
-        "matilda",
-        "benjamin",
-        "elodie",
-        "julien",
-        "amelia",
-        "sebby",
-        "charlie",
-        "rosalie",
-        "freddie",
-        "isabelle",
-        "tobias",
-        "lucien",
-        "henry",
-        "maxime",
-        "oliver",
-        "samuel",
-        "august",
-        "finnley",
-
-        "steevie",
+        -- "emilia",
+        -- "olliver",
+        -- "matilda",
+        -- "benjamin",
+        -- "elodie",
+        -- "julien",
+        -- "amelia",
+        -- "sebby",
+        -- "charlie",
+        -- "rosalie",
+        -- "freddie",
+        -- "isabelle",
+        -- "tobias",
+        -- "lucien",
+        -- "henry",
+        -- "maxime",
+        -- "oliver",
+        -- "samuel",
+        -- "august",
+        -- "finnley",
+        --
+        -- "omega",
     }
     local killed_loot_bugs=new_entity_container()
     local no_cave_angels_killed=true
@@ -44,7 +47,7 @@ function new_death_screen()
 
     local function draw()
         local points_total=0
-        local no_lootbugs_killed=killed_loot_bugs.size()==0
+        local no_loot_bugs_killed=killed_loot_bugs.size()==0
         -- cleaning up game state
         sfx(-1,0)
         sfx(-1,1)
@@ -63,8 +66,11 @@ function new_death_screen()
 
         print("awards:", 111,126,7)
         print("",113,126,7)
-        if no_lootbugs_killed then
-            print("-no lootbugs")
+        print("-distance bonus")
+        print(" (+"..game_logic.get_distance()..")")
+        points_total+=game_logic.get_distance()
+        if no_loot_bugs_killed then
+            print("-no loot_bugs")
             print(" killed (+100)")
             points_total+=100
         end
@@ -73,9 +79,9 @@ function new_death_screen()
             print(" killed (+100)")
             points_total+=100
         end
-        if no_scout_killed then
-            print("-you spared")
-            print(" the scouts (+100)")
+        if no_eggs_killed then
+            print("-you spared the")
+            print(" scouts (+100)")
             points_total+=100
         end
         if at_title_screen then
@@ -83,14 +89,14 @@ function new_death_screen()
             print(" tutorial (+500)")
             points_total+=500
         end
-        -- if not no_lootbugs_killed then
-        if not no_lootbugs_killed then
+        -- if not no_loot_bugs_killed then
+        if not no_loot_bugs_killed then
             print("killed",190,130,7)
             print("loot")
             print("bugs:")
             local y = 148
             for i=1,killed_loot_bugs.size() do
-                print(killed_loot_bugs[i],192,y)
+                print(killed_loot_bugs.get(i),192,y)
                 y+=6
             end
         end
@@ -99,12 +105,12 @@ function new_death_screen()
         -- print("distance travelled: "..game_time)
     end
 
-    local function report_killed_lootbug()
-        killed_loot_bugs.add(choose_one(loot_bug_names))
+    local function report_killed_loot_bug()
+        killed_loot_bugs.add(loot_bug_names[sample_one(1,#loot_bug_names)])
     end
 
     return {
-        report_killed_lootbug=report_killed_lootbug,
+        report_killed_loot_bug=report_killed_loot_bug,
         report_killed_cave_angel=function() no_cave_angels_killed=false end,
         report_killed_egg=function() no_eggs_killed=false end,
         draw=draw,

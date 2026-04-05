@@ -11,7 +11,7 @@ end
 
 function coinflip() return rnd(2)<1 end
 
-function sample_one(first,last) return first+flr(rnd(last+1)) end
+function sample_one(first,last) return first+flr(rnd(last-first+1)) end
 
 function choose_one(list) return list[flr(rnd(#list))+1] end
 

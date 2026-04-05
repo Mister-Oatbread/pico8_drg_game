@@ -23,7 +23,7 @@ function new_creatures()
     -- adds it to creatures list
     local function spawn_creature()
         local creature
-        local x=sample_one(102,118)
+        local x=sample_one(101,220)
         local y=81
 
         creature=pick_spawn(game_logic.creature_spawn_params())
