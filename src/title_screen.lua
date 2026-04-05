@@ -27,8 +27,8 @@ function new_title_screen()
     res_list.add(resources.spawn_menu_item(x0+15,y0,32,"class","gunner"))
     res_list.add(resources.spawn_menu_item(x0+30,y0,34,"class","engineer"))
 
-    x0=180
-    y0=180
+    x0=170
+    y0=170
     res_list.add(resources.spawn_menu_item(x0,y0,192,"number",1))
     res_list.add(resources.spawn_menu_item(x0+8,y0,193,"number",2))
     res_list.add(resources.spawn_menu_item(x0+16,y0,194,"number",3))

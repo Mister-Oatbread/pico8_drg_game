@@ -13,6 +13,7 @@ function new_death_screen()
         "randy",
         "jimothy",
         "geoff",
+        "thorben",
 
         "emilia",
         "olliver",

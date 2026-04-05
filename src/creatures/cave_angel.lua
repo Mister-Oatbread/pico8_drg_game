@@ -11,11 +11,12 @@ function cave_angel(x,y)
     local creature_damage=0
     local hitbox={x={2,7},y={1,7}}
     local wings_open
+    local tracked_player=choose_one(players)
 
     local function update()
         if playing then
             y+=1
-            if frame%45==0 then x+=sgn(x-player_1.x()) end
+            if frame%45==0 then x+=sgn(x-tracked_player.x()) end
             if frame%30==0 then y+=1 end
         end
         wings_open=frame>45
@@ -41,19 +42,15 @@ function cave_angel(x,y)
         pal()
     end
 
-    local function x_f() return x end
-    local function y_f() return y end
-    local function is_alive() return alive end
-
     return {
-        x=x_f,
-        y=y_f,
         update=update,
         damage=damage,
         creature_damage=creature_damage,
         draw=draw,
         hitbox=hitbox,
-        is_alive=is_alive,
+        x=function() return x end,
+        y=function() return y end,
+        is_alive=function() return alive end,
     }
 end
 

@@ -22,7 +22,7 @@ function new_player(number,role)
     local points=0
     local max_ammo=role=="gunner" and 100 or 25
     local ammo=max_ammo
-    local max_fuel=role=="driller" and 150 or 0
+    local max_fuel=role=="driller" and 250 or 0
     local fuel=max_fuel
     local health=3
     local max_health=3
@@ -165,11 +165,6 @@ function new_player(number,role)
         fuel=min(fuel+max_fuel*percentage,max_fuel)
     end
 
-    -- give player amount of health and cap it
-    local function give_health(amount)
-        health=min(health+amount,max_health)
-    end
-
     -- move the player normally, except if a gunner is currently shooting,
     -- then move with half the speed
     local function move_player()
@@ -225,24 +220,6 @@ function new_player(number,role)
         frame+=1
     end
 
-    -- takes in player and returns hitbox ready to be processed by
-    -- are_colliding()
-    local function get_hitbox()
-        return {x={x+1,x+6},y={y,y+7}}
-    end
-
-    -- takes in player and returns hitbox ready to be processed by
-    -- are_colliding(), but for the drills instead of the player
-    local function get_mining_hitbox()
-        return {x={x,x+7},y={y-1,y+3}}
-    end
-
-    -- hitbox for hitting creatures
-    local function get_damaging_hitbox()
-        return {x={x,x+7},y={y-3,y+3}}
-    end
-
-
     local function damage_player(amount)
         if hit_since>30 then
             health-=amount
@@ -283,7 +260,7 @@ function new_player(number,role)
         role=new_role
         max_ammo=role=="gunner" and 100 or 25
         ammo=max_ammo
-        max_fuel=role=="driller" and 150 or 0
+        max_fuel=role=="driller" and 250 or 0
         fuel=max_fuel
         shot_delay=role=="gunner" and 1 or 3
     end
@@ -324,48 +301,36 @@ function new_player(number,role)
         if mining_since<mining_delay*.7 then draw_pickaxe() end
     end
 
-    local function x_f() return x end
-    local function y_f() return y end
-    local function drilling_f() return is.drilling end
-    local function shooting_f() return is.shooting end
-    local function mining_f() return mining_since<2 end
-    local function rns_f() return is.rns end
-    local function hit_f() return is_hit end
-    local function health_f() return health end
-    local function ammo_f() return ammo end
-    local function fuel_f() return fuel end
-    local function points_f() return points end
-    local function give_points(amount) points+=amount end
-    local function role_f() return role end
-    local function max_ammo_f() return max_ammo end
-    local function max_fuel_f() return max_fuel end
-
     return {
-        x=x_f,
-        y=y_f,
+        -- default functions
         update=update,
         draw=draw,
-        give_ammo=give_ammo,
-        give_health=give_health,
-        give_points=give_points,
         damage=damage_player,
-        get_hitbox=get_hitbox,
-        get_mining_hitbox=get_mining_hitbox,
-        get_damaging_hitbox=get_damaging_hitbox,
-        get_role=role_f,
-        is_drilling=drilling_f,
-        is_shooting=shooting_f,
-        is_mining=mining_f,
-        is_rns=rns_f,
-        is_hit=hit_f,
-        health=health_f,
-        number=number,
-        ammo=ammo_f,
-        fuel=fuel_f,
-        points=points_f,
+        give_ammo=give_ammo,
         change_role=change_role,
-        max_ammo=max_ammo_f,
-        max_fuel=max_fuel_f,
+
+        -- inline functions
+        give_points=function(amount) points+=amount end,
+        give_health=function(amount) health=min(health+amount,max_health) end,
+        get_hitbox=function() return {x={x+1,x+6},y={y,y+7}} end,
+        get_mining_hitbox=function() return {x={x,x+7},y={y-1,y+3}} end,
+        get_damaging_hitbox=function() return {x={x,x+7},y={y-3,y+3}} end,
+
+        -- getters
+        x=function() return x end,
+        y=function() return y end,
+        is_drilling=function() return is.drilling end,
+        is_shooting=function() return is.shooting end,
+        is_mining=function() return mining_since<2 end,
+        get_role=function() return role end,
+        is_rns=function() return is.rns end,
+        health=function() return health end,
+        number=function() return number end,
+        ammo=function() return ammo end,
+        fuel=function() return fuel end,
+        points=function() return points end,
+        max_ammo=function() return max_ammo end,
+        max_fuel=function() return max_fuel end,
         drills_damage=drills_damage,
         mining_damage=mining_damage,
     }

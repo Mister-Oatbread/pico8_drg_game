@@ -2,9 +2,9 @@
 
 -- reduced grunt that takes hp at the bottom
 function bottom_grunt(x,y)
-    local frame=rnd(20)
-    local up_down_frame=rnd(20)
-    local up_down_cap=rnd(20)+40
+    local frame=flr(rnd(20))
+    local up_down_frame=flr(rnd(20))
+    local up_down_cap=sample_one(20,40)
     local x=x
     local y=y
     local y0=y
@@ -29,19 +29,15 @@ function bottom_grunt(x,y)
         spr(1,x,y,1,1,display_alt,true)
     end
 
-    local function x_f() return x end
-    local function y_f() return y end
-    local function is_alive() return alive end
-
     return {
-        x=x_f,
-        y=y_f,
         update=update,
         damage=damage,
         creature_damage=creature_damage,
         draw=draw,
         hitbox=hitbox,
-        is_alive=is_alive,
+        x=function() return x end,
+        y=function() return y end,
+        is_alive=function() return alive end,
     }
 end
 

@@ -21,8 +21,8 @@ function praetorian(x,y)
         damaged_since+=1
         if not spitting then frame=frame%40+1 end
 
-        for i=1,#players do
-            if abs(x-players[i].x()-4)<20 and players[i].y()-y<20 then
+        for player in all(players) do
+            if abs(x-player.x()-4)<20 and player.y()-y<20 then
                 if not spitting then
                     projectiles.spit_spit("praet_spit",x,y+16)
                     spitting=true
@@ -50,19 +50,15 @@ function praetorian(x,y)
         pal()
     end
 
-    local function x_f() return x end
-    local function y_f() return y end
-    local function is_alive() return alive end
-
     return {
-        x=x_f,
-        y=y_f,
         update=update,
         damage=damage,
         creature_damage=creature_damage,
         draw=draw,
         hitbox=hitbox,
-        is_alive=is_alive,
+        x=function() return x end,
+        y=function() return y end,
+        is_alive=function() return alive end,
     }
 end
 

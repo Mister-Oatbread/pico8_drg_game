@@ -34,11 +34,6 @@ function pick_spawn(spawn_params)
     end
 end
 
--- -- TODO: check if you can generalize this to house most of the update loops
--- function iterate(list,update_command)
---     return false
--- end
-
 -- takes ratios and variety (no of different spawns), and bundles everything
 -- into a table holding this information
 function generate_spawn_params(ratios,variety)
@@ -89,6 +84,11 @@ end
 --             container.delete(entity)
 --         end
 --     end
+-- end
+--
+-- -- TODO: check if you can generalize this to house most of the update loops
+-- function iterate(list,update_command)
+--     return false
 -- end
 
 

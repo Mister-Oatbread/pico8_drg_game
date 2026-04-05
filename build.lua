@@ -1,7 +1,7 @@
 function bottom_grunt(x,y)
-local frame=rnd(20)
-local up_down_frame=rnd(20)
-local up_down_cap=rnd(20)+40
+local frame=flr(rnd(20))
+local up_down_frame=flr(rnd(20))
+local up_down_cap=sample_one(20,40)
 local x=x
 local y=y
 local y0=y
@@ -20,18 +20,15 @@ end
 local function draw()
 spr(1,x,y,1,1,display_alt,true)
 end
-local function x_f() return x end
-local function y_f() return y end
-local function is_alive() return alive end
 return {
-x=x_f,
-y=y_f,
 update=update,
 damage=damage,
 creature_damage=creature_damage,
 draw=draw,
 hitbox=hitbox,
-is_alive=is_alive,
+x=function() return x end,
+y=function() return y end,
+is_alive=function() return alive end,
 }
 end
 function cave_angel(x,y)
@@ -45,10 +42,11 @@ local alive=true
 local creature_damage=0
 local hitbox={x={2,7},y={1,7}}
 local wings_open
+local tracked_player=choose_one(players)
 local function update()
 if playing then
 y+=1
-if frame%45==0 then x+=sgn(x-player_1.x()) end
+if frame%45==0 then x+=sgn(x-tracked_player.x()) end
 if frame%30==0 then y+=1 end
 end
 wings_open=frame>45
@@ -71,18 +69,15 @@ if not wings_open then sprite+=1 end
 spr(sprite,x,y,1,1,x_flip,false)
 pal()
 end
-local function x_f() return x end
-local function y_f() return y end
-local function is_alive() return alive end
 return {
-x=x_f,
-y=y_f,
 update=update,
 damage=damage,
 creature_damage=creature_damage,
 draw=draw,
 hitbox=hitbox,
-is_alive=is_alive,
+x=function() return x end,
+y=function() return y end,
+is_alive=function() return alive end,
 }
 end
 function egg(x,y)
@@ -118,18 +113,15 @@ if damaged_since<15 then pal(12,2) end
 spr(51,x,y,1,1,x_flip,false)
 pal()
 end
-local function x_f() return x end
-local function y_f() return y end
-local function is_alive() return alive end
 return {
-x=x_f,
-y=y_f,
 update=update,
 damage=damage,
 creature_damage=creature_damage,
 draw=draw,
 hitbox=hitbox,
-is_alive=is_alive,
+x=function() return x end,
+y=function() return y end,
+is_alive=function() return alive end,
 }
 end
 function grunt(x,y)
@@ -164,18 +156,15 @@ local x_flip=frame>6
 spr(1,x,y,1,1,x_flip,false)
 pal()
 end
-local function x_f() return x end
-local function y_f() return y end
-local function is_alive() return alive end
 return {
-x=x_f,
-y=y_f,
 update=update,
 damage=damage,
 creature_damage=creature_damage,
 draw=draw,
 hitbox=hitbox,
-is_alive=is_alive,
+x=function() return x end,
+y=function() return y end,
+is_alive=function() return alive end,
 }
 end
 function loot_bug(x,y)
@@ -212,18 +201,15 @@ if damaged_since<15 then pal(15,2) end
 spr(sprite,x,y,1,1,x_flip,false)
 pal()
 end
-local function x_f() return x end
-local function y_f() return y end
-local function is_alive() return alive end
 return {
-x=x_f,
-y=y_f,
 update=update,
 damage=damage,
 creature_damage=creature_damage,
 draw=draw,
 hitbox=hitbox,
-is_alive=is_alive,
+x=function() return x end,
+y=function() return y end,
+is_alive=function() return alive end,
 }
 end
 function new_creatures()
@@ -323,18 +309,15 @@ if damaged_since<15 then pal(3,2) end
 spr(sprite,x,y)
 pal()
 end
-local function x_f() return x end
-local function y_f() return y end
-local function is_alive() return alive end
 return {
-x=x_f,
-y=y_f,
 update=update,
 damage=damage,
 creature_damage=creature_damage,
 draw=draw,
 hitbox=hitbox,
-is_alive=is_alive,
+x=function() return x end,
+y=function() return y end,
+is_alive=function() return alive end,
 }
 end
 function menace(x,y)
@@ -359,8 +342,8 @@ if frame%10==1 then
 local x_shot_position=x_flip and x+8 or x
 local y_shot_position=y_flip and y+8 or y
 local angle=atan2(
-tracked_player.x()-x_shot_position,
-tracked_player.y()-y_shot_position
+tracked_player.x()-x_shot_position+3,
+tracked_player.y()-y_shot_position+3
 )
 local x_vel=2*cos(angle)
 local y_vel=2*sin(angle)+1
@@ -389,18 +372,15 @@ if damaged_since<15 then pal(12,2) end
 spr(11,x,y,1,1,x_flip,y_flip)
 pal()
 end
-local function x_f() return x end
-local function y_f() return y end
-local function is_alive() return alive end
 return {
-x=x_f,
-y=y_f,
 update=update,
 damage=damage,
 creature_damage=creature_damage,
 draw=draw,
 hitbox=hitbox,
-is_alive=is_alive,
+x=function() return x end,
+y=function() return y end,
+is_alive=function() return alive end,
 }
 end
 function oppressor(x,y)
@@ -423,18 +403,15 @@ local function draw()
 local x_flip=frame>30
 spr(5,x,y,2,2,x_flip,false)
 end
-local function x_f() return x end
-local function y_f() return y end
-local function is_alive() return alive end
 return {
-x=x_f,
-y=y_f,
 update=update,
 damage=damage,
 creature_damage=creature_damage,
 draw=draw,
 hitbox=hitbox,
-is_alive=is_alive,
+x=function() return x end,
+y=function() return y end,
+is_alive=function() return alive end,
 }
 end
 function praetorian(x,y)
@@ -456,8 +433,8 @@ end
 if not spitting then x_flip=frame>20 end
 damaged_since+=1
 if not spitting then frame=frame%40+1 end
-for i=1,#players do
-if abs(x-players[i].x()-4)<20 and players[i].y()-y<20 then
+for player in all(players) do
+if abs(x-player.x()-4)<20 and player.y()-y<20 then
 if not spitting then
 projectiles.spit_spit("praet_spit",x,y+16)
 spitting=true
@@ -482,18 +459,15 @@ if damaged_since<15 then pal(3,2) end
 spr(3,x,y,2,2,x_flip,false)
 pal()
 end
-local function x_f() return x end
-local function y_f() return y end
-local function is_alive() return alive end
 return {
-x=x_f,
-y=y_f,
 update=update,
 damage=damage,
 creature_damage=creature_damage,
 draw=draw,
 hitbox=hitbox,
-is_alive=is_alive,
+x=function() return x end,
+y=function() return y end,
+is_alive=function() return alive end,
 }
 end
 function slasher(x,y)
@@ -528,18 +502,15 @@ if damaged_since<15 then pal(4,2) end
 spr(2,x,y,1,1,x_flip,false)
 pal()
 end
-local function x_f() return x end
-local function y_f() return y end
-local function is_alive() return alive end
 return {
-x=x_f,
-y=y_f,
 update=update,
 damage=damage,
 creature_damage=creature_damage,
 draw=draw,
 hitbox=hitbox,
-is_alive=is_alive,
+x=function() return x end,
+y=function() return y end,
+is_alive=function() return alive end,
 }
 end
 function new_death_screen()
@@ -554,6 +525,7 @@ local loot_bug_names={
 "randy",
 "jimothy",
 "geoff",
+"thorben",
 "emilia",
 "olliver",
 "matilda",
@@ -660,6 +632,8 @@ replace=replace_entity,
 end
 function new_game_logic()
 local obstacle_ratios,resource_ratios,creature_ratios
+local obstacle_spawn_rate,resource_spawn_rate,creature_spawn_rate=0,0,0
+local timer=0
 local function set_difficulty(difficulty)
 if at_title_screen then
 creature_ratios={
@@ -817,6 +791,10 @@ mine_resources(player)
 damage_player(player)
 end
 damage_creatures()
+if timer%100==0 then
+creature_spawn_rate+=.01
+obstacle_spawn_rate+=.01
+end
 if playing then
 if rnd()<creature_spawn_rate then
 creatures.spawn()
@@ -834,6 +812,7 @@ playing=false
 at_death_screen=true
 end
 end
+timer+=1
 end
 local function obstacle_spawn_params_f() return obstacle_spawn_params end
 local function resource_spawn_params_f() return resource_spawn_params end
@@ -1128,31 +1107,31 @@ spawn_obstacle=spawn_obstacle,
 }
 end
 function new_performance_monitor()
-local cpu_percentage = 0;
-local max_cpu_percentage = 0;
-local min_fps = 60;
+local cpu_percentage=0
+local max_cpu_percentage=0
+local min_fps=60
 function reset_cpu_load()
-cpu_percentage = 0;
+cpu_percentage=0
 end
 function register_load()
-cpu_percentage += stat(1);
-max_cpu_percentage = max(cpu_percentage, max_cpu_percentage);
+cpu_percentage+=stat(1)
+max_cpu_percentage=max(cpu_percentage, max_cpu_percentage)
 end
 function print_summary()
-info = flr(max_cpu_percentage*100)/100;
-print("cpu spike: "..info, 150, 200);
-print("fps low:   "..min_fps);
+info = flr(max_cpu_percentage*100)/100
+print("cpu spike: "..info, 150, 200)
+print("fps low:   "..min_fps)
 end
 function print_current()
-print(stat(7), 218, 103, 11);
-min_fps = min(stat(7),min_fps);
+print(stat(7),218,103,11)
+min_fps=min(stat(7),min_fps)
 end
 return {
-register_load = register_load,
-print_summary = print_summary,
-print_current = print_current,
-reset_cpu_load = reset_cpu_load,
-};
+register_load=register_load,
+print_summary=print_summary,
+print_current=print_current,
+reset_cpu_load=reset_cpu_load,
+}
 end
 function new_player(number,role)
 local x=140+8*number
@@ -1173,7 +1152,7 @@ local playing_sound_of={drill=false,gun=false}
 local points=0
 local max_ammo=role=="gunner" and 100 or 25
 local ammo=max_ammo
-local max_fuel=role=="driller" and 150 or 0
+local max_fuel=role=="driller" and 250 or 0
 local fuel=max_fuel
 local health=3
 local max_health=3
@@ -1299,9 +1278,6 @@ local function give_ammo(percentage)
 ammo=min(ammo+max_ammo*percentage,max_ammo)
 fuel=min(fuel+max_fuel*percentage,max_fuel)
 end
-local function give_health(amount)
-health=min(health+amount,max_health)
-end
 local function move_player()
 if is.moving.up and not has_collision.top then
 if y>102 then
@@ -1352,15 +1328,6 @@ shot_since+=1
 hit_since+=1
 frame+=1
 end
-local function get_hitbox()
-return {x={x+1,x+6},y={y,y+7}}
-end
-local function get_mining_hitbox()
-return {x={x,x+7},y={y-1,y+3}}
-end
-local function get_damaging_hitbox()
-return {x={x,x+7},y={y-3,y+3}}
-end
 local function damage_player(amount)
 if hit_since>30 then
 health-=amount
@@ -1397,7 +1364,7 @@ local function change_role(new_role)
 role=new_role
 max_ammo=role=="gunner" and 100 or 25
 ammo=max_ammo
-max_fuel=role=="driller" and 150 or 0
+max_fuel=role=="driller" and 250 or 0
 fuel=max_fuel
 shot_delay=role=="gunner" and 1 or 3
 end
@@ -1428,47 +1395,31 @@ if is.shooting then draw_gun() end
 if is.drilling then draw_drills() end
 if mining_since<mining_delay*.7 then draw_pickaxe() end
 end
-local function x_f() return x end
-local function y_f() return y end
-local function drilling_f() return is.drilling end
-local function shooting_f() return is.shooting end
-local function mining_f() return mining_since<2 end
-local function rns_f() return is.rns end
-local function hit_f() return is_hit end
-local function health_f() return health end
-local function ammo_f() return ammo end
-local function fuel_f() return fuel end
-local function points_f() return points end
-local function give_points(amount) points+=amount end
-local function role_f() return role end
-local function max_ammo_f() return max_ammo end
-local function max_fuel_f() return max_fuel end
 return {
-x=x_f,
-y=y_f,
 update=update,
 draw=draw,
-give_ammo=give_ammo,
-give_health=give_health,
-give_points=give_points,
 damage=damage_player,
-get_hitbox=get_hitbox,
-get_mining_hitbox=get_mining_hitbox,
-get_damaging_hitbox=get_damaging_hitbox,
-get_role=role_f,
-is_drilling=drilling_f,
-is_shooting=shooting_f,
-is_mining=mining_f,
-is_rns=rns_f,
-is_hit=hit_f,
-health=health_f,
-number=number,
-ammo=ammo_f,
-fuel=fuel_f,
-points=points_f,
+give_ammo=give_ammo,
 change_role=change_role,
-max_ammo=max_ammo_f,
-max_fuel=max_fuel_f,
+give_points=function(amount) points+=amount end,
+give_health=function(amount) health=min(health+amount,max_health) end,
+get_hitbox=function() return {x={x+1,x+6},y={y,y+7}} end,
+get_mining_hitbox=function() return {x={x,x+7},y={y-1,y+3}} end,
+get_damaging_hitbox=function() return {x={x,x+7},y={y-3,y+3}} end,
+x=function() return x end,
+y=function() return y end,
+is_drilling=function() return is.drilling end,
+is_shooting=function() return is.shooting end,
+is_mining=function() return mining_since<2 end,
+get_role=function() return role end,
+is_rns=function() return is.rns end,
+health=function() return health end,
+number=function() return number end,
+ammo=function() return ammo end,
+fuel=function() return fuel end,
+points=function() return points end,
+max_ammo=function() return max_ammo end,
+max_fuel=function() return max_fuel end,
 drills_damage=drills_damage,
 mining_damage=mining_damage,
 }
@@ -1833,8 +1784,8 @@ local y0=160
 res_list.add(resources.spawn_menu_item(x0,y0,48,"class","driller"))
 res_list.add(resources.spawn_menu_item(x0+15,y0,32,"class","gunner"))
 res_list.add(resources.spawn_menu_item(x0+30,y0,34,"class","engineer"))
-x0=180
-y0=180
+x0=170
+y0=170
 res_list.add(resources.spawn_menu_item(x0,y0,192,"number",1))
 res_list.add(resources.spawn_menu_item(x0+8,y0,193,"number",2))
 res_list.add(resources.spawn_menu_item(x0+16,y0,194,"number",3))

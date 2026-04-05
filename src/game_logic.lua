@@ -3,6 +3,8 @@
 -- this file houses the entire logic for the game
 function new_game_logic()
     local obstacle_ratios,resource_ratios,creature_ratios
+    local obstacle_spawn_rate,resource_spawn_rate,creature_spawn_rate=0,0,0
+    local timer=0
 
     local function set_difficulty(difficulty)
         if at_title_screen then
@@ -174,6 +176,10 @@ function new_game_logic()
         end
         damage_creatures()
 
+        if timer%100==0 then
+            creature_spawn_rate+=.01
+            obstacle_spawn_rate+=.01
+        end
         if playing then
             if rnd()<creature_spawn_rate then
                 creatures.spawn()
@@ -191,6 +197,7 @@ function new_game_logic()
                 at_death_screen=true
             end
         end
+        timer+=1
     end
 
     local function obstacle_spawn_params_f() return obstacle_spawn_params end

@@ -25,8 +25,8 @@ function menace(x,y)
             local x_shot_position=x_flip and x+8 or x
             local y_shot_position=y_flip and y+8 or y
             local angle=atan2(
-                tracked_player.x()-x_shot_position,
-                tracked_player.y()-y_shot_position
+                tracked_player.x()-x_shot_position+3,
+                tracked_player.y()-y_shot_position+3
             )
             local x_vel=2*cos(angle)
             local y_vel=2*sin(angle)+1
@@ -58,19 +58,15 @@ function menace(x,y)
         pal()
     end
 
-    local function x_f() return x end
-    local function y_f() return y end
-    local function is_alive() return alive end
-
     return {
-        x=x_f,
-        y=y_f,
         update=update,
         damage=damage,
         creature_damage=creature_damage,
         draw=draw,
         hitbox=hitbox,
-        is_alive=is_alive,
+        x=function() return x end,
+        y=function() return y end,
+        is_alive=function() return alive end,
     }
 end
 
