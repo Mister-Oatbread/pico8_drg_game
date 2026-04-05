@@ -58,8 +58,10 @@ function new_death_screen()
         -- player.is_moving.right=false
         -- player.is_drilling=false
         -- player.is_hit=false
-        player.x_pos=130
-        player.y_pos=182
+        for i=1,#players do
+            players[i].x=130+8*i
+            players[i].y=182
+        end
 
         print("awards:", 111,126,7)
         print("",113,126,7)
@@ -94,11 +96,10 @@ function new_death_screen()
         for i=1,#players do points_total+=players[i].points() end
         print("game over!", 120, 105, 7)
         print("score: "..points_total)
-        print("distance travelled: "..game_time)
+        -- print("distance travelled: "..game_time)
     end
 
     return {
-        initialize=initialize,
         report_killed_lootbug=report_killed_lootbug,
         draw=draw,
     }

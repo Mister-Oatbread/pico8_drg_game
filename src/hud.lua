@@ -30,10 +30,10 @@ function new_hud()
         local x=player.number==1 and 105 or 202
         draw_hearts(player,x)
         spr(46,x,190)
-        draw_prog_bar(player.ammo()/player.max_ammo,x+9,192)
+        draw_prog_bar(player.ammo()/player.max_ammo(),x+9,192)
         if player.get_role()=="driller" then
             spr(47,x,200)
-            draw_prog_bar(player.fuel()/player.max_fuel,x+9,202)
+            draw_prog_bar(player.fuel()/player.max_fuel(),x+9,202)
         end
         spr(62,x,210)
         print(player.points(),x+10,211,7)

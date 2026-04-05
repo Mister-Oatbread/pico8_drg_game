@@ -6,7 +6,7 @@ function _init()
     -- music(56)
     -- hacky stuff end
 
-    coop=false
+    coop=true
 
     player_1=new_player(1,"driller")
     player_2=new_player(2,"gunner")
@@ -66,9 +66,16 @@ function _draw()
     hud.draw(player_1)
     if coop then hud.draw(player_2) end
 
-    pset(223,101,at_title_screen and 11 or 8)
-    pset(224,101,playing and 11 or 8)
-    pset(225,101,at_death_screen and 11 or 8)
+    -- pset(223,101,at_title_screen and 11 or 8)
+    -- pset(224,101,playing and 11 or 8)
+    -- pset(225,101,at_death_screen and 11 or 8)
+
+    if at_death_screen then
+        cls(1)
+        map.draw_wall()
+        map.draw_super_wall()
+        death_screen.draw()
+    end
 
     performance_monitor.register_load()
     performance_monitor.print_current()

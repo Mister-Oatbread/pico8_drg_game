@@ -337,6 +337,8 @@ function new_player(number,role)
     local function points_f() return points end
     local function give_points(amount) points+=amount end
     local function role_f() return role end
+    local function max_ammo_f() return max_ammo end
+    local function max_fuel_f() return max_fuel end
 
     return {
         x=x_f,
@@ -362,8 +364,8 @@ function new_player(number,role)
         fuel=fuel_f,
         points=points_f,
         change_role=change_role,
-        max_ammo=max_ammo,
-        max_fuel=max_fuel,
+        max_ammo=max_ammo_f,
+        max_fuel=max_fuel_f,
         drills_damage=drills_damage,
         mining_damage=mining_damage,
     }

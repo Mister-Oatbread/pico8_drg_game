@@ -185,6 +185,12 @@ function new_game_logic()
                 resources.spawn(sample_one(102,118),81)
             end
         end
+        for player in all(players) do
+            if player.health()<=0 then
+                playing=false
+                at_death_screen=true
+            end
+        end
     end
 
     local function obstacle_spawn_params_f() return obstacle_spawn_params end

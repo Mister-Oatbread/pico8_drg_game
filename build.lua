@@ -587,8 +587,10 @@ sfx(-1,0)
 sfx(-1,1)
 sfx(-1,2)
 sfx(-1,3)
-player.x_pos=130
-player.y_pos=182
+for i=1,#players do
+players[i].x=130+8*i
+players[i].y=182
+end
 print("awards:", 111,126,7)
 print("",113,126,7)
 if no_lootbugs_killed then
@@ -621,10 +623,8 @@ local points_total=0
 for i=1,#players do points_total+=players[i].points() end
 print("game over!", 120, 105, 7)
 print("score: "..points_total)
-print("distance travelled: "..game_time)
 end
 return {
-initialize=initialize,
 report_killed_lootbug=report_killed_lootbug,
 draw=draw,
 }
@@ -720,8 +720,6 @@ resource_ratios,resource_variety
 )
 at_title_screen=false
 playing=true
-music(-1)
-music(1)
 end
 end
 local function mine_resources(player)
@@ -830,6 +828,12 @@ if rnd()<resource_spawn_rate then
 resources.spawn(sample_one(102,118),81)
 end
 end
+for player in all(players) do
+if player.health()<=0 then
+playing=false
+at_death_screen=true
+end
+end
 end
 local function obstacle_spawn_params_f() return obstacle_spawn_params end
 local function resource_spawn_params_f() return resource_spawn_params end
@@ -866,10 +870,10 @@ local function draw(player)
 local x=player.number==1 and 105 or 202
 draw_hearts(player,x)
 spr(46,x,190)
-draw_prog_bar(player.ammo()/player.max_ammo,x+9,192)
+draw_prog_bar(player.ammo()/player.max_ammo(),x+9,192)
 if player.get_role()=="driller" then
 spr(47,x,200)
-draw_prog_bar(player.fuel()/player.max_fuel,x+9,202)
+draw_prog_bar(player.fuel()/player.max_fuel(),x+9,202)
 end
 spr(62,x,210)
 print(player.points(),x+10,211,7)
@@ -879,9 +883,7 @@ draw=draw,
 }
 end
 function _init()
-music(-1)
-music(56)
-coop=false
+coop=true
 player_1=new_player(1,"driller")
 player_2=new_player(2,"gunner")
 players={player_1}
@@ -928,9 +930,12 @@ map.draw_vines()
 map.draw_super_wall()
 hud.draw(player_1)
 if coop then hud.draw(player_2) end
-pset(223,101,at_title_screen and 11 or 8)
-pset(224,101,playing and 11 or 8)
-pset(225,101,at_death_screen and 11 or 8)
+if at_death_screen then
+cls(1)
+map.draw_wall()
+map.draw_super_wall()
+death_screen.draw()
+end
 performance_monitor.register_load()
 performance_monitor.print_current()
 end
@@ -1436,6 +1441,8 @@ local function fuel_f() return fuel end
 local function points_f() return points end
 local function give_points(amount) points+=amount end
 local function role_f() return role end
+local function max_ammo_f() return max_ammo end
+local function max_fuel_f() return max_fuel end
 return {
 x=x_f,
 y=y_f,
@@ -1460,8 +1467,8 @@ ammo=ammo_f,
 fuel=fuel_f,
 points=points_f,
 change_role=change_role,
-max_ammo=max_ammo,
-max_fuel=max_fuel,
+max_ammo=max_ammo_f,
+max_fuel=max_fuel_f,
 drills_damage=drills_damage,
 mining_damage=mining_damage,
 }
