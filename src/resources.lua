@@ -5,7 +5,7 @@ function new_resources()
     local list=new_entity_container()
 
     local function spawn_resource(x,y)
-        local sprite,sprites,hitbox,res_type,start_sprite
+        local sprite,hitbox,start_sprite
         local res_type=pick_spawn(game_logic.resource_spawn_params())
         if res_type=="red_sugar" then
             start_sprite=136
@@ -30,6 +30,21 @@ function new_resources()
         })
     end
 
+    -- allows to sapwn menu items, which are used to display stuff
+    -- in the main menu
+    local function spawn_menu_item(x,y,sprite,type,value)
+        list.add({
+            sprite=sprite,
+            x=x,
+            y=y,
+            x_flip=false,
+            y_flip=type=="class",
+            hitbox=type=="class" and {x={2,7},y={2,7}} or {x={2,8},y={1,8}},
+            res_type=type,
+            value=value
+        })
+    end
+
     local function update()
         if playing then
             for i=list.size(),1,-1 do
@@ -40,28 +55,6 @@ function new_resources()
             end
         end
     end
-
-    -- -- check if anything is currently colliding with the drills
-    -- -- if so, delete
-    -- local function mine(hitbox_drills)
-    --     local resource
-    --     for i=resources.size(),1,-1 do
-    --         resource=list.get(i)
-    --         if are_colliding(get_hitbox(resource),hitbox_drills) then
-    --             local res_type=resource.res_type
-    --             if res_type=="red_sugar" then
-    --                 player.give_health(1)
-    --             elseif res_type=="nitra" then
-    --                 player.give_ammo(.5)
-    --             elseif res_type=="gold" then
-    --                 points+=100
-    --             end
-    --             list.deletei(i)
-    --             sfx(-1,3)
-    --             sfx(38,3)
-    --         end
-    --     end
-    -- end
 
     local function get_hitbox(resource)
         local x1=resource.x+resource.hitbox.x[1]-1;
@@ -92,6 +85,7 @@ function new_resources()
         get_hitbox=get_hitbox,
         get_resources=list_f,
         spawn=spawn_resource,
+        spawn_menu_item=spawn_menu_item,
     }
 end
 

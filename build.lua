@@ -403,51 +403,6 @@ hitbox=hitbox,
 is_alive=is_alive,
 }
 end
-function number(x,y,value)
-local value=value
-local x=x
-local y=y
-local health=1
-local alive=true
-local creature_damage=0
-local hitbox={x={3,7},y={1,8}}
-local function update()
-if game_status=="playing" then y+=1 end
-end
-local function damage(damage_received)
-sfx(33)
-health-=damage_received
-if health<=0 then
-difficulty=value
-set_hazard_level()
-in_tutorial=false
-game_status="playing"
-music(-1)
-music(1)
-alive=false
-end
-end
-local function draw()
-local b={x={x+hitbox.x[1]-1, x+hitbox.x[2]-1}}
-local a={x={player.x_pos+6,player.x_pos+6}}
-local sprite=191+value
-if a.x[1]>b.x[2] or a.x[2]<b.x[1] then sprite+=16 end
-spr(sprite,x,y)
-end
-local function x_f() return x end
-local function y_f() return y end
-local function is_alive() return alive end
-return {
-x=x_f,
-y=y_f,
-update=update,
-damage=damage,
-creature_damage=creature_damage,
-draw=draw,
-hitbox=hitbox,
-is_alive=is_alive,
-}
-end
 function oppressor(x,y)
 local frame=1
 local x=x
@@ -706,6 +661,7 @@ end
 function new_game_logic()
 local obstacle_ratios,resource_ratios,creature_ratios
 local function set_difficulty(difficulty)
+if at_title_screen then
 creature_ratios={
 {2,loot_bug},
 {1,cave_angel},
@@ -764,11 +720,12 @@ resource_ratios,resource_variety
 )
 at_title_screen=false
 playing=true
+music(-1)
+music(1)
 end
-local function mine_resources()
-local resource,res_hitbox,player,mining_hitbox
-for p=1,#players do
-player=players[p]
+end
+local function mine_resources(player)
+local resource,res_hitbox,mining_hitbox
 if player.is_drilling() or player.is_mining() then
 mining_hitbox=player.get_mining_hitbox()
 for i=resources.get_resources().size(),1,-1 do
@@ -778,30 +735,29 @@ if are_colliding(res_hitbox,mining_hitbox) then
 local res_type=resource.res_type
 if res_type=="red_sugar" then
 player.give_health(1)
+resources.get_resources().deletei(i)
 elseif res_type=="nitra" then
 player.give_ammo(.5)
+resources.get_resources().deletei(i)
 elseif res_type=="gold" then
 player.give_points(100)
-end
 resources.get_resources().deletei(i)
+elseif res_type=="class" then
+player.change_role(resource.value)
+elseif res_type=="number" then
+game_logic.set_difficulty(resource.value)
+end
 sfx(-1,3)
 sfx(38,3)
 end
 end
 end
 end
-end
 local function damage_creatures()
-local player_box=player_1.get_hitbox()
-local creature_box,bullet_box,drills_box
+local creature_box,bullet_box,melee_box
 local creatures_list=creatures.creatures_list
 local bullets=projectiles.bullets_list
-local creature,bullet
-if player_1.is_drilling() then
-drills_box=player_1.get_damaging_hitbox()
-else
-drills_box={x={3,4},y={3,4}}
-end
+local creature,bullet,player_damage
 for i=1,creatures_list.size() do
 creature=creatures_list.get(i)
 creature_box=get_hitbox(creature)
@@ -809,19 +765,59 @@ for j=bullets.size(),1,-1 do
 bullet=bullets.get(j)
 bullet_box=projectiles.get_bullet_hitbox(bullet)
 if are_colliding(bullet_box, creature_box) then
-creature.damage(bullet.damage,player_1)
+creature.damage(bullet.damage,bullet.owner)
 if not bullet.piercing then
 bullets.deletei(j)
 end
 end
 end
-if are_colliding(creature_box,drills_box) then
-creature.damage(player_1.drills_damage,player_1)
+for player in all(players) do
+if player.is_drilling() then
+melee_box=player.get_damaging_hitbox()
+player_damage=player.drills_damage
+elseif player.is_mining() then
+melee_box=player.get_damaging_hitbox()
+player_damage=player.mining_damage
+else
+melee_box={x={3,4},y={3,4}}
+player_damage=0
+end
+if are_colliding(creature_box,melee_box) then
+creature.damage(player_damage,player)
+end
+end
+end
+end
+local function damage_player(player)
+local player_box,spit_box,creature_box
+local spit,creature,spits
+player_box=player.get_hitbox()
+spits=projectiles.spits_list
+for i=spits.size(),1,-1 do
+spit=spits.get(i)
+spit_box=projectiles.get_spit_hitbox(spit)
+if are_colliding(player_box,spit_box) then
+player.damage(spit.damage)
+if not spit.persists then
+spits.deletei(i)
+end
+end
+end
+for i=creatures.creatures_list.size(),1,-1 do
+creature=creatures.creatures_list.get(i)
+creature_box=creatures.get_hitbox(creature)
+if are_colliding(player_box,creature_box) then
+if creature.creature_damage>0 then
+player.damage(creature.creature_damage)
+end
 end
 end
 end
 local function update()
-mine_resources()
+for player in all(players) do
+mine_resources(player)
+damage_player(player)
+end
 damage_creatures()
 if playing then
 if rnd()<creature_spawn_rate then
@@ -845,74 +841,6 @@ obstacle_spawn_params=obstacle_spawn_params_f,
 resource_spawn_params=resource_spawn_params_f,
 creature_spawn_params=creature_spawn_params_f,
 }
-end
-function initialize_game()
-music(56);
-damaged_sprite_duration = 4;
-game_time = 0;
-game_status = "title_screen";
-no_lootbugs_killed = true;
-no_cave_angels_killed = true;
-in_tutorial = true;
-no_scout_killed = true;
-calculate_extra_credits = true;
-difficulty = 3;
-creature_spawn_rate = 0;
-obstacle_spawn_rate = 0;
-resource_spawn_rage = 0;
-end
-function update_game()
-game_time += 1;
-if game_time%5==0 then player.points += 1 end;
-if difficulty == 1 then
-if game_time%800==799 then creature_spawn_rate+=.01 end;
-if game_time%850==849 then obstacle_spawn_rate+=.01 end;
-player.fuel = player.max_fuel;
-player.ammo = player.max_ammo;
-elseif difficulty == 2 then
-if game_time%200==199 then creature_spawn_rate+=.01 end;
-if game_time%450==449 then obstacle_spawn_rate+=.01 end;
-if game_time%800==799 then resource_spawn_rate+=.01 end;
-elseif difficulty == 3 then
-if game_time%200==199 then creature_spawn_rate+=.01 end;
-if game_time%250==249 then obstacle_spawn_rate+=.01 end;
-if game_time%800==799 then resource_spawn_rate+=.01 end;
-elseif difficulty == 4 then
-if game_time%200==199 then creature_spawn_rate+=.01 end;
-if game_time%250==249 then obstacle_spawn_rate+=.01 end;
-elseif difficulty == 5 then
-if game_time%100==99 then creature_spawn_rate+=.01 end;
-if game_time%150==149 then obstacle_spawn_rate+=.01 end;
-if game_time%600==599 then resource_spawn_rate-=.01 end;
-if resource_spawn_rate<0 then resource_spawn_rate=0 end;
-end
-if player.health <= 0 then
-display_death_screen();
-end
-end
-function snapshot_achievements()
-if calculate_extra_credits then
-if in_tutorial then player.points+=500 end;
-if no_lootbugs_killed then player.points+=100 end;
-if no_cave_angels_killed then player.points+=100 end;
-if no_scout_killed then player.points+=100 end;
-calculate_extra_credits = false;
-end
-end
-function get_cum_probs(ratios)
-local sum = 0;
-local probs = {};
-for ratio in all(ratios) do
-add(probs, ratio);
-sum+=ratio;
-end
-for i=1,#probs do
-probs[i] = probs[i]/sum;
-end
-for i=2,#probs do
-probs[i] += probs[i-1];
-end
-return probs;
 end
 function new_hud()
 local function draw_prog_bar(percentage,x,y)
@@ -939,7 +867,7 @@ local x=player.number==1 and 105 or 202
 draw_hearts(player,x)
 spr(46,x,190)
 draw_prog_bar(player.ammo()/player.max_ammo,x+9,192)
-if player.max_fuel>0 then
+if player.get_role()=="driller" then
 spr(47,x,200)
 draw_prog_bar(player.fuel()/player.max_fuel,x+9,202)
 end
@@ -951,9 +879,11 @@ draw=draw,
 }
 end
 function _init()
+music(-1)
+music(56)
 coop=false
 player_1=new_player(1,"driller")
-player_2=new_player(2)
+player_2=new_player(2,"gunner")
 players={player_1}
 if coop then add(players,player_2) end
 projectiles=new_projectiles()
@@ -965,14 +895,11 @@ title_screen=new_title_screen()
 death_screen=new_death_screen()
 game_logic=new_game_logic()
 performance_monitor=new_performance_monitor()
-timer=0
 at_title_screen=true
 playing=false
 at_death_screen=false
 end
 function _update()
-timer+=1
-if timer>300 then game_logic.set_difficulty(2) end
 performance_monitor.reset_cpu_load()
 if not at_death_screen then
 projectiles.update()
@@ -1236,9 +1163,10 @@ mining=false,
 rns=false}
 local was_mining=false
 local drills_damage=4
+local mining_damage=10
 local playing_sound_of={drill=false,gun=false}
 local points=0
-local max_ammo=role=="driller" and 25 or 100
+local max_ammo=role=="gunner" and 100 or 25
 local ammo=max_ammo
 local max_fuel=role=="driller" and 150 or 0
 local fuel=max_fuel
@@ -1248,7 +1176,7 @@ local mining_since=60
 local mining_delay=10
 local hit_since=60
 local shot_since=60
-local shot_delay=role=="driller" and 3 or 1
+local shot_delay=role=="gunner" and 1 or 3
 local collision_points={left={},right={},top={}}
 local has_collision={left=false,right=false,top=false}
 for i=1,8 do
@@ -1351,7 +1279,7 @@ if role=="gunner" and not playing_sound_of.gun then
 sfx(-1,number)
 sfx(36,number)
 playing_sound_of.gun=true
-elseif role=="driller" then
+elseif role=="driller" or role=="engineer" then
 sfx(-1,number)
 sfx(34,number)
 end
@@ -1416,6 +1344,7 @@ playing_sound_of.gun=false
 end
 mining_since+=1
 shot_since+=1
+hit_since+=1
 frame+=1
 end
 local function get_hitbox()
@@ -1427,18 +1356,12 @@ end
 local function get_damaging_hitbox()
 return {x={x,x+7},y={y-3,y+3}}
 end
-local function handle_being_hit()
-if player.is_hit and player.hit_since>player.invuln_duration then
-player.hit_since = 0
-player.is_hit = false
-player.has_invuln = false
-elseif player.is_hit and player.hit_since<=player.invuln_duration then
-player.hit_since+=1
-end
-if player.is_hit and player.hit_since == 1 then
+local function damage_player(amount)
+if hit_since>30 then
+health-=amount
 sfx(32)
+hit_since=0
 end
-if player.health <= 0 then game_status = "end_screen" end
 end
 local function draw_gun()
 pset(x+6,y,6)
@@ -1465,6 +1388,14 @@ pset(x+6,y,5)
 pset(x+6,y+1,4)
 pset(x+6,y+2,4)
 end
+local function change_role(new_role)
+role=new_role
+max_ammo=role=="gunner" and 100 or 25
+ammo=max_ammo
+max_fuel=role=="driller" and 150 or 0
+fuel=max_fuel
+shot_delay=role=="gunner" and 1 or 3
+end
 local function draw()
 local moving,x_flip
 local speed=1
@@ -1477,10 +1408,15 @@ moving=(is.moving.down or is.moving.up
 or is.moving.left or is.moving.right)
 end
 local sprite=role=="driller" and 48 or 32
+if role=="engineer" then sprite=34 end
 if moving then sprite+=1 end
 x_flip=frame>=8
 frame=(frame+speed)%16
-if is_hit then pal(8,10) end
+if hit_since<=30 then
+pal(10,2)
+pal(3,2)
+pal(8,2)
+end
 spr(sprite,x,y,1,1,x_flip,false)
 pal()
 if is.shooting then draw_gun() end
@@ -1489,7 +1425,7 @@ if mining_since<mining_delay*.7 then draw_pickaxe() end
 end
 local function x_f() return x end
 local function y_f() return y end
-local function drilling_f() return is.drilling or is.mining end
+local function drilling_f() return is.drilling end
 local function shooting_f() return is.shooting end
 local function mining_f() return mining_since<2 end
 local function rns_f() return is.rns end
@@ -1498,9 +1434,8 @@ local function health_f() return health end
 local function ammo_f() return ammo end
 local function fuel_f() return fuel end
 local function points_f() return points end
-local function change_role(role) role=role end
 local function give_points(amount) points+=amount end
-local function get_role() return role end
+local function role_f() return role end
 return {
 x=x_f,
 y=y_f,
@@ -1509,10 +1444,11 @@ draw=draw,
 give_ammo=give_ammo,
 give_health=give_health,
 give_points=give_points,
+damage=damage_player,
 get_hitbox=get_hitbox,
 get_mining_hitbox=get_mining_hitbox,
 get_damaging_hitbox=get_damaging_hitbox,
-get_role=get_role,
+get_role=role_f,
 is_drilling=drilling_f,
 is_shooting=shooting_f,
 is_mining=mining_f,
@@ -1527,6 +1463,7 @@ change_role=change_role,
 max_ammo=max_ammo,
 max_fuel=max_fuel,
 drills_damage=drills_damage,
+mining_damage=mining_damage,
 }
 end
 function new_projectiles()
@@ -1534,13 +1471,13 @@ local bullets=new_entity_container()
 local spits=new_entity_container()
 local menace_spits=new_entity_container()
 local function fire_bullet(number)
-local player=number==1 and player_1 or player_2
+local player=number==1 and players[1] or players[2]
 bullets.add({
 x=player.x(),
 y=(player.y())-8,
 owner=player,
-damage=player.get_role()=="driller" and 10 or 5,
-piercing=player.get_role()=="driller" and false or true,
+damage=player.get_role()=="gunner" and 5 or 10,
+piercing=player.get_role()=="gunner",
 })
 end
 local function new_spit(spit_type,x,y)
@@ -1638,28 +1575,6 @@ for i=1,menace_spits.size() do
 x=flr(menace_spits.get(i).x)
 y=flr(menace_spits.get(i).y)
 pset(x,y,12)
-end
-end
-local function check_spit_collision()
-local no_spits = #spits
-local player_box = get_player_hitbox(player)
-local spit, spit_box
-local colliding
-if no_spits>0 then
-for i=no_spits,1,-1 do
-spit = spits[i]
-spit_box = get_spit_hitbox(spits[i])
-colliding = are_colliding(player_box, spit_box)
-if (colliding and not player.has_invuln) then
-player.health -= spit.damage
-player.is_hit = true
-player.hit_since = 0
-player.has_invuln = true
-if not spit.persists then
-deli(spits, i)
-end
-end
-end
 end
 end
 local function get_bullet_hitbox(bullet)
@@ -1830,7 +1745,7 @@ end
 function new_resources()
 local list=new_entity_container()
 local function spawn_resource(x,y)
-local sprite,sprites,hitbox,res_type,start_sprite
+local sprite,hitbox,start_sprite
 local res_type=pick_spawn(game_logic.resource_spawn_params())
 if res_type=="red_sugar" then
 start_sprite=136
@@ -1851,6 +1766,18 @@ x_flip=coinflip(),
 y_flip=coinflip(),
 hitbox=hitbox,
 res_type=res_type,
+})
+end
+local function spawn_menu_item(x,y,sprite,type,value)
+list.add({
+sprite=sprite,
+x=x,
+y=y,
+x_flip=false,
+y_flip=type=="class",
+hitbox=type=="class" and {x={2,7},y={2,7}} or {x={2,8},y={1,8}},
+res_type=type,
+value=value
 })
 end
 local function update()
@@ -1889,15 +1816,25 @@ draw=draw,
 get_hitbox=get_hitbox,
 get_resources=list_f,
 spawn=spawn_resource,
+spawn_menu_item=spawn_menu_item,
 }
 end
 function new_title_screen()
-map.add_obstacle({sprite=101,x=200,y=160,
-size=2,x_flip=false,y_flip=false})
-map.add_obstacle({sprite=84,x=200,y=155,
-size=1,x_flip=false,y_flip=true})
-local x0=160
-local y0=200
+local res_list=resources.get_resources()
+local x0=120
+local y0=160
+res_list.add(resources.spawn_menu_item(x0,y0,48,"class","driller"))
+res_list.add(resources.spawn_menu_item(x0+15,y0,32,"class","gunner"))
+res_list.add(resources.spawn_menu_item(x0+30,y0,34,"class","engineer"))
+x0=180
+y0=180
+res_list.add(resources.spawn_menu_item(x0,y0,192,"number",1))
+res_list.add(resources.spawn_menu_item(x0+8,y0,193,"number",2))
+res_list.add(resources.spawn_menu_item(x0+16,y0,194,"number",3))
+res_list.add(resources.spawn_menu_item(x0+24,y0,195,"number",4))
+res_list.add(resources.spawn_menu_item(x0+32,y0,196,"number",5))
+x0=160
+y0=200
 map.add_obstacle({
 sprite=227,
 x=x0,

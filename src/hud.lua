@@ -31,7 +31,7 @@ function new_hud()
         draw_hearts(player,x)
         spr(46,x,190)
         draw_prog_bar(player.ammo()/player.max_ammo,x+9,192)
-        if player.max_fuel>0 then
+        if player.get_role()=="driller" then
             spr(47,x,200)
             draw_prog_bar(player.fuel()/player.max_fuel,x+9,202)
         end

@@ -14,14 +14,30 @@ function new_title_screen()
     -- add(creatures, slasher(190, 120))
     -- add(creatures, praetorian(200, 120))
     -- add(creatures, mactera(218, 120))
-    map.add_obstacle({sprite=101,x=200,y=160,
-        size=2,x_flip=false,y_flip=false})
-    map.add_obstacle({sprite=84,x=200,y=155,
-        size=1,x_flip=false,y_flip=true})
+    -- map.add_obstacle({sprite=101,x=200,y=160,
+    --     size=2,x_flip=false,y_flip=false})
+    -- map.add_obstacle({sprite=84,x=200,y=155,
+    --     size=1,x_flip=false,y_flip=true})
+
+    -- difficulty selection and class selection
+    local res_list=resources.get_resources()
+    local x0=120
+    local y0=160
+    res_list.add(resources.spawn_menu_item(x0,y0,48,"class","driller"))
+    res_list.add(resources.spawn_menu_item(x0+15,y0,32,"class","gunner"))
+    res_list.add(resources.spawn_menu_item(x0+30,y0,34,"class","engineer"))
+
+    x0=180
+    y0=180
+    res_list.add(resources.spawn_menu_item(x0,y0,192,"number",1))
+    res_list.add(resources.spawn_menu_item(x0+8,y0,193,"number",2))
+    res_list.add(resources.spawn_menu_item(x0+16,y0,194,"number",3))
+    res_list.add(resources.spawn_menu_item(x0+24,y0,195,"number",4))
+    res_list.add(resources.spawn_menu_item(x0+32,y0,196,"number",5))
 
     -- controls guide
-    local x0=160
-    local y0=200
+    x0=160
+    y0=200
 
     map.add_obstacle({
         sprite=227,

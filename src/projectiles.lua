@@ -8,13 +8,17 @@ function new_projectiles()
 
     -- sends a bullet out from the current location of the player
     local function fire_bullet(number)
-        local player=number==1 and player_1 or player_2
+        local player=number==1 and players[1] or players[2]
         bullets.add({
             x=player.x(),
             y=(player.y())-8,
             owner=player,
-            damage=player.get_role()=="driller" and 10 or 5,
-            piercing=player.get_role()=="driller" and false or true,
+            damage=player.get_role()=="gunner" and 5 or 10,
+            piercing=player.get_role()=="gunner",
+            --
+            -- TODO: find out why both are currently piercing if I set this
+            -- up properly
+            -- piercing=player.get_role()=="driller" and false or true,
         })
     end
 
@@ -127,33 +131,6 @@ function new_projectiles()
             x=flr(menace_spits.get(i).x)
             y=flr(menace_spits.get(i).y)
             pset(x,y,12)
-        end
-    end
-
-    -- checks if one of the spits is currently colliding with the player
-    local function check_spit_collision()
-        local no_spits = #spits
-        local player_box = get_player_hitbox(player)
-        local spit, spit_box
-        local colliding
-
-        if no_spits>0 then
-            for i=no_spits,1,-1 do
-                spit = spits[i]
-                spit_box = get_spit_hitbox(spits[i])
-
-                colliding = are_colliding(player_box, spit_box)
-                if (colliding and not player.has_invuln) then
-                    player.health -= spit.damage
-                    player.is_hit = true
-                    player.hit_since = 0
-                    player.has_invuln = true
-
-                    if not spit.persists then
-                        deli(spits, i)
-                    end
-                end
-            end
         end
     end
 

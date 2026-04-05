@@ -3,13 +3,13 @@
 function _init()
     -- hacky stuff start
     -- music(-1)
-    -- music(1)
+    -- music(56)
     -- hacky stuff end
 
     coop=false
 
     player_1=new_player(1,"driller")
-    player_2=new_player(2)
+    player_2=new_player(2,"gunner")
     players={player_1}
     if coop then add(players,player_2) end
     projectiles=new_projectiles()
@@ -23,7 +23,6 @@ function _init()
     game_logic=new_game_logic()
 
     performance_monitor=new_performance_monitor()
-    timer=0
 
     at_title_screen=true
     playing=false
@@ -32,8 +31,6 @@ end
 
 function _update()
     -- hacky stuff start
-    timer+=1
-    if timer>300 then game_logic.set_difficulty(2) end
     -- hacky stuff end
 
     performance_monitor.reset_cpu_load()

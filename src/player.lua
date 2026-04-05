@@ -17,9 +17,10 @@ function new_player(number,role)
         rns=false}
     local was_mining=false
     local drills_damage=4
+    local mining_damage=10
     local playing_sound_of={drill=false,gun=false}
     local points=0
-    local max_ammo=role=="driller" and 25 or 100
+    local max_ammo=role=="gunner" and 100 or 25
     local ammo=max_ammo
     local max_fuel=role=="driller" and 150 or 0
     local fuel=max_fuel
@@ -29,7 +30,7 @@ function new_player(number,role)
     local mining_delay=10
     local hit_since=60
     local shot_since=60
-    local shot_delay=role=="driller" and 3 or 1
+    local shot_delay=role=="gunner" and 1 or 3
     local collision_points={left={},right={},top={}}
     local has_collision={left=false,right=false,top=false}
     for i=1,8 do
@@ -146,7 +147,7 @@ function new_player(number,role)
                     sfx(-1,number)
                     sfx(36,number)
                     playing_sound_of.gun=true
-                elseif role=="driller" then
+                elseif role=="driller" or role=="engineer" then
                     sfx(-1,number)
                     sfx(34,number)
                 end
@@ -220,6 +221,7 @@ function new_player(number,role)
         end
         mining_since+=1
         shot_since+=1
+        hit_since+=1
         frame+=1
     end
 
@@ -241,20 +243,12 @@ function new_player(number,role)
     end
 
 
-    local function handle_being_hit()
-        if player.is_hit and player.hit_since>player.invuln_duration then
-            player.hit_since = 0
-            player.is_hit = false
-            player.has_invuln = false
-        elseif player.is_hit and player.hit_since<=player.invuln_duration then
-            player.hit_since+=1
-        end
-
-        if player.is_hit and player.hit_since == 1 then
+    local function damage_player(amount)
+        if hit_since>30 then
+            health-=amount
             sfx(32)
+            hit_since=0
         end
-
-        if player.health <= 0 then game_status = "end_screen" end
     end
 
     local function draw_gun()
@@ -285,6 +279,15 @@ function new_player(number,role)
         pset(x+6,y+2,4)
     end
 
+    local function change_role(new_role)
+        role=new_role
+        max_ammo=role=="gunner" and 100 or 25
+        ammo=max_ammo
+        max_fuel=role=="driller" and 150 or 0
+        fuel=max_fuel
+        shot_delay=role=="gunner" and 1 or 3
+    end
+
     -- draws player based on current state
     local function draw()
         local moving,x_flip
@@ -300,6 +303,7 @@ function new_player(number,role)
                 or is.moving.left or is.moving.right)
         end
         local sprite=role=="driller" and 48 or 32
+        if role=="engineer" then sprite=34 end
 
         -- determine how fast legs should switch
 
@@ -308,7 +312,11 @@ function new_player(number,role)
         x_flip=frame>=8
         frame=(frame+speed)%16
 
-        if is_hit then pal(8,10) end
+        if hit_since<=30 then
+            pal(10,2)
+            pal(3,2)
+            pal(8,2)
+        end
         spr(sprite,x,y,1,1,x_flip,false)
         pal()
         if is.shooting then draw_gun() end
@@ -318,7 +326,7 @@ function new_player(number,role)
 
     local function x_f() return x end
     local function y_f() return y end
-    local function drilling_f() return is.drilling or is.mining end
+    local function drilling_f() return is.drilling end
     local function shooting_f() return is.shooting end
     local function mining_f() return mining_since<2 end
     local function rns_f() return is.rns end
@@ -327,9 +335,8 @@ function new_player(number,role)
     local function ammo_f() return ammo end
     local function fuel_f() return fuel end
     local function points_f() return points end
-    local function change_role(role) role=role end
     local function give_points(amount) points+=amount end
-    local function get_role() return role end
+    local function role_f() return role end
 
     return {
         x=x_f,
@@ -339,10 +346,11 @@ function new_player(number,role)
         give_ammo=give_ammo,
         give_health=give_health,
         give_points=give_points,
+        damage=damage_player,
         get_hitbox=get_hitbox,
         get_mining_hitbox=get_mining_hitbox,
         get_damaging_hitbox=get_damaging_hitbox,
-        get_role=get_role,
+        get_role=role_f,
         is_drilling=drilling_f,
         is_shooting=shooting_f,
         is_mining=mining_f,
@@ -357,6 +365,7 @@ function new_player(number,role)
         max_ammo=max_ammo,
         max_fuel=max_fuel,
         drills_damage=drills_damage,
+        mining_damage=mining_damage,
     }
 end
 
