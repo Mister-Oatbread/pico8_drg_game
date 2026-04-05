@@ -20,7 +20,7 @@ function new_title_screen()
     --     size=1,x_flip=false,y_flip=true})
 
     -- difficulty selection and class selection
-    local res_list=resources.get_resources()
+    local res_list=resources.get_resources
     local x0=120
     local y0=160
     res_list.add(resources.spawn_menu_item(x0,y0,48,"class","driller"))

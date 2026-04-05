@@ -27,7 +27,7 @@ function new_hud()
     end
 
     local function draw(player)
-        local x=player.number==1 and 105 or 202
+        local x=player.number()==1 and 105 or 202
         draw_hearts(player,x)
         spr(46,x,190)
         draw_prog_bar(player.ammo()/player.max_ammo(),x+9,192)

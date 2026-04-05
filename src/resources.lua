@@ -77,13 +77,11 @@ function new_resources()
         end
     end
 
-    local function list_f() return list end
-
     return {
         update=update,
         draw=draw,
         get_hitbox=get_hitbox,
-        get_resources=list_f,
+        get_resources=list,
         spawn=spawn_resource,
         spawn_menu_item=spawn_menu_item,
     }

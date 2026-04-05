@@ -4,38 +4,13 @@
 -- of any closure
 function new_entity_container()
     local entities={}
-
-    local function add_entity(entity)
-        add(entities,entity)
-    end
-
-    local function get_entities(i)
-        return entities[i]
-    end
-
-    local function delete_entity(entity)
-        del(entities,entity)
-    end
-
-    local function deletei_entity(i)
-        deli(entities,i)
-    end
-
-    local function size_entities()
-        return #entities
-    end
-
-    local function replace_entity(i,new_entity)
-        entities[i]=new_entity
-    end
-
     return {
-        add=add_entity,
-        get=get_entities,
-        delete=delete_entity,
-        deletei=deletei_entity,
-        size=size_entities,
-        replace=replace_entity,
+        add=function(entity) add(entities,entity) end,
+        get=function(i) return entities[i] end,
+        delete=function(entity) del(entities,entity) end,
+        deletei=function(i) deli(entities,i) end,
+        size=function() return #entities end,
+        replace=function(i,new_entity) entities[i]=new_entity end,
     }
 end
 

@@ -8,7 +8,7 @@ function new_projectiles()
 
     -- sends a bullet out from the current location of the player
     local function fire_bullet(number)
-        local player=number==1 and players[1] or players[2]
+        local player=number()==1 and players[1] or players[2]
         bullets.add({
             x=player.x(),
             y=(player.y())-8,
@@ -72,14 +72,11 @@ function new_projectiles()
             spr(sprite,x,y,size,size,x_flip,y_flip)
         end
 
-        function x_f() return x end
-        function y_f() return y end
-
         return {
             update=update,
             draw=draw,
-            x=x_f,
-            y=y_f,
+            x=function() return x end,
+            y=function() return y end,
             persists=persists,
             damage=damage,
             hitbox=hitbox,

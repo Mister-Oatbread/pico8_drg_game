@@ -59,7 +59,7 @@ damaged_since=0
 health-=damage_received
 if health<=0 then
 alive=false
-no_cave_angels_killed=false
+death_screen.report_killed_cave_angel()
 end
 end
 local function draw()
@@ -103,7 +103,7 @@ if health<=0 then
 player.give_ammo(.5)
 player.give_health(1)
 player.give_points(50)
-no_scout_killed=false
+death_screen.report_killed_egg()
 alive=false
 end
 end
@@ -549,85 +549,73 @@ local loot_bug_names={
 "steevie",
 }
 local killed_loot_bugs=new_entity_container()
-local function initialize()
-end
-local function report_killed_lootbug()
-killed_loot_bugs.add(choose_one(loot_bug_names))
-end
+local no_cave_angels_killed=true
+local no_eggs_killed=true
 local function draw()
+local points_total=0
+local no_lootbugs_killed=killed_loot_bugs.size()==0
 sfx(-1,0)
 sfx(-1,1)
 sfx(-1,2)
 sfx(-1,3)
-for i=1,#players do
-players[i].x=130+8*i
-players[i].y=182
+for player in all(players) do
+player.x=130+8*(player.number()-1)
+points_total+=player.points()
 end
 print("awards:", 111,126,7)
 print("",113,126,7)
 if no_lootbugs_killed then
 print("-no lootbugs")
 print(" killed (+100)")
+points_total+=100
 end
 if no_cave_angels_killed then
 print("-no cave angels")
 print(" killed (+100)")
+points_total+=100
 end
 if no_scout_killed then
 print("-you spared")
 print(" the scouts (+100)")
+points_total+=100
 end
-if in_tutorial then
+if at_title_screen then
 print("-died during the")
 print(" tutorial (+500)")
+points_total+=500
 end
 if not no_lootbugs_killed then
 print("killed",190,130,7)
 print("loot")
 print("bugs:")
 local y = 148
-for name in all(killed_loot_bugs) do
-print(name,192,y)
+for i=1,killed_loot_bugs.size() do
+print(killed_loot_bugs[i],192,y)
 y+=6
 end
 end
-local points_total=0
-for i=1,#players do points_total+=players[i].points() end
 print("game over!", 120, 105, 7)
 print("score: "..points_total)
 end
+local function report_killed_lootbug()
+killed_loot_bugs.add(choose_one(loot_bug_names))
+end
 return {
 report_killed_lootbug=report_killed_lootbug,
+report_killed_cave_angel=function() no_cave_angels_killed=false end,
+report_killed_egg=function() no_eggs_killed=false end,
 draw=draw,
 }
 end
 function new_entity_container()
 local entities={}
-local function add_entity(entity)
-add(entities,entity)
-end
-local function get_entities(i)
-return entities[i]
-end
-local function delete_entity(entity)
-del(entities,entity)
-end
-local function deletei_entity(i)
-deli(entities,i)
-end
-local function size_entities()
-return #entities
-end
-local function replace_entity(i,new_entity)
-entities[i]=new_entity
-end
 return {
-add=add_entity,
-get=get_entities,
-delete=delete_entity,
-deletei=deletei_entity,
-size=size_entities,
-replace=replace_entity,
+add=function(entity) add(entities,entity) end,
+get=function(i) return entities[i] end,
+delete=function(entity) del(entities,entity) end,
+deletei=function(i) deli(entities,i) end,
+size=function() return #entities end,
+replace=function(i,new_entity) entities[i]=new_entity end,
 }
 end
 function new_game_logic()
@@ -700,20 +688,20 @@ local function mine_resources(player)
 local resource,res_hitbox,mining_hitbox
 if player.is_drilling() or player.is_mining() then
 mining_hitbox=player.get_mining_hitbox()
-for i=resources.get_resources().size(),1,-1 do
-resource=resources.get_resources().get(i)
+for i=resources.get_resources.size(),1,-1 do
+resource=resources.get_resources.get(i)
 res_hitbox=resources.get_hitbox(resource)
 if are_colliding(res_hitbox,mining_hitbox) then
 local res_type=resource.res_type
 if res_type=="red_sugar" then
 player.give_health(1)
-resources.get_resources().deletei(i)
+resources.get_resources.deletei(i)
 elseif res_type=="nitra" then
 player.give_ammo(.5)
-resources.get_resources().deletei(i)
+resources.get_resources.deletei(i)
 elseif res_type=="gold" then
 player.give_points(100)
-resources.get_resources().deletei(i)
+resources.get_resources.deletei(i)
 elseif res_type=="class" then
 player.change_role(resource.value)
 elseif res_type=="number" then
@@ -814,15 +802,12 @@ end
 end
 timer+=1
 end
-local function obstacle_spawn_params_f() return obstacle_spawn_params end
-local function resource_spawn_params_f() return resource_spawn_params end
-local function creature_spawn_params_f() return creature_spawn_params end
 return {
 update=update,
 set_difficulty=set_difficulty,
-obstacle_spawn_params=obstacle_spawn_params_f,
-resource_spawn_params=resource_spawn_params_f,
-creature_spawn_params=creature_spawn_params_f,
+obstacle_spawn_params=function() return obstacle_spawn_params end,
+resource_spawn_params=function() return resource_spawn_params end,
+creature_spawn_params=function() return creature_spawn_params end,
 }
 end
 function new_hud()
@@ -846,7 +831,7 @@ pal()
 end
 end
 local function draw(player)
-local x=player.number==1 and 105 or 202
+local x=player.number()==1 and 105 or 202
 draw_hearts(player,x)
 spr(46,x,190)
 draw_prog_bar(player.ammo()/player.max_ammo(),x+9,192)
@@ -1110,19 +1095,16 @@ function new_performance_monitor()
 local cpu_percentage=0
 local max_cpu_percentage=0
 local min_fps=60
-function reset_cpu_load()
-cpu_percentage=0
-end
-function register_load()
+local function register_load()
 cpu_percentage+=stat(1)
 max_cpu_percentage=max(cpu_percentage, max_cpu_percentage)
 end
-function print_summary()
-info = flr(max_cpu_percentage*100)/100
+local function print_summary()
+local info = flr(max_cpu_percentage*100)/100
 print("cpu spike: "..info, 150, 200)
 print("fps low:   "..min_fps)
 end
-function print_current()
+local function print_current()
 print(stat(7),218,103,11)
 min_fps=min(stat(7),min_fps)
 end
@@ -1130,7 +1112,7 @@ return {
 register_load=register_load,
 print_summary=print_summary,
 print_current=print_current,
-reset_cpu_load=reset_cpu_load,
+reset_cpu_load=function() cpu_percentage=0 end,
 }
 end
 function new_player(number,role)
@@ -1429,7 +1411,7 @@ local bullets=new_entity_container()
 local spits=new_entity_container()
 local menace_spits=new_entity_container()
 local function fire_bullet(number)
-local player=number==1 and players[1] or players[2]
+local player=number()==1 and players[1] or players[2]
 bullets.add({
 x=player.x(),
 y=(player.y())-8,
@@ -1480,13 +1462,11 @@ end
 local function draw()
 spr(sprite,x,y,size,size,x_flip,y_flip)
 end
-function x_f() return x end
-function y_f() return y end
 return {
 update=update,
 draw=draw,
-x=x_f,
-y=y_f,
+x=function() return x end,
+y=function() return y end,
 persists=persists,
 damage=damage,
 hitbox=hitbox,
@@ -1767,18 +1747,17 @@ y_flip=resource.y_flip
 spr(sprite,x,y,1,1,x_flip,y_flip)
 end
 end
-local function list_f() return list end
 return {
 update=update,
 draw=draw,
 get_hitbox=get_hitbox,
-get_resources=list_f,
+get_resources=list,
 spawn=spawn_resource,
 spawn_menu_item=spawn_menu_item,
 }
 end
 function new_title_screen()
-local res_list=resources.get_resources()
+local res_list=resources.get_resources
 local x0=120
 local y0=160
 res_list.add(resources.spawn_menu_item(x0,y0,48,"class","driller"))

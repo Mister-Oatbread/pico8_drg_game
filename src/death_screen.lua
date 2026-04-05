@@ -39,15 +39,12 @@ function new_death_screen()
         "steevie",
     }
     local killed_loot_bugs=new_entity_container()
-
-    local function initialize()
-    end
-
-    local function report_killed_lootbug()
-        killed_loot_bugs.add(choose_one(loot_bug_names))
-    end
+    local no_cave_angels_killed=true
+    local no_eggs_killed=true
 
     local function draw()
+        local points_total=0
+        local no_lootbugs_killed=killed_loot_bugs.size()==0
         -- cleaning up game state
         sfx(-1,0)
         sfx(-1,1)
@@ -59,9 +56,9 @@ function new_death_screen()
         -- player.is_moving.right=false
         -- player.is_drilling=false
         -- player.is_hit=false
-        for i=1,#players do
-            players[i].x=130+8*i
-            players[i].y=182
+        for player in all(players) do
+            player.x=130+8*(player.number()-1)
+            points_total+=player.points()
         end
 
         print("awards:", 111,126,7)
@@ -69,18 +66,22 @@ function new_death_screen()
         if no_lootbugs_killed then
             print("-no lootbugs")
             print(" killed (+100)")
+            points_total+=100
         end
         if no_cave_angels_killed then
             print("-no cave angels")
             print(" killed (+100)")
+            points_total+=100
         end
         if no_scout_killed then
             print("-you spared")
             print(" the scouts (+100)")
+            points_total+=100
         end
-        if in_tutorial then
+        if at_title_screen then
             print("-died during the")
             print(" tutorial (+500)")
+            points_total+=500
         end
         -- if not no_lootbugs_killed then
         if not no_lootbugs_killed then
@@ -88,20 +89,24 @@ function new_death_screen()
             print("loot")
             print("bugs:")
             local y = 148
-            for name in all(killed_loot_bugs) do
-                print(name,192,y)
+            for i=1,killed_loot_bugs.size() do
+                print(killed_loot_bugs[i],192,y)
                 y+=6
             end
         end
-        local points_total=0
-        for i=1,#players do points_total+=players[i].points() end
         print("game over!", 120, 105, 7)
         print("score: "..points_total)
         -- print("distance travelled: "..game_time)
     end
 
+    local function report_killed_lootbug()
+        killed_loot_bugs.add(choose_one(loot_bug_names))
+    end
+
     return {
         report_killed_lootbug=report_killed_lootbug,
+        report_killed_cave_angel=function() no_cave_angels_killed=false end,
+        report_killed_egg=function() no_eggs_killed=false end,
         draw=draw,
     }
 end

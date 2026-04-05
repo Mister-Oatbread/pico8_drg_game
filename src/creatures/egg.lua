@@ -25,7 +25,7 @@ function egg(x,y)
             player.give_ammo(.5)
             player.give_health(1)
             player.give_points(50)
-            no_scout_killed=false
+            death_screen.report_killed_egg()
             alive=false
         end
     end

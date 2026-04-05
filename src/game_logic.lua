@@ -75,20 +75,20 @@ function new_game_logic()
         local resource,res_hitbox,mining_hitbox
         if player.is_drilling() or player.is_mining() then
             mining_hitbox=player.get_mining_hitbox()
-            for i=resources.get_resources().size(),1,-1 do
-                resource=resources.get_resources().get(i)
+            for i=resources.get_resources.size(),1,-1 do
+                resource=resources.get_resources.get(i)
                 res_hitbox=resources.get_hitbox(resource)
                 if are_colliding(res_hitbox,mining_hitbox) then
                     local res_type=resource.res_type
                     if res_type=="red_sugar" then
                         player.give_health(1)
-                        resources.get_resources().deletei(i)
+                        resources.get_resources.deletei(i)
                     elseif res_type=="nitra" then
                         player.give_ammo(.5)
-                        resources.get_resources().deletei(i)
+                        resources.get_resources.deletei(i)
                     elseif res_type=="gold" then
                         player.give_points(100)
-                        resources.get_resources().deletei(i)
+                        resources.get_resources.deletei(i)
                     elseif res_type=="class" then
                         player.change_role(resource.value)
                     elseif res_type=="number" then
@@ -200,16 +200,12 @@ function new_game_logic()
         timer+=1
     end
 
-    local function obstacle_spawn_params_f() return obstacle_spawn_params end
-    local function resource_spawn_params_f() return resource_spawn_params end
-    local function creature_spawn_params_f() return creature_spawn_params end
-
     return {
         update=update,
         set_difficulty=set_difficulty,
-        obstacle_spawn_params=obstacle_spawn_params_f,
-        resource_spawn_params=resource_spawn_params_f,
-        creature_spawn_params=creature_spawn_params_f,
+        obstacle_spawn_params=function() return obstacle_spawn_params end,
+        resource_spawn_params=function() return resource_spawn_params end,
+        creature_spawn_params=function() return creature_spawn_params end,
     }
 end
 
