@@ -60,7 +60,8 @@ function new_death_screen()
         -- player.is_drilling=false
         -- player.is_hit=false
         for player in all(players) do
-            player.x=130+8*(player.number()-1)
+            player.reposition(130+8*player.number()-1,180)
+            -- player.x()=130+8*(player.number()-1)
             points_total+=player.points()
         end
 

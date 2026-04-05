@@ -541,7 +541,7 @@ sfx(-1,1)
 sfx(-1,2)
 sfx(-1,3)
 for player in all(players) do
-player.x=130+8*(player.number()-1)
+player.reposition(130+8*player.number()-1,180)
 points_total+=player.points()
 end
 print("awards:", 111,126,7)
@@ -844,6 +844,7 @@ resources=new_resources()
 creatures=new_creatures()
 map=new_map()
 hud=new_hud()
+props=new_props()
 title_screen=new_title_screen()
 death_screen=new_death_screen()
 game_logic=new_game_logic()
@@ -861,6 +862,7 @@ map.update()
 player_1.update()
 if coop then player_2.update() end
 creatures.update()
+props.update()
 game_logic.update()
 end
 performance_monitor.register_load()
@@ -871,12 +873,14 @@ camera(101,101)
 map.draw_terrain()
 map.draw_wall()
 map.draw_obstacles()
+props.draw_props()
 map.draw_drilled_ground()
 resources.draw()
 creatures.draw()
 projectiles.draw()
 if coop then player_2.draw() end
 player_1.draw()
+props.draw_particles()
 map.draw_vines()
 map.draw_super_wall()
 hud.draw(player_1)
@@ -885,6 +889,8 @@ if at_death_screen then
 cls(1)
 map.draw_wall()
 map.draw_super_wall()
+if coop then player_2.draw() end
+player_1.draw()
 death_screen.draw()
 end
 performance_monitor.register_load()
@@ -1375,6 +1381,7 @@ give_health=function(amount) health=min(health+amount,max_health) end,
 get_hitbox=function() return {x={x+1,x+6},y={y,y+7}} end,
 get_mining_hitbox=function() return {x={x,x+7},y={y-1,y+3}} end,
 get_damaging_hitbox=function() return {x={x,x+7},y={y-3,y+3}} end,
+reposition=function(x_new, y_new) x=x_new;y=y_new end,
 x=function() return x end,
 y=function() return y end,
 is_drilling=function() return is.drilling end,
@@ -1531,141 +1538,133 @@ get_spit_hitbox=get_spit_hitbox,
 get_menace_spit_hitbox=get_menace_spit_hitbox,
 }
 end
-function spawn_prop()
-local x=flr(rnd(120))+101
+function new_props()
+local props=new_entity_container()
+local function spawn_prop()
+local x=sample_one(101,220)
 local y=81
 local decision=rnd(100)
 local prop
 if decision<50 then
 prop=nectar_rind(x,y)
-elseif decision<80 then
+elseif decision<60 then
 prop=orchey_shy(x,y)
 else
 prop=p0q(x,y)
 end
-add(props, prop)
+props.add(prop)
 end
-function nectar_rind(x,y)
-local sprite
-local x = x
-local y = y
-local x_flip = coinflip()
-local y_flip = coinflip()
-function animate()
-y+=1
-local distance = (player.x_pos-x)^2 + (player.y_pos-y)^2
-if distance < 30^2 then
-sprite = 173
-else
-sprite = 172
+local function update()
+if playing then
+local prop
+for i=props.size(),1,-1 do
+prop=props.get(i)
+prop.update()
+if prop.y()>=240 then
+props.deletei(i)
 end
 end
-function draw()
-spr(sprite, x, y, 1, 1, x_flip, y_flip)
-end
-function x_coord() return x end
-function y_coord() return y end
-return {
-x_coord=x_coord,
-y_coord=y_coord,
-animate=animate,
-draw=draw,
-}
-end
-function orchey_shy(x, y)
-local sprite
-local x = x
-local y = y
-local x_flip = coinflip()
-local y_flip = coinflip()
-function animate()
-y+=1
-local distance = (player.x_pos-x)^2 + (player.y_pos-y)^2
-if distance < 225 then
-sprite = 190
-elseif distance < 900 then
-sprite = 189
-else
-sprite = 188
-end
-end
-function draw()
-spr(sprite, x, y, 1, 1, x_flip, y_flip)
-end
-function x_coord() return x end
-function y_coord() return y end
-return {
-x_coord=x_coord,
-y_coord=y_coord,
-animate=animate,
-draw=draw,
-}
-end
-function p0q(x, y)
-local sprite = 140
-local x = x
-local y = y
-local x_flip = coinflip()
-local y_flip = coinflip()
-local angle = 0
-local parts = {}
-local n = 30
-local initial_angle
-local r2d = 3.14/180
-for i=1,n do
-initial_angle = 360*i/n
-radius = ceil(rnd(12))
-add(parts,{radius=radius, angle=initial_angle})
-end
-function animate()
-y+=1
-angle = (angle+.25)%360
-end
-function draw()
-spr(sprite, x, y, 2, 2, x_flip, y_flip)
-local x_pos, y_pos
-for i=1,n do
-x_pos = ceil(parts[i].radius*cos((angle+parts[i].angle)*r2d))
-y_pos = ceil(parts[i].radius*sin((angle+parts[i].angle)*r2d))
-pset(x_pos+x+8, y_pos+y+8, 12)
-end
-end
-function x_coord() return x end
-function y_coord() return y end
-return {
-x_coord=x_coord,
-y_coord=y_coord,
-animate=animate,
-draw=draw,
-}
-end
-function initialize_props()
-props = {}
-end
-function update_props()
-if #props>0 then
-for prop in all(props) do
-prop.animate()
-end
-local i=1
-while #props>=i do
-if props[i].y_coord() >= 240 then
-deli(props, i)
-else
-i+=1
-end
-end
-end
-if rnd() < .02 then
+if rnd()<.02 then
 spawn_prop()
 end
 end
+end
 function draw_props()
-if #props>0 then
-for prop in all(props) do
-prop.draw()
+for i=1,props.size() do
+props.get(i).draw()
 end
 end
+function draw_particles()
+for i=1,props.size() do
+props.get(i).draw_particles()
+end
+end
+return {
+update=update,
+draw_props=draw_props,
+draw_particles=draw_particles,
+}
+end
+function nectar_rind(x,y)
+local x=x
+local y=y
+local x_flip = coinflip()
+local y_flip = coinflip()
+local function draw()
+local sprite=172
+for player in all(players) do
+if ((player.x()-x)^2 + (player.y()-y)^2) < 30^2 then
+sprite=173
+end
+end
+spr(sprite,x,y,1,1,x_flip,y_flip)
+end
+return {
+x=function() return x end,
+y=function() return y end,
+update=function() y+=1 end,
+draw=draw,
+draw_particles=function() end,
+}
+end
+function orchey_shy(x, y)
+local x=x
+local y=y
+local x_flip=coinflip()
+local y_flip=coinflip()
+local function draw()
+local sprite
+local distance=10000
+for player in all(players) do
+distance=min((player.x()-x)^2 + (player.y()-y)^2,distance)
+end
+sprite=188
+if distance<225 then
+sprite=190
+elseif distance<900 then
+sprite=189
+end
+spr(sprite,x,y,1,1,x_flip,y_flip)
+end
+return {
+x=function() return x end,
+y=function() return y end,
+update=function() y+=1 end,
+draw=draw,
+draw_particles=function() end,
+}
+end
+function p0q(x, y)
+local x=x
+local y=y
+local x_flip=coinflip()
+local y_flip=coinflip()
+local particles=new_entity_container()
+local n=30
+local angle_offset
+local angle=rnd()
+for i=1,n do
+angle_offset=360*i/n
+radius=sample_one(3,12)
+particles.add({radius=radius,angle_offset=angle_offset})
+end
+function draw_particles()
+local x_pos, y_pos, radius, offset
+for i=1,n do
+radius=particles.get(i).radius
+offset=particles.get(i).offset
+x_pos=ceil(radius*cos(angle+offset))
+y_pos=ceil(radius*sin(angle+offset))
+pset(x_pos+x+8, y_pos+y+8, 12)
+end
+end
+return {
+x=function() return x end,
+y=function() return y end,
+update=function() y+=1; angle=(angle+.01)%1 end,
+draw=function() spr(140,x,y,2,2,x_flip,y_flip) end,
+draw_particles=function() end,
+}
 end
 function new_resources()
 local list=new_entity_container()

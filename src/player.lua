@@ -315,6 +315,7 @@ function new_player(number,role)
         get_hitbox=function() return {x={x+1,x+6},y={y,y+7}} end,
         get_mining_hitbox=function() return {x={x,x+7},y={y-1,y+3}} end,
         get_damaging_hitbox=function() return {x={x,x+7},y={y-3,y+3}} end,
+        reposition=function(x_new, y_new) x=x_new;y=y_new end,
 
         -- getters
         x=function() return x end,

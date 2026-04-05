@@ -17,6 +17,7 @@ function _init()
     creatures=new_creatures()
     map=new_map()
     hud=new_hud()
+    props=new_props()
 
     title_screen=new_title_screen()
     death_screen=new_death_screen()
@@ -42,6 +43,7 @@ function _update()
         if coop then player_2.update() end
 
         creatures.update()
+        props.update()
         game_logic.update()
     end
 
@@ -54,12 +56,14 @@ function _draw()
     map.draw_terrain()
     map.draw_wall()
     map.draw_obstacles()
+    props.draw_props()
     map.draw_drilled_ground()
     resources.draw()
     creatures.draw()
     projectiles.draw()
     if coop then player_2.draw() end
     player_1.draw()
+    props.draw_particles()
     -- if at_title_screen then title_screen.draw() end
     map.draw_vines()
     map.draw_super_wall()
@@ -74,6 +78,8 @@ function _draw()
         cls(1)
         map.draw_wall()
         map.draw_super_wall()
+        if coop then player_2.draw() end
+        player_1.draw()
         death_screen.draw()
     end
 
