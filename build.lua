@@ -280,6 +280,7 @@ if spit_countdown==1 then
 did_spit=true
 performing_spit=false
 projectiles.spit_spit("mactera_spit",x,y)
+sfx(46,3)
 end
 else
 y+=1
@@ -347,6 +348,7 @@ tracked_player.y()-y_shot_position+3
 )
 local x_vel=2*cos(angle)
 local y_vel=2*sin(angle)+1
+sfx(46,3)
 projectiles.add_menace_spit(
 x_shot_position,
 y_shot_position,
@@ -397,6 +399,7 @@ end
 frame=frame%60+1
 end
 local function damage(damage_received,player)
+sfx(47,3)
 end
 local function draw()
 local x_flip=frame>30
@@ -528,45 +531,56 @@ local loot_bug_names={
 "thorben",
 "nil",
 "lisa",
+"omega",
 }
 local killed_loot_bugs=new_entity_container()
+local no_loot_bugs_killed=true
 local no_cave_angels_killed=true
 local no_eggs_killed=true
-local function draw()
 local points_total=0
-local no_loot_bugs_killed=killed_loot_bugs.size()==0
-sfx(-1,0)
-sfx(-1,1)
-sfx(-1,2)
-sfx(-1,3)
+local highscore=0
+local death_screen_calculated=false
+local function calculate_death_screen()
+if not death_screen_calculated then
+no_loot_bugs_killed=killed_loot_bugs.size()==0
 for player in all(players) do
-player.reposition(130+8*player.number()-1,180)
+player.reposition(120+8*player.number()-1,193)
 points_total+=player.points()
 end
+points_total+=game_logic.get_distance()
+if no_loot_bugs_killed then points_total+=100 end
+if no_cave_angels_killed then points_total+=100 end
+if no_eggs_killed then points_total+=100 end
+if at_title_screen then points_total+=500 end
+local highscore_index=game_logic.hazard()
+if coop then highscore_index+=5 end
+highscore=dget(highscore_index)
+if points_total>highscore then
+dset(highscore_index,points_total)
+end
+end
+death_screen_calculated=true
+end
+local function draw()
 print("awards:", 111,126,7)
 print("",113,126,7)
 print("-distance bonus")
 print(" (+"..game_logic.get_distance()..")")
-points_total+=game_logic.get_distance()
 if no_loot_bugs_killed then
 print("-no loot_bugs")
 print(" killed (+100)")
-points_total+=100
 end
 if no_cave_angels_killed then
 print("-no cave angels")
 print(" killed (+100)")
-points_total+=100
 end
 if no_eggs_killed then
 print("-you spared the")
 print(" scouts (+100)")
-points_total+=100
 end
 if at_title_screen then
 print("-died during the")
 print(" tutorial (+500)")
-points_total+=500
 end
 if not no_loot_bugs_killed then
 print("killed",190,130,7)
@@ -578,14 +592,13 @@ print(killed_loot_bugs.get(i),192,y)
 y+=6
 end
 end
-print("game over!", 120, 105, 7)
+print("game over!",108,105)
 print("score: "..points_total)
-local highscore_index=coop and hazard+5 or hazard
-local highscore=dget(highscore_index)
 print("highscore: "..highscore)
+local is_coop=coop and "coop" or ""
+print("at hazard "..game_logic.hazard()..is_coop,158,105)
 if points_total>highscore then
 print("new highscore!!!")
-dset(highscore_index,points_total)
 end
 end
 local function report_killed_loot_bug()
@@ -595,6 +608,7 @@ return {
 report_killed_loot_bug=report_killed_loot_bug,
 report_killed_cave_angel=function() no_cave_angels_killed=false end,
 report_killed_egg=function() no_eggs_killed=false end,
+calculate_death_screen=calculate_death_screen,
 draw=draw,
 }
 end
@@ -610,37 +624,25 @@ replace=function(i,new_entity) entities[i]=new_entity end,
 }
 end
 function new_game_logic()
-local obstacle_ratios,resource_ratios,creature_ratios
-local obstacle_growth_rate=.03
-local resource_growth_rate=0
-local creature_growth_rate=.02
 local obstacle_spawn_rate=.2
-local resource_spawn_rate=.01
-local creature_spawn_rate=.06
-local timer=0
-local creature_spawn_params
-local obstacle_spawn_params
-local resource_spawn_params
-local hazard
-local function set_difficulty(difficulty)
-if at_title_screen then
-local creature_variety=9
-local resource_variety=3
+local obstacle_growth_rate=.03
 local obstacle_variety=2
-if difficulty==1 then
-obstacle_spawn_rate=.08
-resource_spawn_rate=.03
-creature_spawn_rate=.04
-obstacle_growth_rate=.02
-creature_growth_rate=.01
-creature_variety=4
-elseif difficulty==2 then
-creature_spawn_rate=.04
-creature_variety=5
-elseif difficulty==5 then
-resource_variety=2
-end
-creature_ratios={
+local obstacle_ratios={
+{15,"small"},
+{1,"big"},
+}
+local resource_spawn_rate=.01
+local resource_growth_rate=0
+local resource_variety=3
+local resource_ratios={
+{1,"gold"},
+{1,"nitra"},
+{1,"red_sugar"},
+}
+local creature_spawn_rate=.06
+local creature_growth_rate=.02
+local creature_variety=7
+local creature_ratios={
 {2,loot_bug},
 {.01,egg},
 {1,cave_angel},
@@ -651,15 +653,29 @@ creature_ratios={
 {.5,menace},
 {1,oppressor},
 }
-resource_ratios={
-{1,"gold"},
-{1,"nitra"},
-{1,"red_sugar"},
-}
-obstacle_ratios={
-{15,"small"},
-{1,"big"},
-}
+local timer=0
+local creature_spawn_params
+local obstacle_spawn_params
+local resource_spawn_params
+local hazard=1
+local function set_difficulty(difficulty)
+if at_title_screen then
+if difficulty==1 then
+obstacle_spawn_rate=.08
+resource_spawn_rate=.03
+creature_spawn_rate=.04
+obstacle_growth_rate=.02
+creature_growth_rate=.01
+creature_variety=4
+elseif difficulty==2 then
+creature_spawn_rate=.04
+creature_growth_rate=.01
+creature_variety=5
+elseif difficulty==3 then
+creature_variety=7
+elseif difficulty==5 then
+resource_variety=2
+end
 creature_spawn_params=generate_spawn_params(
 creature_ratios,creature_variety
 )
@@ -770,11 +786,6 @@ mine_resources(player)
 damage_player(player)
 end
 damage_creatures()
-if timer%640==0 then
-creature_spawn_rate+=creature_growth_rate
-obstacle_spawn_rate+=obstacle_growth_rate
-resource_spawn_rate+=resource_growth_rate
-end
 if hazard==1 and timer%128==0 then
 for player in all(players) do
 player.give_ammo(.1)
@@ -790,6 +801,12 @@ end
 if rnd()<resource_spawn_rate then
 resources.spawn(sample_one(102,220),81)
 end
+timer+=1
+if timer%640==0 then
+creature_spawn_rate+=creature_growth_rate
+obstacle_spawn_rate+=obstacle_growth_rate
+resource_spawn_rate+=resource_growth_rate
+end
 end
 for player in all(players) do
 if player.health()<=0 then
@@ -797,7 +814,6 @@ playing=false
 at_death_screen=true
 end
 end
-timer+=1
 end
 return {
 update=update,
@@ -806,6 +822,7 @@ get_distance=function() return flr(timer/5) end,
 obstacle_spawn_params=function() return obstacle_spawn_params end,
 resource_spawn_params=function() return resource_spawn_params end,
 creature_spawn_params=function() return creature_spawn_params end,
+hazard=function() return hazard end,
 }
 end
 function new_hud()
@@ -878,6 +895,8 @@ if coop then player_2.update() end
 creatures.update()
 props.update()
 game_logic.update()
+else
+death_screen.calculate_death_screen()
 end
 performance_monitor.register_load()
 end
@@ -909,7 +928,7 @@ death_screen.draw()
 performance_monitor.print_summary()
 end
 performance_monitor.register_load()
-performance_monitor.print_current()
+if playing then performance_monitor.print_current() end
 end
 function new_map()
 local function create_wall(x,y)
@@ -1109,7 +1128,7 @@ max_cpu_percentage=max(cpu_percentage, max_cpu_percentage)
 end
 local function print_summary()
 local info = flr(max_cpu_percentage*100)/100
-print("cpu spike: "..info, 107, 213)
+print("cpu spike: "..info, 107, 203)
 print("fps low:   "..min_fps)
 end
 local function print_current()

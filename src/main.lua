@@ -46,6 +46,8 @@ function _update()
         creatures.update()
         props.update()
         game_logic.update()
+    else
+        death_screen.calculate_death_screen()
     end
 
     performance_monitor.register_load()
@@ -71,10 +73,6 @@ function _draw()
     hud.draw(player_1)
     if coop then hud.draw(player_2) end
 
-    -- pset(223,101,at_title_screen and 11 or 8)
-    -- pset(224,101,playing and 11 or 8)
-    -- pset(225,101,at_death_screen and 11 or 8)
-
     if at_death_screen then
         cls(1)
         map.draw_wall()
@@ -86,7 +84,7 @@ function _draw()
     end
 
     performance_monitor.register_load()
-    performance_monitor.print_current()
+    if playing then performance_monitor.print_current() end
 end
 
 

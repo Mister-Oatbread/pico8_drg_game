@@ -68,7 +68,7 @@ function new_map()
         drilled_ground.add({sprite=sprite,x=x,y=y})
     end
 
-    local function spawn_obstacle(x,y)
+    local function spawn_obstacle(x,y,size_string)
         local sprite,sprites,size
         local decision=pick_spawn(game_logic.obstacle_spawn_params())
         if decision=="small" then
@@ -213,8 +213,8 @@ function new_map()
         draw_obstacles=draw_obstacles,
         draw_vines=draw_vines,
         spawn_drilled_ground=spawn_drilled_ground,
-        add_obstacle=obstacles.add,
         spawn_obstacle=spawn_obstacle,
+        poke_object=poke_obstacle,
     }
 end
 

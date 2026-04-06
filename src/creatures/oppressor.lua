@@ -17,6 +17,7 @@ function oppressor(x,y)
     end
 
     local function damage(damage_received,player)
+        sfx(47,3)
     end
 
     local function draw()

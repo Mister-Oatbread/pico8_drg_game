@@ -27,6 +27,7 @@ function mactera(x,y)
                 did_spit=true
                 performing_spit=false
                 projectiles.spit_spit("mactera_spit",x,y)
+                sfx(46,3)
             end
         else
         -- currently homing

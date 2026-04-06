@@ -14,10 +14,10 @@ function new_title_screen()
     -- add(creatures, slasher(190, 120))
     -- add(creatures, praetorian(200, 120))
     -- add(creatures, mactera(218, 120))
-    -- map.add_obstacle({sprite=101,x=200,y=160,
-    --     size=2,x_flip=false,y_flip=false})
-    -- map.add_obstacle({sprite=84,x=200,y=155,
-    --     size=1,x_flip=false,y_flip=true})
+    map.add_obstacle({sprite=101,x=200,y=160,
+        size=2,x_flip=false,y_flip=false})
+    map.add_obstacle({sprite=84,x=200,y=155,
+        size=1,x_flip=false,y_flip=true})
 
     -- difficulty selection and class selection
     local res_list=resources.get_resources
