@@ -27,6 +27,7 @@ function new_creatures()
         local y=81
 
         creature=pick_spawn(game_logic.creature_spawn_params())
+        if creature==menace then x=coinflip() and 104 or 216 end
         creatures_list.add(creature(x,y))
     end
 

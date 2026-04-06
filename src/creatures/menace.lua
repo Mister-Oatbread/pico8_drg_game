@@ -21,7 +21,7 @@ function menace(x,y)
         x_flip=tracked_player.x()-x>0
         y_flip=tracked_player.y()-y>0
 
-        if frame%10==1 then
+        if frame%10==0 then
             local x_shot_position=x_flip and x+8 or x
             local y_shot_position=y_flip and y+8 or y
             local angle=atan2(
@@ -38,14 +38,13 @@ function menace(x,y)
             )
         end
         frame=frame%10+1
-        damaged_since+=1
+        damaged_since=min(damaged_since+1,1000)
     end
 
     local function damage(damage_received,player)
         sfx(33)
         damaged_since=0
         health-=damage_received
-        x_flip=frame>6
         if health<=0 then
             alive=false
             player.give_points(10)

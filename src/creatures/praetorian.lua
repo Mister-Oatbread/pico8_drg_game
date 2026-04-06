@@ -18,7 +18,6 @@ function praetorian(x,y)
             if not spitting and frame%20==0 then y+=1 end
         end
         if not spitting then x_flip=frame>20 end
-        damaged_since+=1
         if not spitting then frame=frame%40+1 end
 
         for player in all(players) do
@@ -29,6 +28,7 @@ function praetorian(x,y)
                 end
             end
         end
+        damaged_since=min(damaged_since+1,1000)
     end
 
     local function damage(damage_received,player)

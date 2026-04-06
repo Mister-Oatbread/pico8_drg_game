@@ -50,7 +50,7 @@ if frame%45==0 then x+=sgn(x-tracked_player.x()) end
 if frame%30==0 then y+=1 end
 end
 wings_open=frame>45
-damaged_since+=1
+damaged_since=min(damaged_since+1,1000)
 frame=frame%60+1
 end
 local function damage(damage_received,player)
@@ -92,7 +92,7 @@ local hitbox={x={2,7},y={1,8}}
 local function update()
 y+=1
 if frame%5==0 then y-=1 end
-damaged_since+=1
+damaged_since=min(damaged_since+1,1000)
 frame=frame%10+1
 end
 local function damage(damage_received,player)
@@ -181,7 +181,7 @@ if playing then
 y+=1
 if frame%30==0 then y+=1 end
 end
-damaged_since+=1
+damaged_since=min(damaged_since+1,1000)
 frame=frame%60+1
 end
 local function damage(damage_received,player)
@@ -222,6 +222,7 @@ local creature
 local x=sample_one(101,220)
 local y=81
 creature=pick_spawn(game_logic.creature_spawn_params())
+if creature==menace then x=coinflip() and 104 or 216 end
 creatures_list.add(creature(x,y))
 end
 local function update()
@@ -289,7 +290,7 @@ x-=sgn(x-tracked_player.x())
 end
 performing_spit=tracked_player.y()-y<30
 end
-damaged_since+=1
+damaged_since=min(damaged_since+1,1000)
 frame=frame%16+1
 end
 local function damage(damage_received,player)
@@ -338,7 +339,7 @@ y+=1
 end
 x_flip=tracked_player.x()-x>0
 y_flip=tracked_player.y()-y>0
-if frame%10==1 then
+if frame%10==0 then
 local x_shot_position=x_flip and x+8 or x
 local y_shot_position=y_flip and y+8 or y
 local angle=atan2(
@@ -355,13 +356,12 @@ y_vel
 )
 end
 frame=frame%10+1
-damaged_since+=1
+damaged_since=min(damaged_since+1,1000)
 end
 local function damage(damage_received,player)
 sfx(33)
 damaged_since=0
 health-=damage_received
-x_flip=frame>6
 if health<=0 then
 alive=false
 player.give_points(10)
@@ -431,7 +431,6 @@ y+=1
 if not spitting and frame%20==0 then y+=1 end
 end
 if not spitting then x_flip=frame>20 end
-damaged_since+=1
 if not spitting then frame=frame%40+1 end
 for player in all(players) do
 if abs(x-player.x()-4)<20 and player.y()-y<20 then
@@ -441,6 +440,7 @@ spitting=true
 end
 end
 end
+damaged_since=min(damaged_since+1,1000)
 end
 local function damage(damage_received,player)
 sfx(33)
@@ -484,7 +484,7 @@ if playing then
 y+=1
 if frame%4==0 then y+=1 end
 end
-damaged_since+=1
+damaged_since=min(damaged_since+1,1000)
 frame=frame%8+1
 end
 local function damage(damage_received,player)
@@ -605,19 +605,43 @@ replace=function(i,new_entity) entities[i]=new_entity end,
 end
 function new_game_logic()
 local obstacle_ratios,resource_ratios,creature_ratios
-local obstacle_spawn_rate,resource_spawn_rate,creature_spawn_rate=0,0,0
+local obstacle_growth_rate=.03
+local resource_growth_rate=0
+local creature_growth_rate=.02
+local obstacle_spawn_rate=.2
+local resource_spawn_rate=.01
+local creature_spawn_rate=.06
 local timer=0
+local creature_spawn_params
+local obstacle_spawn_params
+local resource_spawn_params
 local function set_difficulty(difficulty)
 if at_title_screen then
+local creature_variety=9
+local resource_variety=3
+local obstacle_variety=2
+if difficulty==1 then
+obstacle_spawn_rate=.08
+resource_spawn_rate=.03
+creature_spawn_rate=.04
+obstacle_growth_rate=.02
+creature_growth_rate=.01
+creature_variety=4
+elseif difficulty==2 then
+creature_spawn_rate=.04
+creature_variety=5
+elseif difficulty==5 then
+resource_variety=2
+end
 creature_ratios={
 {2,loot_bug},
-{.1,egg},
+{.01,egg},
 {1,cave_angel},
 {10,grunt},
 {1,praetorian},
 {2,slasher},
 {1,mactera},
-{1,menace},
+{.5,menace},
 {1,oppressor},
 }
 resource_ratios={
@@ -629,34 +653,6 @@ obstacle_ratios={
 {15,"small"},
 {1,"big"},
 }
-creature_variety=9
-resource_variety=3
-obstacle_variety=2
-if difficulty==1 then
-obstacle_spawn_rate=.08
-resource_spawn_rate=.05
-creature_spawn_rate=.04
-creature_variety=4
-resource_variety=1
-elseif difficulty==2 then
-obstacle_spawn_rate=.2
-resource_spawn_rate=.01
-creature_spawn_rate=.04
-creatre_variety=5
-elseif difficulty==3 then
-obstacle_spawn_rate=.2
-resource_spawn_rate=.01
-creature_spawn_rate=.06
-elseif difficulty==4 then
-obstacle_spawn_rate=.2
-resource_spawn_rate=.01
-creature_spawn_rate=.06
-elseif difficulty==5 then
-obstacle_spawn_rate=.2
-resource_spawn_rate=.01
-creature_spawn_rate=.06
-resource_variety=2
-end
 creature_spawn_params=generate_spawn_params(
 creature_ratios,creature_variety
 )
@@ -765,9 +761,10 @@ mine_resources(player)
 damage_player(player)
 end
 damage_creatures()
-if timer%100==0 then
-creature_spawn_rate+=.01
-obstacle_spawn_rate+=.01
+if timer%640==0 then
+creature_spawn_rate+=creature_growth_rate
+obstacle_spawn_rate+=obstacle_growth_rate
+resource_spawn_rate+=resource_growth_rate
 end
 if playing then
 if rnd()<creature_spawn_rate then
@@ -1298,10 +1295,9 @@ elseif playing_sound_of.gun then
 sfx(-1,number)
 playing_sound_of.gun=false
 end
-mining_since+=1
-shot_since+=1
-hit_since+=1
-frame+=1
+mining_since=min(mining_since+1,1000)
+shot_since=min(shot_since+1,1000)
+hit_since=min(hit_since+1,1000)
 end
 local function damage_player(amount)
 if hit_since>30 then
@@ -1640,30 +1636,39 @@ local y=y
 local x_flip=coinflip()
 local y_flip=coinflip()
 local particles=new_entity_container()
-local n=30
-local angle_offset
+local n=20
+local radius,angle_offset,is_blue
 local angle=rnd()
 for i=1,n do
-angle_offset=360*i/n
+angle_offset=i/n
 radius=sample_one(3,12)
-particles.add({radius=radius,angle_offset=angle_offset})
+is_blue=rnd()<.9 and true or false
+particles.add({
+radius=radius,
+angle_offset=angle_offset,
+is_blue=is_blue,
+})
 end
 function draw_particles()
-local x_pos, y_pos, radius, offset
+local x_pos,y_pos
 for i=1,n do
 radius=particles.get(i).radius
-offset=particles.get(i).offset
-x_pos=ceil(radius*cos(angle+offset))
-y_pos=ceil(radius*sin(angle+offset))
-pset(x_pos+x+8, y_pos+y+8, 12)
+angle_offset=particles.get(i).angle_offset
+x_pos=ceil(radius*cos(angle+angle_offset))
+y_pos=ceil(radius*sin(angle+angle_offset))
+color=particles.get(i).is_blue and 12 or 7
+if rnd()>.99 then
+particles.get(i).is_blue=not particles.get(i).is_blue
+end
+pset(x_pos+x+8,y_pos+y+8,color)
 end
 end
 return {
 x=function() return x end,
 y=function() return y end,
-update=function() y+=1; angle=(angle+.01)%1 end,
+update=function() y+=1; angle=(angle+.003)%1 end,
 draw=function() spr(140,x,y,2,2,x_flip,y_flip) end,
-draw_particles=function() end,
+draw_particles=draw_particles,
 }
 end
 function new_resources()

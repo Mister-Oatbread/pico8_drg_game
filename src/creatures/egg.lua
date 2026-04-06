@@ -13,7 +13,7 @@ function egg(x,y)
     local function update()
         y+=1
         if frame%5==0 then y-=1 end
-        damaged_since+=1
+        damaged_since=min(damaged_since+1,1000)
         frame=frame%10+1
     end
 

@@ -15,7 +15,7 @@ function slasher(x,y)
             y+=1
             if frame%4==0 then y+=1 end
         end
-        damaged_since+=1
+        damaged_since=min(damaged_since+1,1000)
         frame=frame%8+1
     end
 

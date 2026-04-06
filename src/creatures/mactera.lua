@@ -37,7 +37,7 @@ function mactera(x,y)
             end
             performing_spit=tracked_player.y()-y<30
         end
-        damaged_since+=1
+        damaged_since=min(damaged_since+1,1000)
         frame=frame%16+1
     end
 

@@ -3,20 +3,46 @@
 -- this file houses the entire logic for the game
 function new_game_logic()
     local obstacle_ratios,resource_ratios,creature_ratios
-    local obstacle_spawn_rate,resource_spawn_rate,creature_spawn_rate=0,0,0
+    local obstacle_growth_rate=.03
+    local resource_growth_rate=0
+    local creature_growth_rate=.02
+    local obstacle_spawn_rate=.2
+    local resource_spawn_rate=.01
+    local creature_spawn_rate=.06
     local timer=0
+    local creature_spawn_params
+    local obstacle_spawn_params
+    local resource_spawn_params
 
     local function set_difficulty(difficulty)
         if at_title_screen then
+            local creature_variety=9
+            local resource_variety=3
+            local obstacle_variety=2
+            if difficulty==1 then
+                obstacle_spawn_rate=.08
+                resource_spawn_rate=.03
+                creature_spawn_rate=.04
+                obstacle_growth_rate=.02
+                creature_growth_rate=.01
+                creature_variety=4
+            elseif difficulty==2 then
+                creature_spawn_rate=.04
+                creature_variety=5
+            -- elseif difficulty==3 then
+            -- elseif difficulty==4 then
+            elseif difficulty==5 then
+                resource_variety=2
+            end
             creature_ratios={
                 {2,loot_bug},
-                {.1,egg},
+                {.01,egg},
                 {1,cave_angel},
                 {10,grunt},
                 {1,praetorian},
                 {2,slasher},
                 {1,mactera},
-                {1,menace},
+                {.5,menace},
                 {1,oppressor},
             }
             resource_ratios={
@@ -28,34 +54,6 @@ function new_game_logic()
                 {15,"small"},
                 {1,"big"},
             }
-            creature_variety=9
-            resource_variety=3
-            obstacle_variety=2
-            if difficulty==1 then
-                obstacle_spawn_rate=.08
-                resource_spawn_rate=.05
-                creature_spawn_rate=.04
-                creature_variety=4
-                resource_variety=1
-            elseif difficulty==2 then
-                obstacle_spawn_rate=.2
-                resource_spawn_rate=.01
-                creature_spawn_rate=.04
-                creatre_variety=5
-            elseif difficulty==3 then
-                obstacle_spawn_rate=.2
-                resource_spawn_rate=.01
-                creature_spawn_rate=.06
-            elseif difficulty==4 then
-                obstacle_spawn_rate=.2
-                resource_spawn_rate=.01
-                creature_spawn_rate=.06
-            elseif difficulty==5 then
-                obstacle_spawn_rate=.2
-                resource_spawn_rate=.01
-                creature_spawn_rate=.06
-                resource_variety=2
-            end
             creature_spawn_params=generate_spawn_params(
                 creature_ratios,creature_variety
             )
@@ -177,9 +175,10 @@ function new_game_logic()
         end
         damage_creatures()
 
-        if timer%100==0 then
-            creature_spawn_rate+=.01
-            obstacle_spawn_rate+=.01
+        if timer%640==0 then
+            creature_spawn_rate+=creature_growth_rate
+            obstacle_spawn_rate+=obstacle_growth_rate
+            resource_spawn_rate+=resource_growth_rate
         end
         if playing then
             if rnd()<creature_spawn_rate then

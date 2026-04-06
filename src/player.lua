@@ -214,10 +214,9 @@ function new_player(number,role)
             sfx(-1,number)
             playing_sound_of.gun=false
         end
-        mining_since+=1
-        shot_since+=1
-        hit_since+=1
-        frame+=1
+        mining_since=min(mining_since+1,1000)
+        shot_since=min(shot_since+1,1000)
+        hit_since=min(hit_since+1,1000)
     end
 
     local function damage_player(amount)
