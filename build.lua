@@ -54,7 +54,7 @@ damaged_since=min(damaged_since+1,1000)
 frame=frame%60+1
 end
 local function damage(damage_received,player)
-sfx(33)
+sfx(33,3)
 damaged_since=0
 health-=damage_received
 if health<=0 then
@@ -96,7 +96,7 @@ damaged_since=min(damaged_since+1,1000)
 frame=frame%10+1
 end
 local function damage(damage_received,player)
-sfx(32)
+sfx(32,3)
 health-=damage_received
 damaged_since=0
 if health<=0 then
@@ -142,7 +142,7 @@ damaged_since+=1
 frame=frame%12+1
 end
 local function damage(damage_received,player)
-sfx(33)
+sfx(33,3)
 damaged_since=0
 health-=damage_received
 if health<=0 then
@@ -185,7 +185,7 @@ damaged_since=min(damaged_since+1,1000)
 frame=frame%60+1
 end
 local function damage(damage_received,player)
-sfx(33)
+sfx(33,3)
 damaged_since=0
 health-=damage_received
 if health<=0 then
@@ -218,10 +218,9 @@ for x=106,220,9 do
 creatures_list.add(bottom_grunt(x,222))
 end
 local function spawn_creature()
-local creature
 local x=sample_one(101,220)
 local y=81
-creature=pick_spawn(game_logic.creature_spawn_params())
+local creature=pick_spawn(game_logic.creature_spawn_params())
 if creature==menace then x=coinflip() and 104 or 216 end
 creatures_list.add(creature(x,y))
 end
@@ -294,7 +293,7 @@ damaged_since=min(damaged_since+1,1000)
 frame=frame%16+1
 end
 local function damage(damage_received,player)
-sfx(33)
+sfx(33,3)
 damaged_since=0
 health-=damage_received
 if health<=0 then
@@ -359,7 +358,7 @@ frame=frame%10+1
 damaged_since=min(damaged_since+1,1000)
 end
 local function damage(damage_received,player)
-sfx(33)
+sfx(33,3)
 damaged_since=0
 health-=damage_received
 if health<=0 then
@@ -443,7 +442,7 @@ end
 damaged_since=min(damaged_since+1,1000)
 end
 local function damage(damage_received,player)
-sfx(33)
+sfx(33,3)
 damaged_since=0
 health-=damage_received
 if health<=0 then
@@ -488,7 +487,7 @@ damaged_since=min(damaged_since+1,1000)
 frame=frame%8+1
 end
 local function damage(damage_received,player)
-sfx(33)
+sfx(33,3)
 damaged_since=0
 health-=damage_received
 if health<=0 then
@@ -581,6 +580,13 @@ end
 end
 print("game over!", 120, 105, 7)
 print("score: "..points_total)
+local highscore_index=coop and hazard+5 or hazard
+local highscore=dget(highscore_index)
+print("highscore: "..highscore)
+if points_total>highscore then
+print("new highscore!!!")
+dset(highscore_index,points_total)
+end
 end
 local function report_killed_loot_bug()
 killed_loot_bugs.add(loot_bug_names[sample_one(1,#loot_bug_names)])
@@ -615,6 +621,7 @@ local timer=0
 local creature_spawn_params
 local obstacle_spawn_params
 local resource_spawn_params
+local hazard
 local function set_difficulty(difficulty)
 if at_title_screen then
 local creature_variety=9
@@ -664,6 +671,9 @@ resource_ratios,resource_variety
 )
 at_title_screen=false
 playing=true
+hazard=difficulty
+music(-1,0,0)
+music(1,0,0)
 end
 end
 local function mine_resources(player)
@@ -689,7 +699,6 @@ player.change_role(resource.value)
 elseif res_type=="number" then
 game_logic.set_difficulty(resource.value)
 end
-sfx(-1,3)
 sfx(38,3)
 end
 end
@@ -766,6 +775,11 @@ creature_spawn_rate+=creature_growth_rate
 obstacle_spawn_rate+=obstacle_growth_rate
 resource_spawn_rate+=resource_growth_rate
 end
+if hazard==1 and timer%128==0 then
+for player in all(players) do
+player.give_ammo(.1)
+end
+end
 if playing then
 if rnd()<creature_spawn_rate then
 creatures.spawn()
@@ -831,6 +845,9 @@ draw=draw,
 }
 end
 function _init()
+music(-1,0,0)
+music(56,0,0)
+cartdata("oatbreadsdrillerdash")
 coop=false
 player_1=new_player(1,"driller")
 player_2=new_player(2,"gunner")
@@ -889,6 +906,7 @@ map.draw_super_wall()
 if coop then player_2.draw() end
 player_1.draw()
 death_screen.draw()
+performance_monitor.print_summary()
 end
 performance_monitor.register_load()
 performance_monitor.print_current()
@@ -1091,7 +1109,7 @@ max_cpu_percentage=max(cpu_percentage, max_cpu_percentage)
 end
 local function print_summary()
 local info = flr(max_cpu_percentage*100)/100
-print("cpu spike: "..info, 150, 200)
+print("cpu spike: "..info, 107, 213)
 print("fps low:   "..min_fps)
 end
 local function print_current()
@@ -1232,15 +1250,12 @@ if ammo>0 then
 projectiles.fire_bullet(number)
 ammo-=1
 if role=="gunner" and not playing_sound_of.gun then
-sfx(-1,number)
 sfx(36,number)
 playing_sound_of.gun=true
 elseif role=="driller" or role=="engineer" then
-sfx(-1,number)
 sfx(34,number)
 end
 else
-sfx(-1,number)
 sfx(35,number)
 end
 shot_since=0
@@ -1302,7 +1317,7 @@ end
 local function damage_player(amount)
 if hit_since>30 then
 health-=amount
-sfx(32)
+sfx(32,number)
 hit_since=0
 end
 end
@@ -1536,19 +1551,19 @@ get_menace_spit_hitbox=get_menace_spit_hitbox,
 end
 function new_props()
 local props=new_entity_container()
+local props_ratios={
+{1,nectar_rind},
+{1,orchey_shy},
+{.1,p0q},
+}
+local prop_spawn_params=generate_spawn_params(
+props_ratios,#props_ratios
+)
 local function spawn_prop()
 local x=sample_one(101,220)
 local y=81
-local decision=rnd(100)
-local prop
-if decision<50 then
-prop=nectar_rind(x,y)
-elseif decision<60 then
-prop=orchey_shy(x,y)
-else
-prop=p0q(x,y)
-end
-props.add(prop)
+local prop=pick_spawn(prop_spawn_params)
+props.add(prop(x,y))
 end
 local function update()
 if playing then
@@ -1825,6 +1840,46 @@ map.add_obstacle({
 sprite=255,
 x=x0+64,
 y=y0+24,
+size=1,
+x_flip=false,
+y_flip=false,
+})
+map.add_obstacle({
+sprite=208,
+x=x0+10,
+y=y0+32,
+size=1,
+x_flip=false,
+y_flip=false,
+})
+map.add_obstacle({
+sprite=209,
+x=x0+18,
+y=y0+32,
+size=1,
+x_flip=false,
+y_flip=false,
+})
+map.add_obstacle({
+sprite=210,
+x=x0+26,
+y=y0+32,
+size=1,
+x_flip=false,
+y_flip=false,
+})
+map.add_obstacle({
+sprite=211,
+x=x0+34,
+y=y0+32,
+size=1,
+x_flip=false,
+y_flip=false,
+})
+map.add_obstacle({
+sprite=212,
+x=x0+42,
+y=y0+32,
 size=1,
 x_flip=false,
 y_flip=false,

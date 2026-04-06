@@ -13,6 +13,7 @@ function new_game_logic()
     local creature_spawn_params
     local obstacle_spawn_params
     local resource_spawn_params
+    local hazard
 
     local function set_difficulty(difficulty)
         if at_title_screen then
@@ -65,8 +66,9 @@ function new_game_logic()
             )
             at_title_screen=false
             playing=true
-            -- music(-1)
-            -- music(1)
+            hazard=difficulty
+            music(-1,0,0)
+            music(1,0,0)
         end
     end
 
@@ -93,7 +95,6 @@ function new_game_logic()
                     elseif res_type=="number" then
                         game_logic.set_difficulty(resource.value)
                     end
-                    sfx(-1,3)
                     sfx(38,3)
                 end
             end
@@ -179,6 +180,11 @@ function new_game_logic()
             creature_spawn_rate+=creature_growth_rate
             obstacle_spawn_rate+=obstacle_growth_rate
             resource_spawn_rate+=resource_growth_rate
+        end
+        if hazard==1 and timer%128==0 then
+            for player in all(players) do
+                player.give_ammo(.1)
+            end
         end
         if playing then
             if rnd()<creature_spawn_rate then

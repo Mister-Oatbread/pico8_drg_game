@@ -107,6 +107,46 @@ function new_title_screen()
         x_flip=false,
         y_flip=false,
     })
+    map.add_obstacle({
+        sprite=208,
+        x=x0+10,
+        y=y0+32,
+        size=1,
+        x_flip=false,
+        y_flip=false,
+    })
+    map.add_obstacle({
+        sprite=209,
+        x=x0+18,
+        y=y0+32,
+        size=1,
+        x_flip=false,
+        y_flip=false,
+    })
+    map.add_obstacle({
+        sprite=210,
+        x=x0+26,
+        y=y0+32,
+        size=1,
+        x_flip=false,
+        y_flip=false,
+    })
+    map.add_obstacle({
+        sprite=211,
+        x=x0+34,
+        y=y0+32,
+        size=1,
+        x_flip=false,
+        y_flip=false,
+    })
+    map.add_obstacle({
+        sprite=212,
+        x=x0+42,
+        y=y0+32,
+        size=1,
+        x_flip=false,
+        y_flip=false,
+    })
 end
 
 

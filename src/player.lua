@@ -144,15 +144,12 @@ function new_player(number,role)
                 projectiles.fire_bullet(number)
                 ammo-=1
                 if role=="gunner" and not playing_sound_of.gun then
-                    sfx(-1,number)
                     sfx(36,number)
                     playing_sound_of.gun=true
                 elseif role=="driller" or role=="engineer" then
-                    sfx(-1,number)
                     sfx(34,number)
                 end
             else
-                sfx(-1,number)
                 sfx(35,number)
             end
             shot_since=0
@@ -222,7 +219,7 @@ function new_player(number,role)
     local function damage_player(amount)
         if hit_since>30 then
             health-=amount
-            sfx(32)
+            sfx(32,number)
             hit_since=0
         end
     end

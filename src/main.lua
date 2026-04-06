@@ -2,10 +2,11 @@
 
 function _init()
     -- hacky stuff start
-    -- music(-1)
-    -- music(56)
+    music(-1,0,0)
+    music(56,0,0)
     -- hacky stuff end
 
+    cartdata("oatbreadsdrillerdash")
     coop=false
 
     player_1=new_player(1,"driller")
@@ -81,6 +82,7 @@ function _draw()
         if coop then player_2.draw() end
         player_1.draw()
         death_screen.draw()
+        performance_monitor.print_summary()
     end
 
     performance_monitor.register_load()

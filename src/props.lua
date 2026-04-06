@@ -3,21 +3,21 @@
 -- this file takes care of the fancy props
 function new_props()
     local props=new_entity_container()
+    local props_ratios={
+        {1,nectar_rind},
+        {1,orchey_shy},
+        {.1,p0q},
+    }
+    local prop_spawn_params=generate_spawn_params(
+        props_ratios,#props_ratios
+    )
 
     local function spawn_prop()
         local x=sample_one(101,220)
         local y=81
-        local decision=rnd(100)
-        local prop
 
-        if decision<50 then
-            prop=nectar_rind(x,y)
-        elseif decision<60 then
-            prop=orchey_shy(x,y)
-        else
-            prop=p0q(x,y)
-        end
-        props.add(prop)
+        local prop=pick_spawn(prop_spawn_params)
+        props.add(prop(x,y))
     end
 
     local function update()

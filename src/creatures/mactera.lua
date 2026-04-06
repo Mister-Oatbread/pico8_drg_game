@@ -42,7 +42,7 @@ function mactera(x,y)
     end
 
     local function damage(damage_received,player)
-        sfx(33)
+        sfx(33,3)
         damaged_since=0
         health-=damage_received
         if health<=0 then

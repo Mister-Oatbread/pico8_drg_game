@@ -18,7 +18,7 @@ function egg(x,y)
     end
 
     local function damage(damage_received,player)
-        sfx(32)
+        sfx(32,3)
         health-=damage_received
         damaged_since=0
         if health<=0 then

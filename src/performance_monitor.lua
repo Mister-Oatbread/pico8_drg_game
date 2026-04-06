@@ -14,7 +14,7 @@ function new_performance_monitor()
 
     local function print_summary()
         local info = flr(max_cpu_percentage*100)/100
-        print("cpu spike: "..info, 150, 200)
+        print("cpu spike: "..info, 107, 213)
         print("fps low:   "..min_fps)
     end
 

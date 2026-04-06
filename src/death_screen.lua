@@ -103,6 +103,13 @@ function new_death_screen()
         end
         print("game over!", 120, 105, 7)
         print("score: "..points_total)
+        local highscore_index=coop and hazard+5 or hazard
+        local highscore=dget(highscore_index)
+        print("highscore: "..highscore)
+        if points_total>highscore then
+            print("new highscore!!!")
+            dset(highscore_index,points_total)
+        end
         -- print("distance travelled: "..game_time)
     end
 
