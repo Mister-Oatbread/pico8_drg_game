@@ -217,10 +217,10 @@ local creatures_list=new_entity_container()
 for x=106,220,9 do
 creatures_list.add(bottom_grunt(x,222))
 end
-local function spawn_creature()
-local x=sample_one(101,220)
-local y=81
-local creature=pick_spawn(game_logic.creature_spawn_params())
+local function spawn_creature(x,y,type)
+local x=x or sample_one(101,220)
+local y=y or 81
+local creature=type or pick_spawn(game_logic.creature_spawn_params())
 if creature==menace then x=coinflip() and 104 or 216 end
 creatures_list.add(creature(x,y))
 end
@@ -249,7 +249,7 @@ local y2=creature.hitbox.y[2]+creature.y()-1;
 return {x={x1,x2},y={y1,y2}};
 end
 return {
-spawn=spawn_creature,
+spawn_creature=spawn_creature,
 update=update,
 draw=draw,
 get_hitbox=get_hitbox,
@@ -270,6 +270,7 @@ local creature_damage=0
 local hitbox={x={2,7},y={1,7}}
 local tracked_player=choose_one(players)
 local function update()
+if playing then
 if did_spit then
 y+=1
 if frame%2==0 then y+=1 end
@@ -289,6 +290,7 @@ y+=1
 x-=sgn(x-tracked_player.x())
 end
 performing_spit=tracked_player.y()-y<30
+end
 end
 damaged_since=min(damaged_since+1,1000)
 frame=frame%16+1
@@ -793,13 +795,13 @@ end
 end
 if playing then
 if rnd()<creature_spawn_rate then
-creatures.spawn()
+creatures.spawn_creature()
 end
 if rnd()<obstacle_spawn_rate then
-map.spawn_obstacle(sample_one(100,220),81)
+map.spawn_obstacle()
 end
 if rnd()<resource_spawn_rate then
-resources.spawn(sample_one(102,220),81)
+resources.spawn_resource()
 end
 timer+=1
 if timer%640==0 then
@@ -931,7 +933,7 @@ performance_monitor.register_load()
 if playing then performance_monitor.print_current() end
 end
 function new_map()
-local function create_wall(x,y)
+local function add_wall(x,y)
 return {
 sprite=64+flr(rnd(4))+16*flr(rnd(4)),
 x=x,
@@ -950,7 +952,7 @@ local obstacles=new_entity_container()
 local vines=new_entity_container()
 for x=102,220,118 do
 for y=91,228,8 do
-walls.add(create_wall(x,y))
+walls.add(add_wall(x,y))
 end
 end
 for i=98,230,130 do
@@ -976,27 +978,26 @@ x_flip=coinflip(),
 y_flip=coinflip(),
 }
 end
-local function spawn_drilled_ground(sprite,x,y)
+local function add_drilled_ground(sprite,x,y)
 drilled_ground.add({sprite=sprite,x=x,y=y})
 end
-local function spawn_obstacle(x,y)
-local sprite,sprites,size
-local decision=pick_spawn(game_logic.obstacle_spawn_params())
-if decision=="small" then
+local function spawn_obstacle(sprite,x,y,size,x_flip,y_flip)
+local sprites
+size=size or pick_spawn(game_logic.obstacle_spawn_params())
+if size==1 then
 sprites={68,69,70,71,84,85,86,87,100,101,116,117}
-size=1
 else
 sprites={72,74,102,104,106}
-size=2
 end
-sprite=choose_one(sprites)
+if x_flip==nil then x_flip=coinflip() end
+if y_flip==nil then y_flip=coinflip() end
 obstacles.add({
-sprite=sprite,
-x=x,
-y=y,
+sprite=sprite or choose_one(sprites),
+x=x or sample_one(101,220),
+y=y or 81,
 size=size,
-x_flip=coinflip(),
-y_flip=coinflip(),
+x_flip=x_flip,
+y_flip=y_flip,
 })
 end
 local function update()
@@ -1006,7 +1007,7 @@ for i=1,walls.size() do
 wall=walls.get(i)
 wall.y+=1
 if wall.y>=230 then
-walls.replace(i,create_wall(wall.x,91))
+walls.replace(i,add_wall(wall.x,91))
 end
 end
 for i=terrain.size(),1,-1 do
@@ -1113,9 +1114,9 @@ draw_terrain=draw_terrain,
 draw_drilled_ground=draw_drilled_ground,
 draw_obstacles=draw_obstacles,
 draw_vines=draw_vines,
-spawn_drilled_ground=spawn_drilled_ground,
-add_obstacle=obstacles.add,
+add_drilled_ground=add_drilled_ground,
 spawn_obstacle=spawn_obstacle,
+poke_object=poke_obstacle,
 }
 end
 function new_performance_monitor()
@@ -1246,7 +1247,7 @@ end
 end
 local function mine()
 if mining_since>mining_delay then
-map.spawn_drilled_ground(53,x,y-2)
+map.add_drilled_ground(53,x,y-2)
 sfx(-1,number)
 sfx(31,number)
 mining_since=0
@@ -1254,7 +1255,7 @@ end
 end
 local function drill()
 if fuel>0 then
-map.spawn_drilled_ground(52,x,y-2)
+map.add_drilled_ground(52,x,y-2)
 fuel-=1
 if not playing_sound_of.drill then
 sfx(-1,number)
@@ -1707,9 +1708,9 @@ draw_particles=draw_particles,
 end
 function new_resources()
 local list=new_entity_container()
-local function spawn_resource(x,y)
+local function spawn_resource(x,y,type)
 local sprite,hitbox,start_sprite
-local res_type=pick_spawn(game_logic.resource_spawn_params())
+local res_type=type or pick_spawn(game_logic.resource_spawn_params())
 if res_type=="red_sugar" then
 start_sprite=136
 hitbox={x={3,6},y={3,6}}
@@ -1720,11 +1721,11 @@ else
 start_sprite=168
 hitbox={x={1,8},y={1,8}}
 end
-sprite=start_sprite+flr(rnd(4))
+sprite=sprite or sample_one(start_sprite,start_sprite+3)
 list.add({
 sprite=sprite,
-x=x,
-y=y,
+x=x or sample_one(101,220),
+y=y or 81,
 x_flip=coinflip(),
 y_flip=coinflip(),
 hitbox=hitbox,
@@ -1777,14 +1778,31 @@ update=update,
 draw=draw,
 get_hitbox=get_hitbox,
 get_resources=list,
-spawn=spawn_resource,
+spawn_resource=spawn_resource,
 spawn_menu_item=spawn_menu_item,
 }
 end
 function new_title_screen()
+local x0=150
+local y0=170
+resources.spawn_resource(x0,y0,"nitra")
+resources.spawn_resource(x0-2,y0+20,"gold")
+resources.spawn_resource(x0+14,y0+15,"red_sugar")
+x0=180
+y0=120
+creatures.spawn_creature(190,180,loot_bug)
+creatures.spawn_creature(182,165,cave_angel)
+creatures.spawn_creature(x0,y0,grunt)
+creatures.spawn_creature(x0+10,y0,slasher)
+creatures.spawn_creature(x0+20,y0,praetorian)
+creatures.spawn_creature(x0+30,y0,mactera)
+x0=200
+y0=160
+map.spawn_obstacle(nil,x0,y0,2)
+map.spawn_obstacle(nil,x0,y0-5,1)
 local res_list=resources.get_resources
-local x0=120
-local y0=160
+x0=120
+y0=160
 res_list.add(resources.spawn_menu_item(x0,y0,48,"class","driller"))
 res_list.add(resources.spawn_menu_item(x0+15,y0,32,"class","gunner"))
 res_list.add(resources.spawn_menu_item(x0+30,y0,34,"class","engineer"))
@@ -1797,112 +1815,21 @@ res_list.add(resources.spawn_menu_item(x0+24,y0,195,"number",4))
 res_list.add(resources.spawn_menu_item(x0+32,y0,196,"number",5))
 x0=160
 y0=200
-map.add_obstacle({
-sprite=227,
-x=x0,
-y=y0,
-size=2,
-x_flip=false,
-y_flip=false,
-})
-map.add_obstacle({
-sprite=229,
-x=x0+16,
-y=y0,
-size=2,
-x_flip=false,
-y_flip=false,
-})
+map.spawn_obstacle(227,x0,y0,2,false,false)
+map.spawn_obstacle(229,x0+16,y0,2,false,false)
 x0=105
 y0=105
-map.add_obstacle({
-sprite=199,
-x=x0,
-y=y0,
-size=4,
-x_flip=false,
-y_flip=false,
-})
-map.add_obstacle({
-sprite=203,
-x=x0+32,
-y=y0,
-size=4,
-x_flip=false,
-y_flip=false,
-})
-map.add_obstacle({
-sprite=207,
-x=x0+64,
-y=y0,
-size=1,
-x_flip=false,
-y_flip=false,
-})
-map.add_obstacle({
-sprite=223,
-x=x0+64,
-y=y0+8,
-size=1,
-x_flip=false,
-y_flip=false,
-})
-map.add_obstacle({
-sprite=239,
-x=x0+64,
-y=y0+16,
-size=1,
-x_flip=false,
-y_flip=false,
-})
-map.add_obstacle({
-sprite=255,
-x=x0+64,
-y=y0+24,
-size=1,
-x_flip=false,
-y_flip=false,
-})
-map.add_obstacle({
-sprite=208,
-x=x0+10,
-y=y0+32,
-size=1,
-x_flip=false,
-y_flip=false,
-})
-map.add_obstacle({
-sprite=209,
-x=x0+18,
-y=y0+32,
-size=1,
-x_flip=false,
-y_flip=false,
-})
-map.add_obstacle({
-sprite=210,
-x=x0+26,
-y=y0+32,
-size=1,
-x_flip=false,
-y_flip=false,
-})
-map.add_obstacle({
-sprite=211,
-x=x0+34,
-y=y0+32,
-size=1,
-x_flip=false,
-y_flip=false,
-})
-map.add_obstacle({
-sprite=212,
-x=x0+42,
-y=y0+32,
-size=1,
-x_flip=false,
-y_flip=false,
-})
+map.spawn_obstacle(199,x0,   y0,   4,false,false)
+map.spawn_obstacle(203,x0+32,y0,   4,false,false)
+map.spawn_obstacle(207,x0+64,y0,   1,false,false)
+map.spawn_obstacle(223,x0+64,y0+8, 1,false,false)
+map.spawn_obstacle(239,x0+64,y0+16,1,false,false)
+map.spawn_obstacle(255,x0+64,y0+24,1,false,false)
+map.spawn_obstacle(208,x0+10,y0+32,1,false,false)
+map.spawn_obstacle(209,x0+18,y0+32,1,false,false)
+map.spawn_obstacle(210,x0+26,y0+32,1,false,false)
+map.spawn_obstacle(211,x0+34,y0+32,1,false,false)
+map.spawn_obstacle(212,x0+42,y0+32,1,false,false)
 end
 function are_colliding(a, b)
 local x_good = a.x[1]>b.x[2] or a.x[2]<b.x[1]

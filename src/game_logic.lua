@@ -187,13 +187,13 @@ function new_game_logic()
         end
         if playing then
             if rnd()<creature_spawn_rate then
-                creatures.spawn()
+                creatures.spawn_creature()
             end
             if rnd()<obstacle_spawn_rate then
-                map.spawn_obstacle(sample_one(100,220),81)
+                map.spawn_obstacle()
             end
             if rnd()<resource_spawn_rate then
-                resources.spawn(sample_one(102,220),81)
+                resources.spawn_resource()
             end
             timer+=1
             if timer%640==0 then

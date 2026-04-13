@@ -21,12 +21,13 @@ function new_creatures()
 
     -- handles spawning a creature with correspondig percentages, and
     -- adds it to creatures list
-    local function spawn_creature()
-        local x=sample_one(101,220)
-        local y=81
+    local function spawn_creature(x,y,type)
+        local x=x or sample_one(101,220)
+        local y=y or 81
 
-        local creature=pick_spawn(game_logic.creature_spawn_params())
+        local creature=type or pick_spawn(game_logic.creature_spawn_params())
         if creature==menace then x=coinflip() and 104 or 216 end
+
         creatures_list.add(creature(x,y))
     end
 
@@ -60,7 +61,7 @@ function new_creatures()
     end
 
     return {
-        spawn=spawn_creature,
+        spawn_creature=spawn_creature,
         update=update,
         draw=draw,
         get_hitbox=get_hitbox,

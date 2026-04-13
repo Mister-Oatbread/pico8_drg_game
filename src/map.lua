@@ -3,11 +3,11 @@
 -- this file contains the needed files to generate the rolling background
 
 function new_map()
-    -- create walls needs to come first
+    -- add wall needs to come first
 
     -- takes x,y coord and creates a random wall sprite with random x flip and
     -- according orientation for wall
-    local function create_wall(x,y)
+    local function add_wall(x,y)
         -- choose one of the sprites
         return {
             sprite=64+flr(rnd(4))+16*flr(rnd(4)),
@@ -33,7 +33,7 @@ function new_map()
     -- initialize walls with random sprite
     for x=102,220,118 do
         for y=91,228,8 do
-            walls.add(create_wall(x,y))
+            walls.add(add_wall(x,y))
         end
     end
 
@@ -64,28 +64,31 @@ function new_map()
         }
     end
 
-    local function spawn_drilled_ground(sprite,x,y)
+    local function add_drilled_ground(sprite,x,y)
         drilled_ground.add({sprite=sprite,x=x,y=y})
     end
 
-    local function spawn_obstacle(x,y,size_string)
-        local sprite,sprites,size
-        local decision=pick_spawn(game_logic.obstacle_spawn_params())
-        if decision=="small" then
+    local function spawn_obstacle(sprite,x,y,size,x_flip,y_flip)
+        local sprites
+        -- check of size has ben set, else pick one at random
+        size=size or pick_spawn(game_logic.obstacle_spawn_params())
+
+        if size==1 then
             sprites={68,69,70,71,84,85,86,87,100,101,116,117}
-            size=1
         else
             sprites={72,74,102,104,106}
-            size=2
         end
-        sprite=choose_one(sprites)
+        if x_flip==nil then x_flip=coinflip() end
+        if y_flip==nil then y_flip=coinflip() end
+
+        -- pass on attributes, or if none have been assigned, pick at random
         obstacles.add({
-            sprite=sprite,
-            x=x,
-            y=y,
+            sprite=sprite or choose_one(sprites),
+            x=x or sample_one(101,220),
+            y=y or 81,
             size=size,
-            x_flip=coinflip(),
-            y_flip=coinflip(),
+            x_flip=x_flip,
+            y_flip=y_flip,
         })
     end
 
@@ -97,7 +100,7 @@ function new_map()
                 wall=walls.get(i)
                 wall.y+=1
                 if wall.y>=230 then
-                    walls.replace(i,create_wall(wall.x,91))
+                    walls.replace(i,add_wall(wall.x,91))
                 end
             end
             for i=terrain.size(),1,-1 do
@@ -212,7 +215,7 @@ function new_map()
         draw_drilled_ground=draw_drilled_ground,
         draw_obstacles=draw_obstacles,
         draw_vines=draw_vines,
-        spawn_drilled_ground=spawn_drilled_ground,
+        add_drilled_ground=add_drilled_ground,
         spawn_obstacle=spawn_obstacle,
         poke_object=poke_obstacle,
     }

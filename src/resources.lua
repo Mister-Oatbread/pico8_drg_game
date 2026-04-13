@@ -4,9 +4,9 @@
 function new_resources()
     local list=new_entity_container()
 
-    local function spawn_resource(x,y)
+    local function spawn_resource(x,y,type)
         local sprite,hitbox,start_sprite
-        local res_type=pick_spawn(game_logic.resource_spawn_params())
+        local res_type=type or pick_spawn(game_logic.resource_spawn_params())
         if res_type=="red_sugar" then
             start_sprite=136
             hitbox={x={3,6},y={3,6}}
@@ -17,12 +17,12 @@ function new_resources()
             start_sprite=168
             hitbox={x={1,8},y={1,8}}
         end
-        sprite=start_sprite+flr(rnd(4))
+        sprite=sprite or sample_one(start_sprite,start_sprite+3)
 
         list.add({
             sprite=sprite,
-            x=x,
-            y=y,
+            x=x or sample_one(101,220),
+            y=y or 81,
             x_flip=coinflip(),
             y_flip=coinflip(),
             hitbox=hitbox,
@@ -82,7 +82,7 @@ function new_resources()
         draw=draw,
         get_hitbox=get_hitbox,
         get_resources=list,
-        spawn=spawn_resource,
+        spawn_resource=spawn_resource,
         spawn_menu_item=spawn_menu_item,
     }
 end

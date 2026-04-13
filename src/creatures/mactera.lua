@@ -15,28 +15,30 @@ function mactera(x,y)
     local tracked_player=choose_one(players)
 
     local function update()
-        if did_spit then
-        -- did already spit, fly along
-            y+=1
-            if frame%2==0 then y+=1 end
-        elseif performing_spit then
-        -- currently spitting, perform spit animation
-            if frame%2==0 then x-=sgn(x-tracked_player.x()) end
-            spit_countdown-=1
-            if spit_countdown==1 then
-                did_spit=true
-                performing_spit=false
-                projectiles.spit_spit("mactera_spit",x,y)
-                sfx(46,3)
-            end
-        else
-        -- currently homing
-            y+=1
-            if frame%2==0 then
+        if playing then
+            if did_spit then
+            -- did already spit, fly along
                 y+=1
-                x-=sgn(x-tracked_player.x())
+                if frame%2==0 then y+=1 end
+            elseif performing_spit then
+            -- currently spitting, perform spit animation
+                if frame%2==0 then x-=sgn(x-tracked_player.x()) end
+                spit_countdown-=1
+                if spit_countdown==1 then
+                    did_spit=true
+                    performing_spit=false
+                    projectiles.spit_spit("mactera_spit",x,y)
+                    sfx(46,3)
+                end
+            else
+            -- currently homing
+                y+=1
+                if frame%2==0 then
+                    y+=1
+                    x-=sgn(x-tracked_player.x())
+                end
+                performing_spit=tracked_player.y()-y<30
             end
-            performing_spit=tracked_player.y()-y<30
         end
         damaged_since=min(damaged_since+1,1000)
         frame=frame%16+1
