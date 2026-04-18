@@ -259,6 +259,8 @@ function new_player(number,role)
         max_fuel=role=="driller" and 250 or 0
         fuel=max_fuel
         shot_delay=role=="gunner" and 1 or 3
+        local role_ids={driller=1,gunner=2,engineer=3}
+        dset(10+number,role_ids[role])
     end
 
     -- draws player based on current state

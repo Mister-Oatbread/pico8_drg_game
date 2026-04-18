@@ -869,8 +869,9 @@ music(-1,0,0)
 music(56,0,0)
 cartdata("oatbreadsdrillerdash")
 coop=false
-last_player_1_class="driller"
-last_player_2_class="gunner"
+local roles={"driller","gunner","engineer"}
+last_player_1_class=dget(11) and roles[dget(11)] or "driller"
+last_player_2_class=dget(12) and roles[dget(12)] or "gunner"
 player_1=new_player(1,last_player_1_class)
 player_2=new_player(2,last_player_2_class)
 players={player_1}
@@ -1376,6 +1377,8 @@ ammo=max_ammo
 max_fuel=role=="driller" and 250 or 0
 fuel=max_fuel
 shot_delay=role=="gunner" and 1 or 3
+local role_ids={driller=1,gunner=2,engineer=3}
+dset(10+number,role_ids[role])
 end
 local function draw()
 local moving,x_flip

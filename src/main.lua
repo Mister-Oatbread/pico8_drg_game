@@ -23,8 +23,9 @@ function _init()
     cartdata("oatbreadsdrillerdash")
     coop=false
 
-    last_player_1_class="driller"
-    last_player_2_class="gunner"
+    local roles={"driller","gunner","engineer"}
+    last_player_1_class=dget(11) and roles[dget(11)] or "driller"
+    last_player_2_class=dget(12) and roles[dget(12)] or "gunner"
 
     player_1=new_player(1,last_player_1_class)
     player_2=new_player(2,last_player_2_class)
