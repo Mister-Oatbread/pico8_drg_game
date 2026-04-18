@@ -6,8 +6,8 @@ function new_game_logic()
     local obstacle_growth_rate=.03
     local obstacle_variety=2
     local obstacle_ratios={
-        {15,"small"},
-        {1,"big"},
+        {15,1},
+        {1,2},
     }
 
     local resource_spawn_rate=.01

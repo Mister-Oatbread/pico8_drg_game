@@ -630,8 +630,8 @@ local obstacle_spawn_rate=.2
 local obstacle_growth_rate=.03
 local obstacle_variety=2
 local obstacle_ratios={
-{15,"small"},
-{1,"big"},
+{15,1},
+{1,2},
 }
 local resource_spawn_rate=.01
 local resource_growth_rate=0
@@ -944,8 +944,7 @@ x=x,
 y=y,
 x_flip=x>140,
 y_flip=coinflip(),
-swap_gray=coinflip(),
-swap_blue=coinflip(),
+color_profile=sample_one(1,3),
 }
 end
 local terrain=new_entity_container()
@@ -985,7 +984,7 @@ end
 local function add_drilled_ground(sprite,x,y)
 drilled_ground.add({sprite=sprite,x=x,y=y})
 end
-local function spawn_obstacle(sprite,x,y,size,x_flip,y_flip)
+local function spawn_obstacle(sprite,x,y,size,x_flip,y_flip,color_profile)
 local sprites
 size=size or pick_spawn(game_logic.obstacle_spawn_params())
 if size==1 then
@@ -1002,6 +1001,7 @@ y=y or 81,
 size=size,
 x_flip=x_flip,
 y_flip=y_flip,
+color_profile=color_profile or sample_one(1,3),
 })
 end
 local function update()
@@ -1047,12 +1047,20 @@ vines.add(spawn_vine())
 end
 end
 end
+local function swap_colors(color_profile)
+if color_profile==2 then
+pal(14,12)
+pal(12,11)
+elseif color_profile==3 then
+pal(14,2)
+pal(12,14)
+end
+end
 local function draw_wall()
 local wall
 for i=1,walls.size() do
 wall=walls.get(i)
-if wall.swap_gray then pal(6,13) end
-if wall.swap_blue then pal(13,6) end
+swap_colors(wall.color_profile)
 spr(
 wall.sprite,
 wall.x,
@@ -1092,6 +1100,7 @@ local function draw_obstacles()
 local obstacle
 for i=1,obstacles.size() do
 obstacle=obstacles.get(i)
+swap_colors(obstacle.color_profile)
 spr(
 obstacle.sprite,
 obstacle.x,
@@ -1101,6 +1110,7 @@ obstacle.size,
 obstacle.x_flip,
 obstacle.y_flip
 )
+pal()
 end
 end
 local function draw_vines()
@@ -1189,7 +1199,7 @@ if role=="gunner" and is.shooting then
 is.moving.up=false
 is.moving.left=false
 is.moving.right=false
-is.moving.down=true
+is.moving.down=playing
 else
 is.moving.up=btn(2,p)
 is.moving.down=btn(3,p)
@@ -1310,7 +1320,7 @@ if x<=220 then
 x+=1
 end
 end
-if has_collision.top then
+if has_collision.top and playing then
 y+=1
 end
 if y<=102 then y=102 end
@@ -1447,8 +1457,8 @@ bullets.add({
 x=player.x(),
 y=(player.y())-8,
 owner=player,
-damage=player.get_role()=="gunner" and 5 or 10,
-piercing=player.get_role()=="gunner",
+damage=player.get_role()=="gunner" and 6 or 10,
+piercing=false
 })
 end
 local function new_spit(spit_type,x,y)

@@ -13,12 +13,13 @@ function new_projectiles()
             x=player.x(),
             y=(player.y())-8,
             owner=player,
-            damage=player.get_role()=="gunner" and 5 or 10,
-            piercing=player.get_role()=="gunner",
+            damage=player.get_role()=="gunner" and 6 or 10,
+            piercing=false
+            -- PIERCING IS CURRENTLY NOT SUPPORTED
+            -- piercing=player.get_role()=="gunner",
             --
             -- TODO: find out why both are currently piercing if I set this
             -- up properly
-            -- piercing=player.get_role()=="driller" and false or true,
         })
     end
 

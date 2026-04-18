@@ -48,13 +48,15 @@ function new_player(number,role)
             is.moving.up=false
             is.moving.left=false
             is.moving.right=false
-            is.moving.down=true
+            -- move down if playing, else stay in place
+            is.moving.down=playing
         else
             is.moving.up=btn(2,p)
             is.moving.down=btn(3,p)
             is.moving.left=btn(0,p)
             is.moving.right=btn(1,p)
         end
+        -- CURRENTLY YOU CANNOT ROCK AND STONE
         is.rns=btn(3,p) and btn(4,p) and btn(5,p)
         -- determine if mining or drilling
         if btn(4,p) and not btn(5,p) then
@@ -185,7 +187,7 @@ function new_player(number,role)
                 x+=1
             end
         end
-        if has_collision.top then
+        if has_collision.top and playing then
             y+=1
         end
         if y<=102 then y=102 end
