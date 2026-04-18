@@ -5,7 +5,7 @@
 -- initialize player
 function new_player(number,role)
     local x=140+8*number
-    local y=200
+    local y=205
     local frame=0
     local number=number
     local role=role

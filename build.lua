@@ -690,6 +690,7 @@ resource_ratios,resource_variety
 at_title_screen=false
 playing=true
 hazard=difficulty
+dset(13,difficulty)
 music(-1,0,0)
 music(1,0,0)
 end
@@ -715,7 +716,7 @@ resources.get_resources.deletei(i)
 elseif res_type=="class" then
 player.change_role(resource.value)
 elseif res_type=="number" then
-game_logic.set_difficulty(resource.value)
+set_difficulty(resource.value)
 end
 sfx(38,3)
 end
@@ -868,8 +869,10 @@ music(-1,0,0)
 music(56,0,0)
 cartdata("oatbreadsdrillerdash")
 coop=false
-player_1=new_player(1,"driller")
-player_2=new_player(2,"gunner")
+last_player_1_class="driller"
+last_player_2_class="gunner"
+player_1=new_player(1,last_player_1_class)
+player_2=new_player(2,last_player_2_class)
 players={player_1}
 if coop then add(players,player_2) end
 projectiles=new_projectiles()
@@ -1145,7 +1148,7 @@ reset_cpu_load=function() cpu_percentage=0 end,
 end
 function new_player(number,role)
 local x=140+8*number
-local y=200
+local y=205
 local frame=0
 local number=number
 local role=role
@@ -1783,37 +1786,39 @@ spawn_menu_item=spawn_menu_item,
 }
 end
 function new_title_screen()
-local x0=150
-local y0=170
+local x0=170
+local y0=140
 resources.spawn_resource(x0,y0,"nitra")
 resources.spawn_resource(x0-2,y0+20,"gold")
 resources.spawn_resource(x0+14,y0+15,"red_sugar")
 x0=180
 y0=120
-creatures.spawn_creature(190,180,loot_bug)
-creatures.spawn_creature(182,165,cave_angel)
+creatures.spawn_creature(120,150,loot_bug)
+creatures.spawn_creature(130,150,cave_angel)
 creatures.spawn_creature(x0,y0,grunt)
 creatures.spawn_creature(x0+10,y0,slasher)
-creatures.spawn_creature(x0+20,y0,praetorian)
-creatures.spawn_creature(x0+30,y0,mactera)
+creatures.spawn_creature(x0+18,y0,praetorian)
+creatures.spawn_creature(x0+34,y0,mactera)
 x0=200
 y0=160
 map.spawn_obstacle(nil,x0,y0,2)
 map.spawn_obstacle(nil,x0,y0-5,1)
-local res_list=resources.get_resources
-x0=120
-y0=160
-res_list.add(resources.spawn_menu_item(x0,y0,48,"class","driller"))
-res_list.add(resources.spawn_menu_item(x0+15,y0,32,"class","gunner"))
-res_list.add(resources.spawn_menu_item(x0+30,y0,34,"class","engineer"))
-x0=170
+x0=180
+y0=180
+resources.spawn_menu_item(x0,y0,48,"class","driller")
+resources.spawn_menu_item(x0+15,y0,32,"class","gunner")
+resources.spawn_menu_item(x0+30,y0,34,"class","engineer")
+x0=118
 y0=170
-res_list.add(resources.spawn_menu_item(x0,y0,192,"number",1))
-res_list.add(resources.spawn_menu_item(x0+8,y0,193,"number",2))
-res_list.add(resources.spawn_menu_item(x0+16,y0,194,"number",3))
-res_list.add(resources.spawn_menu_item(x0+24,y0,195,"number",4))
-res_list.add(resources.spawn_menu_item(x0+32,y0,196,"number",5))
-x0=160
+resources.spawn_menu_item(x0,y0,192,"number",1)
+resources.spawn_menu_item(x0+15,y0,193,"number",2)
+resources.spawn_menu_item(x0+30,y0,194,"number",3)
+resources.spawn_menu_item(x0+45,y0,195,"number",4)
+resources.spawn_menu_item(x0+60,y0,196,"number",5)
+local last_diff=dget(13)
+last_diff=last_diff==0 and 1 or last_diff
+resources.spawn_menu_item(148,198,191+last_diff,"number",last_diff)
+x0=190
 y0=200
 map.spawn_obstacle(227,x0,y0,2,false,false)
 map.spawn_obstacle(229,x0+16,y0,2,false,false)

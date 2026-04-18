@@ -6,11 +6,28 @@ function _init()
     music(56,0,0)
     -- hacky stuff end
 
+    -- cartdata layout
+    -- 01 | haz 1 singleplayer
+    -- 02 | haz 2 singleplayer
+    -- 03 | haz 3 singleplayer
+    -- 04 | haz 4 singleplayer
+    -- 05 | haz 5 singleplayer
+    -- 06 | haz 1 multiplayer
+    -- 07 | haz 2 multiplayer
+    -- 08 | haz 3 multiplayer
+    -- 09 | haz 4 multiplayer
+    -- 10 | haz 5 multiplayer
+    -- 11 | player 1 last class
+    -- 12 | player 2 last class
+    -- 13 | last difficulty
     cartdata("oatbreadsdrillerdash")
     coop=false
 
-    player_1=new_player(1,"driller")
-    player_2=new_player(2,"gunner")
+    last_player_1_class="driller"
+    last_player_2_class="gunner"
+
+    player_1=new_player(1,last_player_1_class)
+    player_2=new_player(2,last_player_2_class)
     players={player_1}
     if coop then add(players,player_2) end
     projectiles=new_projectiles()

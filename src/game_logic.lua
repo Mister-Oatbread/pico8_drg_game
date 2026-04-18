@@ -71,6 +71,7 @@ function new_game_logic()
             at_title_screen=false
             playing=true
             hazard=difficulty
+            dset(13,difficulty)
             music(-1,0,0)
             music(1,0,0)
         end
@@ -97,7 +98,7 @@ function new_game_logic()
                     elseif res_type=="class" then
                         player.change_role(resource.value)
                     elseif res_type=="number" then
-                        game_logic.set_difficulty(resource.value)
+                        set_difficulty(resource.value)
                     end
                     sfx(38,3)
                 end
