@@ -17,6 +17,9 @@ function new_death_screen()
         "thorben",
         "nil",
         "lisa",
+        "jeffeory",
+        "zundolf",
+        "morty",
 
         -- "emilia",
         -- "olliver",

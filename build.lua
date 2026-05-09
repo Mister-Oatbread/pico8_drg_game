@@ -533,6 +533,9 @@ local loot_bug_names={
 "thorben",
 "nil",
 "lisa",
+"jeffeory",
+"zundolf",
+"morty",
 "omega",
 }
 local killed_loot_bugs=new_entity_container()
