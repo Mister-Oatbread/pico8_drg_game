@@ -25,7 +25,7 @@ function loot_bug(x,y)
         health-=damage_received
         if health<=0 then
             alive=false
-            player.give_ammo(.2)
+            player.give_resources(.2)
             death_screen.report_killed_loot_bug()
         end
     end

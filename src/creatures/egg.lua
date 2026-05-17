@@ -22,7 +22,7 @@ function egg(x,y)
         health-=damage_received
         damaged_since=0
         if health<=0 then
-            player.give_ammo(.5)
+            player.give_resources(.5)
             player.give_health(1)
             player.give_points(50)
             death_screen.report_killed_egg()

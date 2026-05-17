@@ -90,7 +90,7 @@ function new_game_logic()
                         player.give_health(1)
                         resources.get_resources.deletei(i)
                     elseif res_type=="nitra" then
-                        player.give_ammo(.5)
+                        player.give_resources(.5)
                         resources.get_resources.deletei(i)
                     elseif res_type=="gold" then
                         player.give_points(100)
@@ -183,7 +183,7 @@ function new_game_logic()
 
         if hazard==1 and timer%128==0 then
             for player in all(players) do
-                player.give_ammo(.1)
+                player.give_resources(.1)
             end
         end
         if playing then
