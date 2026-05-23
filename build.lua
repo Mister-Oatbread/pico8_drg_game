@@ -1188,7 +1188,7 @@ local is_mining=false
 local is_drilling=false
 local is_shooting=false
 local mining_since=30
-local mining_delay=3
+local mining_delay=6
 local shot_since=30
 local mining_damage=10
 local drills_damage=4
@@ -1196,6 +1196,8 @@ change_role(role)
 local max_health=3
 local health=max_health
 local hit_since=60
+local was_drilling=false
+local was_shooting=false
 local collision_points_left={}
 local collision_points_right={}
 local collision_points_top={}
@@ -1277,10 +1279,12 @@ if shot_since>shot_delay then
 if ammo>0 then
 projectiles.fire_bullet(number)
 ammo-=1
-if role=="gunner" and not playing_sound_of.gun then
+if role=="gunner" then
+if not was_shooting then
 sfx(36,number)
-playing_sound_of.gun=true
-elseif role=="driller" or role=="engineer" then
+end
+else
+sfx(-1,number)
 sfx(34,number)
 end
 else
@@ -1292,12 +1296,10 @@ end
 local function drill()
 if fuel>0 then
 map.add_drilled_ground(52,x,y-2)
-fuel-=1
-if not playing_sound_of.drill then
-sfx(-1,number)
+if not was_drilling then
 sfx(30,number)
-playing_sound_of.drill=true
 end
+fuel-=1
 end
 end
 local function give_resources(percentage)
@@ -1340,11 +1342,13 @@ local function update()
 fetch_inputs()
 find_terrain_collision()
 update_position()
-if is_drilling then drill() end
-if is_shooting then shoot() end
+if is_drilling then drill() else sfx(-1,number) end
+if is_shooting then shoot() elseif role=="gunner" then sfx(-1,number) end
 if is_mining then mine() end
 shot_since+=1
 mining_since+=1
+was_drilling=is_drilling
+was_shooting=is_shooting
 end
 local function draw()
 local x_flip
@@ -1372,9 +1376,12 @@ draw=draw,
 change_role=change_role,
 give_resources=give_resources,
 damage_player=damage_player,
+give_points=function(amount) points+=amount end,
 x=function() return x end,
 y=function() return y end,
 get_hitbox=function() return {x={x+1,x+6},y={y,y+7}} end,
+get_mining_hitbox=function() return {x={x,x+7},y={y-1,y+3}} end,
+get_damaging_hitbox=function() return {x={x,x+7},y={y-3,y+3}} end,
 is_drilling=function() return is_drilling end,
 is_shooting=function() return is_shooting end,
 is_mining=function() return mining_since<2 end,
