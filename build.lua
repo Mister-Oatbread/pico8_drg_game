@@ -597,7 +597,7 @@ print(killed_loot_bugs.get(i),192,y)
 y+=6
 end
 end
-print("game over!",108,105)
+print("game over!",108,105,15)
 print("score: "..points_total)
 print("highscore: "..highscore)
 local is_coop=coop and "coop" or ""
@@ -1201,9 +1201,9 @@ local was_shooting=false
 local collision_points_left={}
 local collision_points_right={}
 local collision_points_top={}
-local no_collision_left=false
-local no_collision_right=false
-local no_collision_top=false
+local collision_left=false
+local collision_right=false
+local collision_top=false
 for i=1,6 do
 add(collision_points_left,{x=0,y=0})
 add(collision_points_right,{x=0,y=0})
@@ -1241,28 +1241,29 @@ for i=1,6 do
 collision_points_top[i].x=x+i
 collision_points_top[i].y=y-1
 end
-local function check_if_clear(collision_points)
+local function check_for_collision(collision_points)
 local color
 for i=1,#collision_points do
 color=pget(collision_points[i].x, collision_points[i].y)
 if color==5 or color==13 then
-return false
-end
-end
 return true
 end
-no_collision_left=check_if_clear(collision_points_left)
-no_collision_right=check_if_clear(collision_points_right)
-no_collision_top=check_if_clear(collision_points_top)
+end
+return false
+end
+collision_left=check_for_collision(collision_points_left)
+collision_right=check_for_collision(collision_points_right)
+collision_top=check_for_collision(collision_points_top)
 end
 local function update_position()
-if is_moving_left and no_collision_left then x-=1 end
-if is_moving_right and no_collision_right then x+=1 end
+if is_moving_left and not collision_left then x-=1 end
+if is_moving_right and not collision_right then x+=1 end
 if playing then
 if is_standing then y+=1 end
-if is_sprinting and no_collision_top then y-=1 end
+if is_sprinting and not collision_top then y-=1 end
+if collision_top then y+=1 end
 elseif at_title_screen then
-if is_moving_up and no_collision_top then y-=1 end
+if is_moving_up and not collision_top then y-=1 end
 if is_moving_down then y+=1 end
 end
 end
@@ -1306,7 +1307,7 @@ local function give_resources(percentage)
 ammo=min(ammo+max_ammo*percentage,max_ammo)
 fuel=min(fuel+max_fuel*percentage,max_fuel)
 end
-local function damage_player(amount)
+local function damage(amount)
 if hit_since>30 then
 health-=amount
 sfx(32,number)
@@ -1347,6 +1348,7 @@ if is_shooting then shoot() elseif role=="gunner" then sfx(-1,number) end
 if is_mining then mine() end
 shot_since+=1
 mining_since+=1
+hit_since+=1
 was_drilling=is_drilling
 was_shooting=is_shooting
 end
@@ -1373,9 +1375,11 @@ end
 return {
 update=update,
 draw=draw,
+reposition=function(x_new,y_new) x=x_new; y=y_new end,
 change_role=change_role,
 give_resources=give_resources,
-damage_player=damage_player,
+damage=damage,
+give_health=function(amount) health=min(3,health+amount) end,
 give_points=function(amount) points+=amount end,
 x=function() return x end,
 y=function() return y end,
@@ -1438,7 +1442,7 @@ persists=false
 damage=1
 end
 local function update()
-if game_status=="title_screen" then
+if at_title_screen then
 y-=1
 end
 y+=speed

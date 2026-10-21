@@ -55,7 +55,7 @@ function new_projectiles()
 
         local function update()
             -- compensate forward velocity when game is not gaming
-            if game_status=="title_screen" then
+            if at_title_screen then
                 y-=1
             end
             y+=speed

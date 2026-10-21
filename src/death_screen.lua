@@ -108,7 +108,7 @@ function new_death_screen()
                 y+=6
             end
         end
-        print("game over!",108,105)
+        print("game over!",108,105,15)
         print("score: "..points_total)
         print("highscore: "..highscore)
         local is_coop=coop and "coop" or ""
