@@ -26,11 +26,11 @@ function new_player(number,role)
     local number=number
     local role=role
 
-    local is_walking=false
-    local is_moving_right=false
-    local is_moving_left=false
-    local is_sprinting=false
-    local is_standing=true
+    local input_up=false
+    local input_down=false
+    local input_left=false
+    local input_right=false
+
     local is_crawling=false
 
     local is_mining=false
@@ -70,22 +70,24 @@ function new_player(number,role)
     local function fetch_inputs()
         local p=number-1
 
-        is_moving_left=btn(0,p)
-        is_moving_right=btn(1,p)
-        is_moving_up=not btn(3,p) and (
-            not btn(2,p) and playing or btn(2,p) and at_title_screen
-        )
-        is_moving_down=not btn(2,p) and btn(3,p) and at_title_screen
-        is_sprinting=btn(2,p) and not btn(3,p) and playing
-        is_standing=(
-            playing and btn(3,p)
-        ) or (
-            at_title_screen and not (btn(3,p) or btn(2,p))
-        )
+        input_up=btn(2,p) and not btn(3,p)
+        input_down=btn(3,p) and not btn(2,p)
+        input_left=btn(0,p) and not btn(1,p)
+        input_right=btn(1,p) and not btn(0,p)
+
         is_drilling=btn(4,p) and not btn(5,p) and fuel>0
         is_mining=btn(4,p) and not btn(5,p) and fuel==0
         is_shooting=btn(5,p) and not btn(4,p)
         is_crawling=role=="gunner" and is_shooting
+
+        -- is_moving_down=btn(3,p) and at_title_screen
+        -- is_sprinting=btn(2,p) and not btn(3,p) and playing
+        -- is_standing=(
+        --     playing and btn(3,p)
+        -- ) or (
+        --     at_title_screen and not (btn(3,p) or btn(2,p))
+        -- )
+        -- is_walking=is_moving_up
     end
 
     local function find_terrain_collision()
@@ -123,15 +125,16 @@ function new_player(number,role)
     end
 
     local function update_position()
-        if is_moving_left and not collision_left then x-=1 end
-        if is_moving_right and not collision_right then x+=1 end
+        if input_left and not collision_left then x-=1 end
+        if input_right and not collision_right then x+=1 end
+
         if playing then
-            if is_standing then y+=1 end
-            if is_sprinting and not collision_top then y-=1 end
+            if input_down then y+=1 end
+            if input_up and not collision_top then y-=1 end
             if collision_top then y+=1 end
         elseif at_title_screen then
-            if is_moving_up and not collision_top then y-=1 end
-            if is_moving_down then y+=1 end
+            if input_up and not collision_top then y-=1 end
+            if input_down then y+=1 end
         end
     end
 
@@ -237,16 +240,31 @@ function new_player(number,role)
     end
 
     local function draw()
-        local x_flip
+        local is_sprinting = playing and input_up and not collision_top
+        local is_walking = not is_sprinting and (
+            input_left or input_right or input_up or (
+                at_title_screen and input_down
+            ) or (
+                playing and not input_down
+            ) and not collision_top
+        )
+        if at_death_screen then
+            is_sprinting=false
+            is_walking=false
+        end
+
+        local x_flip=false
         local sprite=role=="driller" and 48 or role=="gunner" and 32 or 34
 
         -- determine how fast legs should switch
         frame=(frame+1)%16
 
-        if is_sprinting then
+        if is_walking then
             x_flip=frame>8
+            sprite+=1
         elseif is_sprinting then
-            x_flip=frame%2>4
+            x_flip=frame%8>4
+            sprite+=1
         end
         if hit_since<=30 then
             pal(10,2)

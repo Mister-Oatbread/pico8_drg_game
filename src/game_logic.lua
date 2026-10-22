@@ -21,7 +21,7 @@ function new_game_logic()
 
     local creature_spawn_rate=.06
     local creature_growth_rate=.02
-    local creature_variety=7
+    local creature_variety=9
     local creature_ratios={
         {2,loot_bug},
         {.01,egg},
