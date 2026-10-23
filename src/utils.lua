@@ -15,6 +15,20 @@ function sample_one(first,last) return first+flr(rnd(last-first+1)) end
 
 function choose_one(list) return list[flr(rnd(#list))+1] end
 
+function random_walk(x,y,prob)
+    local choice=rnd()
+    if choice<prob then
+        x+=1
+    elseif choice<2*prob then
+        x-=1
+    elseif choice<3*prob then
+        y+=1
+    elseif choice<4*prob then
+        y-=1
+    end
+    return x,y
+end
+
 -- returns one index based on ratios of ratios table
 -- entry 1 must contain the ratios, and entry 2 contains the thing that
 -- is returned

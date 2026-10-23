@@ -1544,6 +1544,33 @@ get_spit_hitbox=get_spit_hitbox,
 get_menace_spit_hitbox=get_menace_spit_hitbox,
 }
 end
+function callow_seeder(x, y)
+local x=x
+local y=y
+local x_flip=coinflip()
+local y_flip=coinflip()
+local particles=new_entity_container()
+for i=1,sample_one(3,5) do
+particles.add({
+x_offset=x_flip and sample_one(0,3) or sample_one(4,7),
+y_offset=y_flip and sample_one(0,3) or sample_one(4,7),
+})
+end
+local function draw_particles()
+for i=1,particles.size() do
+local particle=particles.get(i)
+particle.x_offset, particle.y_offset=random_walk(particle.x_offset, particle.y_offset, .005)
+pset(x+particle.x_offset,y+particle.y_offset,10)
+end
+end
+return {
+x=function() return x end,
+y=function() return y end,
+update=function() y+=1 end,
+draw=function() spr(174,x,y,1,1,x_flip,y_flip) end,
+draw_particles=draw_particles,
+}
+end
 function new_props()
 local props=new_entity_container()
 local props_ratios={
@@ -1551,6 +1578,7 @@ local props_ratios={
 {1,orchey_shy},
 {.1,p0q},
 {1,void_basket},
+{1,callow_seeder},
 }
 local prop_spawn_params=generate_spawn_params(
 props_ratios,#props_ratios
@@ -1685,8 +1713,8 @@ end
 function void_basket(x, y)
 local x=x
 local y=y
-local x_flip = coinflip()
-local y_flip = coinflip()
+local x_flip=coinflip()
+local y_flip=coinflip()
 local particles=new_entity_container()
 for i=1,sample_one(4,7) do
 particles.add({
@@ -1698,16 +1726,11 @@ end
 local function draw_particles()
 for i=1,particles.size() do
 local particle=particles.get(i)
-local choice=rnd()
-if choice<.005 then
-particle.x_offset+=1
-elseif choice<.01 then
-particle.x_offset-=1
-elseif choice<.015 then
-particle.y_offset+=1
-elseif choice<.02 then
-particle.y_offset-=1
-end
+particle.x_offset, particle.y_offset=random_walk(
+particle.x_offset,
+particle.y_offset,
+.005
+)
 pset(x+particle.x_offset,y+particle.y_offset,particle.is_white and 7 or 14)
 end
 end
@@ -1854,6 +1877,19 @@ end
 function coinflip() return rnd(2)<1 end
 function sample_one(first,last) return first+flr(rnd(last-first+1)) end
 function choose_one(list) return list[flr(rnd(#list))+1] end
+function random_walk(x,y,prob)
+local choice=rnd()
+if choice<prob then
+x+=1
+elseif choice<2*prob then
+x-=1
+elseif choice<3*prob then
+y+=1
+elseif choice<4*prob then
+y-=1
+end
+return x,y
+end
 function pick_spawn(spawn_params)
 local decision=rnd(spawn_params.cum_sum)
 for i=1,spawn_params.variety do
