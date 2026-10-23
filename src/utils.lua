@@ -29,6 +29,21 @@ function random_walk(x,y,prob)
     return x,y
 end
 
+spawn_cluster(x,y)
+    local positions = new_entity_container()
+    positions.add({x,y})
+    local x = x.min
+    while x<x.max do
+        local y = y.min
+        x+=choose_one(4,7)
+        while y=y.max do
+            y+=choose_one(4,7)
+            positions.add({x,y})
+        end
+    end
+    return positions
+end
+
 -- returns one index based on ratios of ratios table
 -- entry 1 must contain the ratios, and entry 2 contains the thing that
 -- is returned
