@@ -7,6 +7,7 @@ function new_props()
         {1,nectar_rind},
         {1,orchey_shy},
         {.1,p0q},
+        {1,void_basket},
     }
     local prop_spawn_params=generate_spawn_params(
         props_ratios,#props_ratios

@@ -13,7 +13,7 @@ function p0q(x, y)
     for i=1,n do
         angle_offset=i/n
         radius=sample_one(3,12)
-        is_blue=rnd()<.9 and true or false
+        is_blue=rnd()<.9
         particles.add({
             radius=radius,
             angle_offset=angle_offset,

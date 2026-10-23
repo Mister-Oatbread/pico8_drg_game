@@ -1550,6 +1550,7 @@ local props_ratios={
 {1,nectar_rind},
 {1,orchey_shy},
 {.1,p0q},
+{1,void_basket},
 }
 local prop_spawn_params=generate_spawn_params(
 props_ratios,#props_ratios
@@ -1652,7 +1653,7 @@ local angle=rnd()
 for i=1,n do
 angle_offset=i/n
 radius=sample_one(3,12)
-is_blue=rnd()<.9 and true or false
+is_blue=rnd()<.9
 particles.add({
 radius=radius,
 angle_offset=angle_offset,
@@ -1678,6 +1679,43 @@ x=function() return x end,
 y=function() return y end,
 update=function() y+=1; angle=(angle+.003)%1 end,
 draw=function() spr(140,x,y,2,2,x_flip,y_flip) end,
+draw_particles=draw_particles,
+}
+end
+function void_basket(x, y)
+local x=x
+local y=y
+local x_flip = coinflip()
+local y_flip = coinflip()
+local particles=new_entity_container()
+for i=1,sample_one(4,7) do
+particles.add({
+x_offset=sample_one(0,7),
+y_offset=sample_one(0,7),
+is_white=rnd()<.9,
+})
+end
+local function draw_particles()
+for i=1,particles.size() do
+local particle=particles.get(i)
+local choice=rnd()
+if choice<.005 then
+particle.x_offset+=1
+elseif choice<.01 then
+particle.x_offset-=1
+elseif choice<.015 then
+particle.y_offset+=1
+elseif choice<.02 then
+particle.y_offset-=1
+end
+pset(x+particle.x_offset,y+particle.y_offset,particle.is_white and 7 or 14)
+end
+end
+return {
+x=function() return x end,
+y=function() return y end,
+update=function() y+=1 end,
+draw=function() spr(158,x,y,1,1,x_flip,y_flip) end,
 draw_particles=draw_particles,
 }
 end
