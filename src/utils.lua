@@ -44,6 +44,16 @@ function get_cluster_positions(x, y)
     return positions
 end
 
+function swap_colors(color_profile)
+    if color_profile==2 then
+        pal(14,12)
+        pal(12,11)
+    elseif color_profile==3 then
+        pal(14,2)
+        pal(12,14)
+    end
+end
+
 -- returns one index based on ratios of ratios table
 -- entry 1 must contain the ratios, and entry 2 contains the thing that
 -- is returned

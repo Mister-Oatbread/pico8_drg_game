@@ -19,8 +19,8 @@ function new_title_screen()
 
     x0=200
     y0=160
-    map.spawn_obstacle(nil,x0,y0,2)
-    map.spawn_obstacle(nil,x0,y0-5,1)
+    spawn_obstacle(nil,x0,y0,2)
+    spawn_obstacle(nil,x0,y0-5,1)
 
     -- difficulty selection and class selection
     x0=180
@@ -44,23 +44,23 @@ function new_title_screen()
     -- controls guide
     x0=190
     y0=200
-    map.spawn_obstacle(227,x0,y0,2,false,false)
-    map.spawn_obstacle(229,x0+16,y0,2,false,false)
+    spawn_obstacle(227,x0,y0,2,false,false)
+    spawn_obstacle(229,x0+16,y0,2,false,false)
 
     -- banner
     x0=105
     y0=105
-    map.spawn_obstacle(199,x0,   y0,   4,false,false)
-    map.spawn_obstacle(203,x0+32,y0,   4,false,false)
-    map.spawn_obstacle(207,x0+64,y0,   1,false,false)
-    map.spawn_obstacle(223,x0+64,y0+8, 1,false,false)
-    map.spawn_obstacle(239,x0+64,y0+16,1,false,false)
-    map.spawn_obstacle(255,x0+64,y0+24,1,false,false)
-    map.spawn_obstacle(208,x0+10,y0+32,1,false,false)
-    map.spawn_obstacle(209,x0+18,y0+32,1,false,false)
-    map.spawn_obstacle(210,x0+26,y0+32,1,false,false)
-    map.spawn_obstacle(211,x0+34,y0+32,1,false,false)
-    map.spawn_obstacle(212,x0+42,y0+32,1,false,false)
+    spawn_obstacle(199,x0,   y0,   4,false,false)
+    spawn_obstacle(203,x0+32,y0,   4,false,false)
+    spawn_obstacle(207,x0+64,y0,   1,false,false)
+    spawn_obstacle(223,x0+64,y0+8, 1,false,false)
+    spawn_obstacle(239,x0+64,y0+16,1,false,false)
+    spawn_obstacle(255,x0+64,y0+24,1,false,false)
+    spawn_obstacle(208,x0+10,y0+32,1,false,false)
+    spawn_obstacle(209,x0+18,y0+32,1,false,false)
+    spawn_obstacle(210,x0+26,y0+32,1,false,false)
+    spawn_obstacle(211,x0+34,y0+32,1,false,false)
+    spawn_obstacle(212,x0+42,y0+32,1,false,false)
 end
 
 

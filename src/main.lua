@@ -1,22 +1,20 @@
 
 
 function _init()
-    -- hacky stuff start
     music(-1,0,0)
     music(56,0,0)
-    -- hacky stuff end
 
     -- cartdata layout
-    -- 01 | haz 1 singleplayer
-    -- 02 | haz 2 singleplayer
-    -- 03 | haz 3 singleplayer
-    -- 04 | haz 4 singleplayer
-    -- 05 | haz 5 singleplayer
-    -- 06 | haz 1 multiplayer
-    -- 07 | haz 2 multiplayer
-    -- 08 | haz 3 multiplayer
-    -- 09 | haz 4 multiplayer
-    -- 10 | haz 5 multiplayer
+    -- 01 | haz 1 singleplayer highscore
+    -- 02 | haz 2 singleplayer highscore
+    -- 03 | haz 3 singleplayer highscore
+    -- 04 | haz 4 singleplayer highscore
+    -- 05 | haz 5 singleplayer highscore
+    -- 06 | haz 1 multiplayer highscore
+    -- 07 | haz 2 multiplayer highscore
+    -- 08 | haz 3 multiplayer highscore
+    -- 09 | haz 4 multiplayer highscore
+    -- 10 | haz 5 multiplayer highscore
     -- 11 | player 1 last class
     -- 12 | player 2 last class
     -- 13 | last difficulty
@@ -27,6 +25,14 @@ function _init()
     last_player_1_class=dget(11) and roles[dget(11)] or "driller"
     last_player_2_class=dget(12) and roles[dget(12)] or "gunner"
 
+    -- terrain
+    terrain=new_entity_container()
+    walls=new_entity_container()
+    super_walls=new_entity_container()
+    drilled_ground=new_entity_container()
+    obstacles=new_entity_container()
+    squishy_stuff=new_entity_container()
+
     player_1=new_player(1,last_player_1_class)
     player_2=new_player(2,last_player_2_class)
     players={player_1}
@@ -34,7 +40,6 @@ function _init()
     projectiles=new_projectiles()
     resources=new_resources()
     creatures=new_creatures()
-    map=new_map()
     hud=new_hud()
     props=new_props()
 
@@ -47,6 +52,20 @@ function _init()
     at_title_screen=true
     playing=false
     at_death_screen=false
+
+    -- initialize walls with random sprite
+    for x=102,220,118 do
+        for y=91,228,8 do
+            walls.add(add_wall(x,y))
+        end
+    end
+
+    -- initialize super walls
+    for i=98,230,130 do
+        for j=91,228,8 do
+            super_walls.add({x=i,y=j})
+        end
+    end
 end
 
 function _update()
@@ -57,7 +76,7 @@ function _update()
     if not at_death_screen then
         projectiles.update()
         resources.update()
-        map.update()
+        update_map()
         player_1.update()
         if coop then player_2.update() end
 
@@ -74,11 +93,10 @@ end
 function _draw()
     cls(1)
     camera(101,101)
-    map.draw_terrain()
-    map.draw_wall()
-    map.draw_obstacles()
+    draw_base_map()
+    draw_walls()
     props.draw_props()
-    map.draw_drilled_ground()
+    draw_drilled_ground()
     resources.draw()
     creatures.draw()
     projectiles.draw()
@@ -86,14 +104,14 @@ function _draw()
     player_1.draw()
     props.draw_particles()
     -- if at_title_screen then title_screen.draw() end
-    map.draw_super_wall()
+    draw_super_wall()
     hud.draw(player_1)
     if coop then hud.draw(player_2) end
 
     if at_death_screen then
         cls(1)
-        map.draw_wall()
-        map.draw_super_wall()
+        draw_walls()
+        draw_super_wall()
         if coop then player_2.draw() end
         player_1.draw()
         death_screen.draw()

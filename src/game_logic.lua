@@ -191,7 +191,7 @@ function new_game_logic()
                 creatures.spawn_creature()
             end
             if rnd()<obstacle_spawn_rate then
-                map.spawn_obstacle()
+                spawn_obstacle()
             end
             if rnd()<resource_spawn_rate then
                 resources.spawn_resource()

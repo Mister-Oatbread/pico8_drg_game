@@ -802,7 +802,7 @@ if rnd()<creature_spawn_rate then
 creatures.spawn_creature()
 end
 if rnd()<obstacle_spawn_rate then
-map.spawn_obstacle()
+spawn_obstacle()
 end
 if rnd()<resource_spawn_rate then
 resources.spawn_resource()
@@ -875,6 +875,12 @@ coop=false
 local roles={"driller","gunner","engineer"}
 last_player_1_class=dget(11) and roles[dget(11)] or "driller"
 last_player_2_class=dget(12) and roles[dget(12)] or "gunner"
+terrain=new_entity_container()
+walls=new_entity_container()
+super_walls=new_entity_container()
+drilled_ground=new_entity_container()
+obstacles=new_entity_container()
+squishy_stuff=new_entity_container()
 player_1=new_player(1,last_player_1_class)
 player_2=new_player(2,last_player_2_class)
 players={player_1}
@@ -882,7 +888,6 @@ if coop then add(players,player_2) end
 projectiles=new_projectiles()
 resources=new_resources()
 creatures=new_creatures()
-map=new_map()
 hud=new_hud()
 props=new_props()
 title_screen=new_title_screen()
@@ -892,13 +897,23 @@ performance_monitor=new_performance_monitor()
 at_title_screen=true
 playing=false
 at_death_screen=false
+for x=102,220,118 do
+for y=91,228,8 do
+walls.add(add_wall(x,y))
+end
+end
+for i=98,230,130 do
+for j=91,228,8 do
+super_walls.add({x=i,y=j})
+end
+end
 end
 function _update()
 performance_monitor.reset_cpu_load()
 if not at_death_screen then
 projectiles.update()
 resources.update()
-map.update()
+update_map()
 player_1.update()
 if coop then player_2.update() end
 creatures.update()
@@ -912,24 +927,23 @@ end
 function _draw()
 cls(1)
 camera(101,101)
-map.draw_terrain()
-map.draw_wall()
-map.draw_obstacles()
+draw_base_map()
+draw_walls()
 props.draw_props()
-map.draw_drilled_ground()
+draw_drilled_ground()
 resources.draw()
 creatures.draw()
 projectiles.draw()
 if coop then player_2.draw() end
 player_1.draw()
 props.draw_particles()
-map.draw_super_wall()
+draw_super_wall()
 hud.draw(player_1)
 if coop then hud.draw(player_2) end
 if at_death_screen then
 cls(1)
-map.draw_wall()
-map.draw_super_wall()
+draw_walls()
+draw_super_wall()
 if coop then player_2.draw() end
 player_1.draw()
 death_screen.draw()
@@ -938,10 +952,9 @@ end
 performance_monitor.register_load()
 if playing then performance_monitor.print_current() end
 end
-function new_map()
-local function add_wall(x,y)
+function add_wall(x,y)
 return {
-sprite=64+flr(rnd(4))+16*flr(rnd(4)),
+sprite=sample_one(64,79),
 x=x,
 y=y,
 x_flip=x>140,
@@ -949,54 +962,31 @@ y_flip=coinflip(),
 color_profile=sample_one(1,3),
 }
 end
-local terrain=new_entity_container()
-local walls=new_entity_container()
-local super_walls=new_entity_container()
-local drilled_ground=new_entity_container()
-local obstacles=new_entity_container()
-local squishy_stuff=new_entity_container()
-for x=102,220,118 do
-for y=91,228,8 do
-walls.add(add_wall(x,y))
-end
-end
-for i=98,230,130 do
-for j=91,228,8 do
-super_walls.add({x=i,y=j})
-end
-end
-local function spawn_pebble()
-local color=coinflip() and 6 or 2
-return {
-color=color,
-x=flr(rnd(128))+101,
-y=94,
-}
-end
-local function add_drilled_ground(sprite,x,y)
+function add_drilled_ground(sprite,x,y)
 drilled_ground.add({sprite=sprite,x=x,y=y})
 end
-local function spawn_obstacle(sprite,x,y,size,x_flip,y_flip,color_profile)
-local sprites
-size=size or pick_spawn(game_logic.obstacle_spawn_params())
+function spawn_obstacle(sprite, x, y, size, color_profile, x_flip, y_flip)
+size = size or pick_spawn(game_logic.obstacle_spawn_params())
+if sprite==nil then
 if size==1 then
-sprites={68,69,70,71,84,85,86,87,100,101,116,117}
+sprite=sample_one(80,90)
 else
-sprites={72,74,102,104,106}
+sprite=96+2*sample_one(1,5)
+end
 end
 if x_flip==nil then x_flip=coinflip() end
 if y_flip==nil then y_flip=coinflip() end
 obstacles.add({
-sprite=sprite or choose_one(sprites),
+sprite=sprite,
 x=x or sample_one(101,220),
 y=y or 81,
 size=size,
 x_flip=x_flip,
-y_flip=y_flip,
+y_flip=x_flip,
 color_profile=color_profile or sample_one(1,3),
 })
 end
-local function update()
+function update_map()
 local wall,terrain_piece, squishy_piece
 if playing then
 for i=1,walls.size() do
@@ -1027,7 +1017,11 @@ drilled_ground.deletei(i)
 end
 end
 if rnd()<.8 then
-terrain.add(spawn_pebble())
+terrain.add({
+color=coinflip() and 6 or 2,
+x=sample_one(128,101),
+y=94
+})
 end
 for i=obstacles.size(),1,-1 do
 obstacles.get(i).y+=1
@@ -1044,43 +1038,13 @@ end
 end
 end
 end
-local function swap_colors(color_profile)
-if color_profile==2 then
-pal(14,12)
-pal(12,11)
-elseif color_profile==3 then
-pal(14,2)
-pal(12,14)
-end
-end
-local function draw_wall()
-local wall
-for i=1,walls.size() do
-wall=walls.get(i)
-swap_colors(wall.color_profile)
-spr(
-wall.sprite,
-wall.x,
-wall.y,
-1,1,
-wall.x_flip,
-wall.y_flip
-)
-pal()
-end
-end
-local function draw_super_wall()
+function draw_super_wall()
 for i=1,super_walls.size() do
-spr(
-61,
-super_walls.get(i).x,
-super_walls.get(i).y,
-1,1,false,false
-)
+spr(61, super_walls.get(i).x, super_walls.get(i).y, 1, 1, false, false)
 end
 end
-local function draw_terrain()
-local terrain_piece, squishy_piece
+function draw_base_map()
+local terrain_piece, obstacle
 for i=1,terrain.size() do
 terrain_piece=terrain.get(i)
 pset(terrain_piece.x,terrain_piece.y,terrain_piece.color)
@@ -1088,16 +1052,6 @@ end
 for i=1,squishy_stuff.size() do
 squishy_stuff.get(i).draw()
 end
-end
-local function draw_drilled_ground()
-local ground_piece
-for i=1,drilled_ground.size() do
-ground_piece=drilled_ground.get(i)
-spr(ground_piece.sprite,ground_piece.x,ground_piece.y)
-end
-end
-local function draw_obstacles()
-local obstacle
 for i=1,obstacles.size() do
 obstacle=obstacles.get(i)
 swap_colors(obstacle.color_profile)
@@ -1113,16 +1067,28 @@ obstacle.y_flip
 pal()
 end
 end
-return {
-update=update,
-draw_wall=draw_wall,
-draw_super_wall=draw_super_wall,
-draw_terrain=draw_terrain,
-draw_drilled_ground=draw_drilled_ground,
-draw_obstacles=draw_obstacles,
-add_drilled_ground=add_drilled_ground,
-spawn_obstacle=spawn_obstacle,
-}
+function draw_walls()
+local wall
+for i=1,walls.size() do
+wall=walls.get(i)
+swap_colors(wall.color_profile)
+spr(
+wall.sprite,
+wall.x,
+wall.y,
+1,1,
+wall.x_flip,
+wall.y_flip
+)
+pal()
+end
+end
+function draw_drilled_ground()
+local ground_piece
+for i=1,drilled_ground.size() do
+ground_piece=drilled_ground.get(i)
+spr(ground_piece.sprite,ground_piece.x,ground_piece.y)
+end
 end
 function new_performance_monitor()
 local cpu_percentage=0
@@ -1248,7 +1214,7 @@ end
 end
 local function mine()
 if mining_since>mining_delay then
-map.add_drilled_ground(53,x,y-2)
+add_drilled_ground(53,x,y-2)
 sfx(-1,number)
 sfx(31,number)
 mining_since=0
@@ -1275,7 +1241,7 @@ end
 end
 local function drill()
 if fuel>0 then
-map.add_drilled_ground(52,x,y-2)
+add_drilled_ground(52,x,y-2)
 if not was_drilling then
 sfx(30,number)
 end
@@ -1836,8 +1802,8 @@ creatures.spawn_creature(x0+18,y0,praetorian)
 creatures.spawn_creature(x0+34,y0,mactera)
 x0=200
 y0=160
-map.spawn_obstacle(nil,x0,y0,2)
-map.spawn_obstacle(nil,x0,y0-5,1)
+spawn_obstacle(nil,x0,y0,2)
+spawn_obstacle(nil,x0,y0-5,1)
 x0=180
 y0=180
 resources.spawn_menu_item(x0,y0,48,"class","driller")
@@ -1855,21 +1821,21 @@ last_diff=last_diff==0 and 1 or last_diff
 resources.spawn_menu_item(148,198,191+last_diff,"number",last_diff)
 x0=190
 y0=200
-map.spawn_obstacle(227,x0,y0,2,false,false)
-map.spawn_obstacle(229,x0+16,y0,2,false,false)
+spawn_obstacle(227,x0,y0,2,false,false)
+spawn_obstacle(229,x0+16,y0,2,false,false)
 x0=105
 y0=105
-map.spawn_obstacle(199,x0,   y0,   4,false,false)
-map.spawn_obstacle(203,x0+32,y0,   4,false,false)
-map.spawn_obstacle(207,x0+64,y0,   1,false,false)
-map.spawn_obstacle(223,x0+64,y0+8, 1,false,false)
-map.spawn_obstacle(239,x0+64,y0+16,1,false,false)
-map.spawn_obstacle(255,x0+64,y0+24,1,false,false)
-map.spawn_obstacle(208,x0+10,y0+32,1,false,false)
-map.spawn_obstacle(209,x0+18,y0+32,1,false,false)
-map.spawn_obstacle(210,x0+26,y0+32,1,false,false)
-map.spawn_obstacle(211,x0+34,y0+32,1,false,false)
-map.spawn_obstacle(212,x0+42,y0+32,1,false,false)
+spawn_obstacle(199,x0,   y0,   4,false,false)
+spawn_obstacle(203,x0+32,y0,   4,false,false)
+spawn_obstacle(207,x0+64,y0,   1,false,false)
+spawn_obstacle(223,x0+64,y0+8, 1,false,false)
+spawn_obstacle(239,x0+64,y0+16,1,false,false)
+spawn_obstacle(255,x0+64,y0+24,1,false,false)
+spawn_obstacle(208,x0+10,y0+32,1,false,false)
+spawn_obstacle(209,x0+18,y0+32,1,false,false)
+spawn_obstacle(210,x0+26,y0+32,1,false,false)
+spawn_obstacle(211,x0+34,y0+32,1,false,false)
+spawn_obstacle(212,x0+42,y0+32,1,false,false)
 end
 function are_colliding(a, b)
 local x_good = a.x[1]>b.x[2] or a.x[2]<b.x[1]
@@ -1905,6 +1871,15 @@ positions.add({x_coord, y_coord})
 end
 end
 return positions
+end
+function swap_colors(color_profile)
+if color_profile==2 then
+pal(14,12)
+pal(12,11)
+elseif color_profile==3 then
+pal(14,2)
+pal(12,14)
+end
 end
 function pick_spawn(spawn_params)
 local decision=rnd(spawn_params.cum_sum)

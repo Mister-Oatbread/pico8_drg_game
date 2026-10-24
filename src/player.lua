@@ -142,7 +142,7 @@ function new_player(number,role)
     -- "drilled_ground" is called
     local function mine()
         if mining_since>mining_delay then
-            map.add_drilled_ground(53,x,y-2)
+            add_drilled_ground(53,x,y-2)
             sfx(-1,number)
             sfx(31,number)
             mining_since=0
@@ -171,7 +171,7 @@ function new_player(number,role)
 
     local function drill()
         if fuel>0 then
-            map.add_drilled_ground(52,x,y-2)
+            add_drilled_ground(52,x,y-2)
             if not was_drilling then
                 sfx(30,number)
             end
