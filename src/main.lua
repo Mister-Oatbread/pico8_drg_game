@@ -86,7 +86,6 @@ function _draw()
     player_1.draw()
     props.draw_particles()
     -- if at_title_screen then title_screen.draw() end
-    map.draw_vines()
     map.draw_super_wall()
     hud.draw(player_1)
     if coop then hud.draw(player_2) end

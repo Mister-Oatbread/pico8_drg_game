@@ -1,6 +1,6 @@
 
 
-function bloopy_fruit(x,y)
+function bloopy_fruit(x, y)
     local x=x
     local y=y
     local x_flip=coinflip()
@@ -8,9 +8,11 @@ function bloopy_fruit(x,y)
     local sprite=sample_one(178,181)
 
     return {
+        x=function() return x end,
+        y=function() return y end,
         update=function() y+=1 end,
         draw=function() spr(sprite,x,y,1,1,x_flip,y_flip) end,
-        hitbox=function() return {x={3,6},y={3,6} end,
+        hitbox=function() return {x={3,6},y={3,6}} end,
     }
 end
 

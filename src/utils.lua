@@ -29,16 +29,16 @@ function random_walk(x,y,prob)
     return x,y
 end
 
-spawn_cluster(x,y)
+function get_cluster_positions(x, y)
     local positions = new_entity_container()
-    positions.add({x,y})
-    local x = x.min
-    while x<x.max do
-        local y = y.min
-        x+=choose_one(4,7)
-        while y=y.max do
-            y+=choose_one(4,7)
-            positions.add({x,y})
+    positions.add({x[1],y[1]})
+    local x_coord = x[1]
+    while x_coord < x[2] do
+        local y_coord = y[1]
+        x_coord += sample_one(4, 7)
+        while y_coord < y[2] do
+            y_coord += sample_one(4, 7)
+            positions.add({x_coord, y_coord})
         end
     end
     return positions

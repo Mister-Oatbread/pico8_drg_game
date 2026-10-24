@@ -27,7 +27,7 @@ function new_map()
     local super_walls=new_entity_container()
     local drilled_ground=new_entity_container()
     local obstacles=new_entity_container()
-    local vines=new_entity_container()
+    local squishy_stuff=new_entity_container()
 
     -- initialize walls with random sprite
     for x=102,220,118 do
@@ -49,17 +49,6 @@ function new_map()
             color=color,
             x=flr(rnd(128))+101,
             y=94,
-        }
-    end
-
-    local function spawn_vine()
-        local sprites={76,78,108,110}
-        return {
-            sprite=choose_one(sprites),
-            x=flr(rnd(112))+101,
-            y=81,
-            x_flip=coinflip(),
-            y_flip=coinflip(),
         }
     end
 
@@ -94,7 +83,7 @@ function new_map()
 
     -- slides the floor one frame to the bottom, and realigns the floor if needed
     local function update()
-        local wall,terrain_piece
+        local wall,terrain_piece, squishy_piece
         if playing then
             for i=1,walls.size() do
                 wall=walls.get(i)
@@ -108,6 +97,13 @@ function new_map()
                 terrain_piece.y+=1
                 if terrain_piece.y>230 then
                     terrain.deletei(i)
+                end
+            end
+            for i=squishy_stuff.size(),1,-1 do
+                squishy_piece=squishy_stuff.get(i)
+                squishy_piece.update()
+                if squishy_piece.y()>230 then
+                    squishy_stuff.deletei(i)
                 end
             end
             -- remove_bottom_entities(drilled_ground,y)
@@ -126,14 +122,12 @@ function new_map()
                     obstacles.deletei(i)
                 end
             end
-            for i=vines.size(),1,-1 do
-                vines.get(i).y+=1
-                if vines.get(i).y>=230 then
-                    vines.deletei(i)
+            if rnd()<.04 then
+                local cluster_positions = get_cluster_positions({10,20},{110,120})
+                for i=1,cluster_positions.size() do
+                    local cluster_pos = cluster_positions.get(i)
+                    squishy_stuff.add(bloopy_fruit(cluster_pos[1], cluster_pos[2]))
                 end
-            end
-            if rnd()<.05 then
-                vines.add(spawn_vine())
             end
         end
     end
@@ -178,10 +172,13 @@ function new_map()
     end
 
     local function draw_terrain()
-        local terrain_piece
+        local terrain_piece, squishy_piece
         for i=1,terrain.size() do
             terrain_piece=terrain.get(i)
             pset(terrain_piece.x,terrain_piece.y,terrain_piece.color)
+        end
+        for i=1,squishy_stuff.size() do
+            squishy_stuff.get(i).draw()
         end
     end
 
@@ -211,14 +208,6 @@ function new_map()
         end
     end
 
-    local function draw_vines()
-        local vine
-        for i=1,vines.size() do
-            vine=vines.get(i)
-            spr(vine.sprite,vine.x,vine.y,2,2,vine.x_flip,vine.y_flip)
-        end
-    end
-
     return {
         update=update,
         draw_wall=draw_wall,
@@ -226,10 +215,9 @@ function new_map()
         draw_terrain=draw_terrain,
         draw_drilled_ground=draw_drilled_ground,
         draw_obstacles=draw_obstacles,
-        draw_vines=draw_vines,
         add_drilled_ground=add_drilled_ground,
         spawn_obstacle=spawn_obstacle,
-        poke_object=poke_obstacle,
+        -- poke_object=poke_obstacle,
     }
 end
 

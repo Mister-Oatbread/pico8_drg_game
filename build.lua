@@ -923,7 +923,6 @@ projectiles.draw()
 if coop then player_2.draw() end
 player_1.draw()
 props.draw_particles()
-map.draw_vines()
 map.draw_super_wall()
 hud.draw(player_1)
 if coop then hud.draw(player_2) end
@@ -955,7 +954,7 @@ local walls=new_entity_container()
 local super_walls=new_entity_container()
 local drilled_ground=new_entity_container()
 local obstacles=new_entity_container()
-local vines=new_entity_container()
+local squishy_stuff=new_entity_container()
 for x=102,220,118 do
 for y=91,228,8 do
 walls.add(add_wall(x,y))
@@ -972,16 +971,6 @@ return {
 color=color,
 x=flr(rnd(128))+101,
 y=94,
-}
-end
-local function spawn_vine()
-local sprites={76,78,108,110}
-return {
-sprite=choose_one(sprites),
-x=flr(rnd(112))+101,
-y=81,
-x_flip=coinflip(),
-y_flip=coinflip(),
 }
 end
 local function add_drilled_ground(sprite,x,y)
@@ -1008,7 +997,7 @@ color_profile=color_profile or sample_one(1,3),
 })
 end
 local function update()
-local wall,terrain_piece
+local wall,terrain_piece, squishy_piece
 if playing then
 for i=1,walls.size() do
 wall=walls.get(i)
@@ -1022,6 +1011,13 @@ terrain_piece=terrain.get(i)
 terrain_piece.y+=1
 if terrain_piece.y>230 then
 terrain.deletei(i)
+end
+end
+for i=squishy_stuff.size(),1,-1 do
+squishy_piece=squishy_stuff.get(i)
+squishy_piece.update()
+if squishy_piece.y()>230 then
+squishy_stuff.deletei(i)
 end
 end
 for i=drilled_ground.size(),1,-1 do
@@ -1039,14 +1035,12 @@ if obstacles.get(i).y>=230 then
 obstacles.deletei(i)
 end
 end
-for i=vines.size(),1,-1 do
-vines.get(i).y+=1
-if vines.get(i).y>=230 then
-vines.deletei(i)
+if rnd()<.04 then
+local cluster_positions = get_cluster_positions({10,20},{110,120})
+for i=1,cluster_positions.size() do
+local cluster_pos = cluster_positions.get(i)
+squishy_stuff.add(bloopy_fruit(cluster_pos[1], cluster_pos[2]))
 end
-end
-if rnd()<.05 then
-vines.add(spawn_vine())
 end
 end
 end
@@ -1086,10 +1080,13 @@ super_walls.get(i).y,
 end
 end
 local function draw_terrain()
-local terrain_piece
+local terrain_piece, squishy_piece
 for i=1,terrain.size() do
 terrain_piece=terrain.get(i)
 pset(terrain_piece.x,terrain_piece.y,terrain_piece.color)
+end
+for i=1,squishy_stuff.size() do
+squishy_stuff.get(i).draw()
 end
 end
 local function draw_drilled_ground()
@@ -1116,13 +1113,6 @@ obstacle.y_flip
 pal()
 end
 end
-local function draw_vines()
-local vine
-for i=1,vines.size() do
-vine=vines.get(i)
-spr(vine.sprite,vine.x,vine.y,2,2,vine.x_flip,vine.y_flip)
-end
-end
 return {
 update=update,
 draw_wall=draw_wall,
@@ -1130,10 +1120,8 @@ draw_super_wall=draw_super_wall,
 draw_terrain=draw_terrain,
 draw_drilled_ground=draw_drilled_ground,
 draw_obstacles=draw_obstacles,
-draw_vines=draw_vines,
 add_drilled_ground=add_drilled_ground,
 spawn_obstacle=spawn_obstacle,
-poke_object=poke_obstacle,
 }
 end
 function new_performance_monitor()
@@ -1544,16 +1532,18 @@ get_spit_hitbox=get_spit_hitbox,
 get_menace_spit_hitbox=get_menace_spit_hitbox,
 }
 end
-function bloopy_fruit(x,y)
+function bloopy_fruit(x, y)
 local x=x
 local y=y
 local x_flip=coinflip()
 local y_flip=coinflip()
 local sprite=sample_one(178,181)
 return {
+x=function() return x end,
+y=function() return y end,
 update=function() y+=1 end,
 draw=function() spr(sprite,x,y,1,1,x_flip,y_flip) end,
-hitbox=function() return {x={3,6},y={3,6} end,
+hitbox=function() return {x={3,6},y={3,6}} end,
 }
 end
 function callow_seeder(x, y)
@@ -1902,16 +1892,16 @@ y-=1
 end
 return x,y
 end
-spawn_cluster(x,y)
+function get_cluster_positions(x, y)
 local positions = new_entity_container()
-positions.add({x,y})
-local x = x.min
-while x<x.max do
-local y = y.min
-x+=choose_one(4,7)
-while y=y.max do
-y+=choose_one(4,7)
-positions.add({x,y})
+positions.add({x[1],y[1]})
+local x_coord = x[1]
+while x_coord < x[2] do
+local y_coord = y[1]
+x_coord += sample_one(4, 7)
+while y_coord < y[2] do
+y_coord += sample_one(4, 7)
+positions.add({x_coord, y_coord})
 end
 end
 return positions
