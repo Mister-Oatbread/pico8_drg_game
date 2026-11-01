@@ -23,7 +23,7 @@ function praetorian(x,y)
         for player in all(players) do
             if abs(x-player.x()-4)<20 and player.y()-y<20 then
                 if not spitting then
-                    projectiles.spit_spit("praet_spit",x,y+16)
+                    spit_spit("praet_spit",x,y+16)
                     spitting=true
                 end
             end
@@ -37,7 +37,7 @@ function praetorian(x,y)
         health-=damage_received
         if health<=0 then
             alive=false
-            projectiles.spit_spit("praet_cloud",x,y)
+            spit_spit("praet_cloud",x,y)
             del(spits,spit)
             player.give_points(100)
         end

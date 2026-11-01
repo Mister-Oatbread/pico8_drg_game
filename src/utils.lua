@@ -29,6 +29,10 @@ function random_walk(x,y,prob)
     return x,y
 end
 
+function outside_of_screen(x, y)
+    return (x>250 or x<80 or y>250 or y<80)
+end
+
 function get_cluster_positions(x, y)
     local positions = new_entity_container()
     positions.add({x[1],y[1]})

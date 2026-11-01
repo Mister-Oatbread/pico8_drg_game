@@ -27,7 +27,7 @@ function mactera(x,y)
                 if spit_countdown==1 then
                     did_spit=true
                     performing_spit=false
-                    projectiles.spit_spit("mactera_spit",x,y)
+                    spit_spit("mactera_spit",x,y)
                     sfx(46,3)
                 end
             else

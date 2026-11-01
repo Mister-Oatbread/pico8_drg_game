@@ -152,7 +152,7 @@ function new_player(number,role)
     local function shoot()
         if shot_since>shot_delay then
             if ammo>0 then
-                projectiles.fire_bullet(number)
+                fire_bullet(number)
                 ammo-=1
                 if role=="gunner" then
                     if not was_shooting then

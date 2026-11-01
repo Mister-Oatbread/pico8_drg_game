@@ -6,7 +6,6 @@ local x=x
 local y=y
 local y0=y
 local display_alt=false
-local alive=true
 local creature_damage=1
 local hitbox={x={1,8},y={1,8}}
 local function update()
@@ -15,20 +14,15 @@ y=y0+sgn(up_down_frame-up_down_cap/2)
 frame=frame%30+1
 up_down_frame=(up_down_frame+1)%up_down_cap
 end
-local function damage(damage_received,player)
-end
-local function draw()
-spr(1,x,y,1,1,display_alt,true)
-end
 return {
 update=update,
-damage=damage,
+damage=function(damage_received, player) end,
 creature_damage=creature_damage,
-draw=draw,
+draw=function() spr(1,x,y,1,1,display_alt,true) end,
 hitbox=hitbox,
 x=function() return x end,
 y=function() return y end,
-is_alive=function() return alive end,
+is_alive=function() return true end,
 }
 end
 function cave_angel(x,y)
@@ -126,8 +120,6 @@ is_alive=function() return alive end,
 end
 function grunt(x,y)
 local frame=1
-local x=x
-local y=y
 local damaged_since=60
 local health=40
 local alive=true
@@ -280,7 +272,7 @@ spit_countdown-=1
 if spit_countdown==1 then
 did_spit=true
 performing_spit=false
-projectiles.spit_spit("mactera_spit",x,y)
+spit_spit("mactera_spit",x,y)
 sfx(46,3)
 end
 else
@@ -351,7 +343,7 @@ tracked_player.y()-y_shot_position+3
 local x_vel=2*cos(angle)
 local y_vel=2*sin(angle)+1
 sfx(46,3)
-projectiles.add_menace_spit(
+spit_menace_spit(
 x_shot_position,
 y_shot_position,
 x_vel,
@@ -439,7 +431,7 @@ if not spitting then frame=frame%40+1 end
 for player in all(players) do
 if abs(x-player.x()-4)<20 and player.y()-y<20 then
 if not spitting then
-projectiles.spit_spit("praet_spit",x,y+16)
+spit_spit("praet_spit",x,y+16)
 spitting=true
 end
 end
@@ -452,7 +444,7 @@ damaged_since=0
 health-=damage_received
 if health<=0 then
 alive=false
-projectiles.spit_spit("praet_cloud",x,y)
+spit_spit("praet_cloud",x,y)
 del(spits,spit)
 player.give_points(100)
 end
@@ -729,14 +721,13 @@ end
 local function damage_creatures()
 local creature_box,bullet_box,melee_box
 local creatures_list=creatures.creatures_list
-local bullets=projectiles.bullets_list
 local creature,bullet,player_damage
 for i=1,creatures_list.size() do
 creature=creatures_list.get(i)
 creature_box=get_hitbox(creature)
 for j=bullets.size(),1,-1 do
 bullet=bullets.get(j)
-bullet_box=projectiles.get_bullet_hitbox(bullet)
+bullet_box=get_bullet_hitbox(bullet)
 if are_colliding(bullet_box, creature_box) then
 creature.damage(bullet.damage,bullet.owner)
 if not bullet.piercing then
@@ -763,26 +754,16 @@ end
 end
 local function damage_player(player)
 local player_box,spit_box,creature_box
-local spit,creature,spits,menace_spits
+local spit,creature
 player_box=player.get_hitbox()
-spits=projectiles.spits_list
-menace_spits=projectiles.menace_spit_list
 for i=spits.size(),1,-1 do
 spit=spits.get(i)
-spit_box=projectiles.get_spit_hitbox(spit)
+spit_box=get_spit_hitbox(spit)
 if are_colliding(player_box,spit_box) then
 player.damage(spit.damage)
 if not spit.persists then
 spits.deletei(i)
 end
-end
-end
-for i=menace_spits.size(),1,-1 do
-spit=menace_spits.get(i)
-spit_box = projectiles.get_menace_spit_hitbox(spit)
-if are_colliding(player_box,spit_box) then
-player.damage(1)
-spits.deletei(i)
 end
 end
 for i=creatures.creatures_list.size(),1,-1 do
@@ -890,11 +871,12 @@ super_walls=new_entity_container()
 drilled_ground=new_entity_container()
 obstacles=new_entity_container()
 squishy_stuff=new_entity_container()
+bullets=new_entity_container()
+spits=new_entity_container()
 player_1=new_player(1,last_player_1_class)
 player_2=new_player(2,last_player_2_class)
 players={player_1}
 if coop then add(players,player_2) end
-projectiles=new_projectiles()
 resources=new_resources()
 creatures=new_creatures()
 hud=new_hud()
@@ -920,7 +902,7 @@ end
 function _update()
 performance_monitor.reset_cpu_load()
 if not at_death_screen then
-projectiles.update()
+update_projectiles()
 resources.update()
 update_map()
 player_1.update()
@@ -942,7 +924,7 @@ props.draw_props()
 draw_drilled_ground()
 resources.draw()
 creatures.draw()
-projectiles.draw()
+draw_projectiles()
 if coop then player_2.draw() end
 player_1.draw()
 props.draw_particles()
@@ -1227,7 +1209,7 @@ end
 local function shoot()
 if shot_since>shot_delay then
 if ammo>0 then
-projectiles.fire_bullet(number)
+fire_bullet(number)
 ammo-=1
 if role=="gunner" then
 if not was_shooting then
@@ -1364,11 +1346,7 @@ drills_damage=drills_damage,
 mining_damage=mining_damage,
 }
 end
-function new_projectiles()
-local bullets=new_entity_container()
-local spits=new_entity_container()
-local menace_spits=new_entity_container()
-local function fire_bullet(number)
+function fire_bullet(number)
 local player=number==1 and players[1] or players[2]
 bullets.add({
 x=player.x(),
@@ -1378,7 +1356,7 @@ damage=player.get_role()=="gunner" and 6 or 10,
 piercing=false
 })
 end
-local function new_spit(spit_type,x,y)
+function new_spit(spit_type,x,y)
 local sprite,speed,size,hitbox,persists,damage
 local x_flip,y_flip=false,false
 local frame=0
@@ -1430,13 +1408,28 @@ damage=damage,
 hitbox=hitbox,
 }
 end
-local function spit_spit(spit_type,x,y)
+function new_menace_spit(x,y,x_vel,y_vel)
+local function update()
+x+=x_vel
+y+=y_vel
+end
+return {
+update=update,
+draw=function() pset(flr(x),flr(y),12) end,
+x=function() return x end,
+y=function() return y end,
+persists=false,
+damage=1,
+hitbox={x={1,1},y={1,1}},
+}
+end
+function spit_menace_spit(x,y,x_vel,y_vel)
+spits.add(new_menace_spit(x,y,x_vel,y_vel))
+end
+function spit_spit(spit_type,x,y)
 spits.add(new_spit(spit_type,x,y))
 end
-local function add_menace_spit(x,y,x_vel,y_vel)
-menace_spits.add({x=x,y=y,x_vel=x_vel,y_vel=y_vel})
-end
-local function update()
+function update_projectiles()
 for i=bullets.size(),1,-1 do
 bullets.get(i).y-=6
 if bullets.get(i).y<=91 then
@@ -1447,64 +1440,31 @@ local spit
 for i=spits.size(),1,-1 do
 spit=spits.get(i)
 spit.update()
-if spit.y()>=240 then
+if outside_of_screen(spit.x(), spit.y()) then
 spits.deletei(i)
 end
 end
-for i=menace_spits.size(),1,-1 do
-spit=menace_spits.get(i)
-spit.x+=spit.x_vel
-spit.y+=spit.y_vel
-if spit.x<99 or spit.x>230 or spit.y<99 or spit.y>230 then
-menace_spits.deletei(i)
 end
-end
-end
-local function draw()
+function draw_projectiles()
 for i=1,bullets.size() do
 spr(29,bullets.get(i).x, bullets.get(i).y)
 end
 for i=1,spits.size() do
 spits.get(i).draw()
 end
-local x,y
-for i=1,menace_spits.size() do
-x=flr(menace_spits.get(i).x)
-y=flr(menace_spits.get(i).y)
-pset(x,y,12)
 end
-end
-local function get_bullet_hitbox(bullet)
+function get_bullet_hitbox(bullet)
 return {
 x={bullet.x+6,bullet.x+6},
 y={bullet.y+5,bullet.y+15},
 }
 end
-local function get_spit_hitbox(spit)
+function get_spit_hitbox(spit)
 local x1=spit.hitbox.x[1]+spit.x()-1
 local x2=spit.hitbox.x[2]+spit.x()-1
 local y1=spit.hitbox.y[1]+spit.y()-1
 local y2=spit.hitbox.y[2]+spit.y()-1
 return {x={x1,x2}, y={y1,y2}}
-end
-local function get_menace_spit_hitbox(spit)
-local x_pos = flr(spit.x)
-local y_pos = flr(spit.y)
-return {x={x_pos, x_pos},y={y_pos,y_pos}}
-end
-return {
-update=update,
-draw=draw,
-fire_bullet=fire_bullet,
-spit_spit=spit_spit,
-add_menace_spit=add_menace_spit,
-spits_list=spits,
-bullets_list=bullets,
-menace_spit_list=menace_spits,
-get_bullet_hitbox=get_bullet_hitbox,
-get_spit_hitbox=get_spit_hitbox,
-get_menace_spit_hitbox=get_menace_spit_hitbox,
-}
 end
 function bloopy_fruit(x, y)
 local x=x
@@ -1865,6 +1825,9 @@ elseif choice<4*prob then
 y-=1
 end
 return x,y
+end
+function outside_of_screen(x, y)
+return (x>250 or x<80 or y>250 or y<80)
 end
 function get_cluster_positions(x, y)
 local positions = new_entity_container()

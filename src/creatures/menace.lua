@@ -31,7 +31,7 @@ function menace(x,y)
             local x_vel=2*cos(angle)
             local y_vel=2*sin(angle)+1
             sfx(46,3)
-            projectiles.add_menace_spit(
+            spit_menace_spit(
                 x_shot_position,
                 y_shot_position,
                 x_vel,

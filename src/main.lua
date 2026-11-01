@@ -33,11 +33,13 @@ function _init()
     obstacles=new_entity_container()
     squishy_stuff=new_entity_container()
 
+    bullets=new_entity_container()
+    spits=new_entity_container()
+
     player_1=new_player(1,last_player_1_class)
     player_2=new_player(2,last_player_2_class)
     players={player_1}
     if coop then add(players,player_2) end
-    projectiles=new_projectiles()
     resources=new_resources()
     creatures=new_creatures()
     hud=new_hud()
@@ -74,7 +76,7 @@ function _update()
 
     performance_monitor.reset_cpu_load()
     if not at_death_screen then
-        projectiles.update()
+        update_projectiles()
         resources.update()
         update_map()
         player_1.update()
@@ -99,7 +101,7 @@ function _draw()
     draw_drilled_ground()
     resources.draw()
     creatures.draw()
-    projectiles.draw()
+    draw_projectiles()
     if coop then player_2.draw() end
     player_1.draw()
     props.draw_particles()

@@ -109,7 +109,6 @@ function new_game_logic()
     local function damage_creatures()
         local creature_box,bullet_box,melee_box
         local creatures_list=creatures.creatures_list
-        local bullets=projectiles.bullets_list
         local creature,bullet,player_damage
 
         -- get drills hitbox if player is drilling, else assign meaningless
@@ -120,7 +119,7 @@ function new_game_logic()
             creature_box=get_hitbox(creature)
             for j=bullets.size(),1,-1 do
                 bullet=bullets.get(j)
-                bullet_box=projectiles.get_bullet_hitbox(bullet)
+                bullet_box=get_bullet_hitbox(bullet)
                 if are_colliding(bullet_box, creature_box) then
                     creature.damage(bullet.damage,bullet.owner)
                     if not bullet.piercing then
@@ -150,29 +149,18 @@ function new_game_logic()
 
     local function damage_player(player)
         local player_box,spit_box,creature_box
-        local spit,creature,spits,menace_spits
+        local spit,creature
 
         player_box=player.get_hitbox()
-        spits=projectiles.spits_list
-        menace_spits=projectiles.menace_spit_list
 
         for i=spits.size(),1,-1 do
             spit=spits.get(i)
-            spit_box=projectiles.get_spit_hitbox(spit)
+            spit_box=get_spit_hitbox(spit)
             if are_colliding(player_box,spit_box) then
                 player.damage(spit.damage)
                 if not spit.persists then
                     spits.deletei(i)
                 end
-            end
-        end
-
-        for i=menace_spits.size(),1,-1 do
-            spit=menace_spits.get(i)
-            spit_box = projectiles.get_menace_spit_hitbox(spit)
-            if are_colliding(player_box,spit_box) then
-                player.damage(1)
-                spits.deletei(i)
             end
         end
 
