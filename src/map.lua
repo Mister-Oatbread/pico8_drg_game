@@ -74,13 +74,11 @@ function update_map()
                 drilled_ground.deletei(i)
             end
         end
-        if rnd()<.8 then
-            terrain.add({
-                color=coinflip() and 6 or 2,
-                x=sample_one(128,101),
-                y=94
-            })
-        end
+        terrain.add({
+            x=sample_one(101,227),
+            y=94,
+            color=coinflip() and 6 or 2,
+        })
         for i=obstacles.size(),1,-1 do
             obstacles.get(i).y+=1
             if obstacles.get(i).y>=230 then
@@ -111,9 +109,9 @@ function draw_base_map()
         pset(terrain_piece.x,terrain_piece.y,terrain_piece.color)
     end
 
-    for i=1,squishy_stuff.size() do
-        squishy_stuff.get(i).draw()
-    end
+    -- for i=1,squishy_stuff.size() do
+    --     squishy_stuff.get(i).draw()
+    -- end
 
     for i=1,obstacles.size() do
         obstacle=obstacles.get(i)

@@ -11,7 +11,7 @@ function new_player(number,role)
 -- INIT START
     local function change_role(new_role)
         role=new_role
-        max_ammo=role=="gunner" and 100 or 25
+        max_ammo=role=="gunner" and 100 or 35
         ammo=max_ammo
         max_fuel=role=="driller" and 250 or 0
         fuel=max_fuel

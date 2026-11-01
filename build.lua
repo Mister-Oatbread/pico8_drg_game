@@ -763,9 +763,10 @@ end
 end
 local function damage_player(player)
 local player_box,spit_box,creature_box
-local spit,creature,spits
+local spit,creature,spits,menace_spits
 player_box=player.get_hitbox()
 spits=projectiles.spits_list
+menace_spits=projectiles.menace_spit_list
 for i=spits.size(),1,-1 do
 spit=spits.get(i)
 spit_box=projectiles.get_spit_hitbox(spit)
@@ -774,6 +775,14 @@ player.damage(spit.damage)
 if not spit.persists then
 spits.deletei(i)
 end
+end
+end
+for i=menace_spits.size(),1,-1 do
+spit=menace_spits.get(i)
+spit_box = projectiles.get_menace_spit_hitbox(spit)
+if are_colliding(player_box,spit_box) then
+player.damage(1)
+spits.deletei(i)
 end
 end
 for i=creatures.creatures_list.size(),1,-1 do
@@ -1016,13 +1025,11 @@ if drilled_ground.get(i).y>=230 then
 drilled_ground.deletei(i)
 end
 end
-if rnd()<.8 then
 terrain.add({
+x=sample_one(101,227),
+y=94,
 color=coinflip() and 6 or 2,
-x=sample_one(128,101),
-y=94
 })
-end
 for i=obstacles.size(),1,-1 do
 obstacles.get(i).y+=1
 if obstacles.get(i).y>=230 then
@@ -1048,9 +1055,6 @@ local terrain_piece, obstacle
 for i=1,terrain.size() do
 terrain_piece=terrain.get(i)
 pset(terrain_piece.x,terrain_piece.y,terrain_piece.color)
-end
-for i=1,squishy_stuff.size() do
-squishy_stuff.get(i).draw()
 end
 for i=1,obstacles.size() do
 obstacle=obstacles.get(i)
@@ -1119,7 +1123,7 @@ local max_ammo,max_fuel,fuel,ammo,shot_delay
 local role_numbers={["driller"]=1,["gunner"]=2,["engineer"]=3}
 local function change_role(new_role)
 role=new_role
-max_ammo=role=="gunner" and 100 or 25
+max_ammo=role=="gunner" and 100 or 35
 ammo=max_ammo
 max_fuel=role=="driller" and 250 or 0
 fuel=max_fuel
@@ -1439,13 +1443,14 @@ if bullets.get(i).y<=91 then
 bullets.deletei(i)
 end
 end
+local spit
 for i=spits.size(),1,-1 do
-spits.get(i).update()
-if spits.get(i).y()>=240 then
+spit=spits.get(i)
+spit.update()
+if spit.y()>=240 then
 spits.deletei(i)
 end
 end
-local spit
 for i=menace_spits.size(),1,-1 do
 spit=menace_spits.get(i)
 spit.x+=spit.x_vel
@@ -1483,7 +1488,9 @@ local y2=spit.hitbox.y[2]+spit.y()-1
 return {x={x1,x2}, y={y1,y2}}
 end
 local function get_menace_spit_hitbox(spit)
-return {x={flr(spit.x),flr(spit.x)},y={flr(spit.y),flr(spit.y)}}
+local x_pos = flr(spit.x)
+local y_pos = flr(spit.y)
+return {x={x_pos, x_pos},y={y_pos,y_pos}}
 end
 return {
 update=update,
@@ -1493,6 +1500,7 @@ spit_spit=spit_spit,
 add_menace_spit=add_menace_spit,
 spits_list=spits,
 bullets_list=bullets,
+menace_spit_list=menace_spits,
 get_bullet_hitbox=get_bullet_hitbox,
 get_spit_hitbox=get_spit_hitbox,
 get_menace_spit_hitbox=get_menace_spit_hitbox,

@@ -100,13 +100,14 @@ function new_projectiles()
                 bullets.deletei(i)
             end
         end
+        local spit
         for i=spits.size(),1,-1 do
-            spits.get(i).update()
-            if spits.get(i).y()>=240 then
+            spit=spits.get(i)
+            spit.update()
+            if spit.y()>=240 then
                 spits.deletei(i)
             end
         end
-        local spit
         for i=menace_spits.size(),1,-1 do
             spit=menace_spits.get(i)
             spit.x+=spit.x_vel
@@ -150,7 +151,9 @@ function new_projectiles()
     end
 
     local function get_menace_spit_hitbox(spit)
-        return {x={flr(spit.x),flr(spit.x)},y={flr(spit.y),flr(spit.y)}}
+        local x_pos = flr(spit.x)
+        local y_pos = flr(spit.y)
+        return {x={x_pos, x_pos},y={y_pos,y_pos}}
     end
 
     return {
@@ -161,6 +164,7 @@ function new_projectiles()
         add_menace_spit=add_menace_spit,
         spits_list=spits,
         bullets_list=bullets,
+        menace_spit_list=menace_spits,
         get_bullet_hitbox=get_bullet_hitbox,
         get_spit_hitbox=get_spit_hitbox,
         get_menace_spit_hitbox=get_menace_spit_hitbox,

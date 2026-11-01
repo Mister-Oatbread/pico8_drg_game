@@ -150,9 +150,12 @@ function new_game_logic()
 
     local function damage_player(player)
         local player_box,spit_box,creature_box
-        local spit,creature,spits
+        local spit,creature,spits,menace_spits
+
         player_box=player.get_hitbox()
         spits=projectiles.spits_list
+        menace_spits=projectiles.menace_spit_list
+
         for i=spits.size(),1,-1 do
             spit=spits.get(i)
             spit_box=projectiles.get_spit_hitbox(spit)
@@ -163,6 +166,16 @@ function new_game_logic()
                 end
             end
         end
+
+        for i=menace_spits.size(),1,-1 do
+            spit=menace_spits.get(i)
+            spit_box = projectiles.get_menace_spit_hitbox(spit)
+            if are_colliding(player_box,spit_box) then
+                player.damage(1)
+                spits.deletei(i)
+            end
+        end
+
         for i=creatures.creatures_list.size(),1,-1 do
             creature=creatures.creatures_list.get(i)
             creature_box=creatures.get_hitbox(creature)
