@@ -81,20 +81,20 @@ function new_game_logic()
         local resource,res_hitbox,mining_hitbox
         if player.is_drilling() or player.is_mining() then
             mining_hitbox=player.get_mining_hitbox()
-            for i=resources.get_resources.size(),1,-1 do
-                resource=resources.get_resources.get(i)
-                res_hitbox=resources.get_hitbox(resource)
+            for i=resources.size(),1,-1 do
+                resource=resources.get(i)
+                res_hitbox=get_resource_hitbox(resource)
                 if are_colliding(res_hitbox,mining_hitbox) then
                     local res_type=resource.res_type
                     if res_type=="red_sugar" then
                         player.give_health(1)
-                        resources.get_resources.deletei(i)
+                        resources.deletei(i)
                     elseif res_type=="nitra" then
                         player.give_resources(.5)
-                        resources.get_resources.deletei(i)
+                        resources.deletei(i)
                     elseif res_type=="gold" then
                         player.give_points(100)
-                        resources.get_resources.deletei(i)
+                        resources.deletei(i)
                     elseif res_type=="class" then
                         player.change_role(resource.value)
                     elseif res_type=="number" then
@@ -195,7 +195,7 @@ function new_game_logic()
                 spawn_obstacle()
             end
             if rnd()<resource_spawn_rate then
-                resources.spawn_resource()
+                spawn_resource()
             end
             timer+=1
             if timer%640==0 then

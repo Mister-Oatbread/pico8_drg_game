@@ -26,7 +26,7 @@ function loot_bug(x,y)
         if health<=0 then
             alive=false
             player.give_resources(.2)
-            death_screen.report_killed_loot_bug()
+            killed_loot_bugs.add(loot_bug_names[sample_one(1,#loot_bug_names)])
         end
     end
 

@@ -53,6 +53,7 @@ damaged_since=0
 health-=damage_received
 if health<=0 then
 alive=false
+no_cave_angels_killed=false
 death_screen.report_killed_cave_angel()
 end
 end
@@ -97,7 +98,7 @@ if health<=0 then
 player.give_resources(.5)
 player.give_health(1)
 player.give_points(50)
-death_screen.report_killed_egg()
+no_eggs_killed = false
 alive=false
 end
 end
@@ -183,7 +184,7 @@ health-=damage_received
 if health<=0 then
 alive=false
 player.give_resources(.2)
-death_screen.report_killed_loot_bug()
+killed_loot_bugs.add(loot_bug_names[sample_one(1,#loot_bug_names)])
 end
 end
 local function draw()
@@ -509,35 +510,7 @@ y=function() return y end,
 is_alive=function() return alive end,
 }
 end
-function new_death_screen()
-local loot_bug_names={
-"steeve",
-"steevie",
-"jimini",
-"jebediah",
-"david",
-"eva",
-"lloyd",
-"molly",
-"randy",
-"jimothy",
-"geoff",
-"thorben",
-"nil",
-"lisa",
-"jeffeory",
-"zundolf",
-"morty",
-"omega",
-}
-local killed_loot_bugs=new_entity_container()
-local no_loot_bugs_killed=true
-local no_cave_angels_killed=true
-local no_eggs_killed=true
-local points_total=0
-local highscore=0
-local death_screen_calculated=false
-local function calculate_death_screen()
+function calculate_death_screen()
 if not death_screen_calculated then
 no_loot_bugs_killed=killed_loot_bugs.size()==0
 for player in all(players) do
@@ -558,7 +531,7 @@ end
 end
 death_screen_calculated=true
 end
-local function draw()
+function draw_death_screen()
 print("awards:", 111,126,7)
 print("",113,126,7)
 print("-distance bonus")
@@ -597,17 +570,6 @@ print("at hazard "..game_logic.hazard()..is_coop,158,105)
 if points_total>highscore then
 print("new highscore!!!")
 end
-end
-local function report_killed_loot_bug()
-killed_loot_bugs.add(loot_bug_names[sample_one(1,#loot_bug_names)])
-end
-return {
-report_killed_loot_bug=report_killed_loot_bug,
-report_killed_cave_angel=function() no_cave_angels_killed=false end,
-report_killed_egg=function() no_eggs_killed=false end,
-calculate_death_screen=calculate_death_screen,
-draw=draw,
-}
 end
 function new_entity_container()
 local entities={}
@@ -694,20 +656,20 @@ local function mine_resources(player)
 local resource,res_hitbox,mining_hitbox
 if player.is_drilling() or player.is_mining() then
 mining_hitbox=player.get_mining_hitbox()
-for i=resources.get_resources.size(),1,-1 do
-resource=resources.get_resources.get(i)
-res_hitbox=resources.get_hitbox(resource)
+for i=resources.size(),1,-1 do
+resource=resources.get(i)
+res_hitbox=get_resource_hitbox(resource)
 if are_colliding(res_hitbox,mining_hitbox) then
 local res_type=resource.res_type
 if res_type=="red_sugar" then
 player.give_health(1)
-resources.get_resources.deletei(i)
+resources.deletei(i)
 elseif res_type=="nitra" then
 player.give_resources(.5)
-resources.get_resources.deletei(i)
+resources.deletei(i)
 elseif res_type=="gold" then
 player.give_points(100)
-resources.get_resources.deletei(i)
+resources.deletei(i)
 elseif res_type=="class" then
 player.change_role(resource.value)
 elseif res_type=="number" then
@@ -795,7 +757,7 @@ if rnd()<obstacle_spawn_rate then
 spawn_obstacle()
 end
 if rnd()<resource_spawn_rate then
-resources.spawn_resource()
+spawn_resource()
 end
 timer+=1
 if timer%640==0 then
@@ -821,7 +783,7 @@ creature_spawn_params=function() return creature_spawn_params end,
 hazard=function() return hazard end,
 }
 end
-function new_hud()
+function draw_hud()
 local function draw_prog_bar(percentage,x,y)
 local green_pixels=flr(percentage*12)
 local color
@@ -832,7 +794,8 @@ color=i>green_pixels and 8 or 11
 pset(x+i,y+1,color)
 end
 end
-local function draw_hearts(player,x)
+for player in all(players) do
+local x=player.number()==1 and 105 or 202
 for i=1,3 do
 if i>player.health() then
 pal(8,6)
@@ -840,10 +803,6 @@ end
 spr(31,x+8*(i-1),180)
 pal()
 end
-end
-local function draw(player)
-local x=player.number()==1 and 105 or 202
-draw_hearts(player,x)
 spr(46,x,190)
 draw_prog_bar(player.ammo()/player.max_ammo(),x+9,192)
 if player.get_role()=="driller" then
@@ -853,9 +812,6 @@ end
 spr(62,x,210)
 print(player.points(),x+10,211,7)
 end
-return {
-draw=draw,
-}
 end
 function _init()
 music(-1,0,0)
@@ -873,21 +829,48 @@ obstacles=new_entity_container()
 squishy_stuff=new_entity_container()
 bullets=new_entity_container()
 spits=new_entity_container()
+resources=new_entity_container()
 player_1=new_player(1,last_player_1_class)
 player_2=new_player(2,last_player_2_class)
 players={player_1}
-if coop then add(players,player_2) end
-resources=new_resources()
+if coop then
+add(players,player_2)
+end
 creatures=new_creatures()
-hud=new_hud()
 props=new_props()
-title_screen=new_title_screen()
-death_screen=new_death_screen()
+initialize_title_screen()
 game_logic=new_game_logic()
 performance_monitor=new_performance_monitor()
 at_title_screen=true
 playing=false
 at_death_screen=false
+loot_bug_names={
+"steeve",
+"steevie",
+"jimini",
+"jebediah",
+"david",
+"eva",
+"lloyd",
+"molly",
+"randy",
+"jimothy",
+"geoff",
+"thorben",
+"nil",
+"lisa",
+"jeffeory",
+"zundolf",
+"morty",
+"omega",
+}
+killed_loot_bugs = new_entity_container()
+no_loot_bugs_killed = true
+no_cave_angels_killed = true
+no_eggs_killed = true
+points_total=0
+highscore=0
+death_screen_calculated=false
 for x=102,220,118 do
 for y=91,228,8 do
 walls.add(add_wall(x,y))
@@ -903,7 +886,7 @@ function _update()
 performance_monitor.reset_cpu_load()
 if not at_death_screen then
 update_projectiles()
-resources.update()
+update_resources()
 update_map()
 player_1.update()
 if coop then player_2.update() end
@@ -911,7 +894,7 @@ creatures.update()
 props.update()
 game_logic.update()
 else
-death_screen.calculate_death_screen()
+calculate_death_screen()
 end
 performance_monitor.register_load()
 end
@@ -922,22 +905,21 @@ draw_base_map()
 draw_walls()
 props.draw_props()
 draw_drilled_ground()
-resources.draw()
+draw_resources()
 creatures.draw()
 draw_projectiles()
 if coop then player_2.draw() end
 player_1.draw()
 props.draw_particles()
 draw_super_wall()
-hud.draw(player_1)
-if coop then hud.draw(player_2) end
+draw_hud()
 if at_death_screen then
 cls(1)
 draw_walls()
 draw_super_wall()
 if coop then player_2.draw() end
 player_1.draw()
-death_screen.draw()
+draw_death_screen()
 performance_monitor.print_summary()
 end
 performance_monitor.register_load()
@@ -1678,9 +1660,7 @@ draw=function() spr(158,x,y,1,1,x_flip,y_flip) end,
 draw_particles=draw_particles,
 }
 end
-function new_resources()
-local list=new_entity_container()
-local function spawn_resource(x,y,type)
+function spawn_resource(x,y,type)
 local sprite,hitbox,start_sprite
 local res_type=type or pick_spawn(game_logic.resource_spawn_params())
 if res_type=="red_sugar" then
@@ -1694,7 +1674,7 @@ start_sprite=168
 hitbox={x={1,8},y={1,8}}
 end
 sprite=sprite or sample_one(start_sprite,start_sprite+3)
-list.add({
+resources.add({
 sprite=sprite,
 x=x or sample_one(101,220),
 y=y or 81,
@@ -1704,8 +1684,8 @@ hitbox=hitbox,
 res_type=res_type,
 })
 end
-local function spawn_menu_item(x,y,sprite,type,value)
-list.add({
+function spawn_menu_item(x,y,sprite,type,value)
+resources.add({
 sprite=sprite,
 x=x,
 y=y,
@@ -1716,27 +1696,27 @@ res_type=type,
 value=value
 })
 end
-local function update()
+function update_resources()
 if playing then
-for i=list.size(),1,-1 do
-list.get(i).y+=1
-if list.get(i).y>=230 then
-list.deletei(i)
+for i=resources.size(),1,-1 do
+resources.get(i).y+=1
+if resources.get(i).y>=230 then
+resources.deletei(i)
 end
 end
 end
 end
-local function get_hitbox(resource)
+function get_resource_hitbox(resource)
 local x1=resource.x+resource.hitbox.x[1]-1;
 local x2=resource.x+resource.hitbox.x[2]-1;
 local y1=resource.y+resource.hitbox.y[1]-1;
 local y2=resource.y+resource.hitbox.y[2]-1;
 return {x={x1,x2},y={y1,y2}};
 end
-local function draw()
+function draw_resources()
 local sprite,x,y,x_flip,y_flip,resource
-for i=1,list.size() do
-resource=list.get(i)
+for i=1,resources.size() do
+resource=resources.get(i)
 sprite=resource.sprite
 x=resource.x
 y=resource.y
@@ -1745,21 +1725,12 @@ y_flip=resource.y_flip
 spr(sprite,x,y,1,1,x_flip,y_flip)
 end
 end
-return {
-update=update,
-draw=draw,
-get_hitbox=get_hitbox,
-get_resources=list,
-spawn_resource=spawn_resource,
-spawn_menu_item=spawn_menu_item,
-}
-end
-function new_title_screen()
+function initialize_title_screen()
 local x0=170
 local y0=140
-resources.spawn_resource(x0,y0,"nitra")
-resources.spawn_resource(x0-2,y0+20,"gold")
-resources.spawn_resource(x0+14,y0+15,"red_sugar")
+spawn_resource(x0,y0,"nitra")
+spawn_resource(x0-2,y0+20,"gold")
+spawn_resource(x0+14,y0+15,"red_sugar")
 x0=180
 y0=120
 creatures.spawn_creature(120,150,loot_bug)
@@ -1774,19 +1745,19 @@ spawn_obstacle(nil,x0,y0,2)
 spawn_obstacle(nil,x0,y0-5,1)
 x0=180
 y0=180
-resources.spawn_menu_item(x0,y0,48,"class","driller")
-resources.spawn_menu_item(x0+15,y0,32,"class","gunner")
-resources.spawn_menu_item(x0+30,y0,34,"class","engineer")
+spawn_menu_item(x0,y0,48,"class","driller")
+spawn_menu_item(x0+15,y0,32,"class","gunner")
+spawn_menu_item(x0+30,y0,34,"class","engineer")
 x0=118
 y0=170
-resources.spawn_menu_item(x0,y0,192,"number",1)
-resources.spawn_menu_item(x0+15,y0,193,"number",2)
-resources.spawn_menu_item(x0+30,y0,194,"number",3)
-resources.spawn_menu_item(x0+45,y0,195,"number",4)
-resources.spawn_menu_item(x0+60,y0,196,"number",5)
+spawn_menu_item(x0,y0,192,"number",1)
+spawn_menu_item(x0+15,y0,193,"number",2)
+spawn_menu_item(x0+30,y0,194,"number",3)
+spawn_menu_item(x0+45,y0,195,"number",4)
+spawn_menu_item(x0+60,y0,196,"number",5)
 local last_diff=dget(13)
 last_diff=last_diff==0 and 1 or last_diff
-resources.spawn_menu_item(148,198,191+last_diff,"number",last_diff)
+spawn_menu_item(148,198,191+last_diff,"number",last_diff)
 x0=190
 y0=200
 spawn_obstacle(227,x0,y0,2,false,false)

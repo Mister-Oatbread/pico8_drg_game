@@ -1,9 +1,9 @@
 
 
--- this file contains all hud elements
-function new_hud()
+-- takes a percentage, as well as x and y position, and paints a prog bar
 
-    -- takes a percentage, as well as x and y position, and paints a prog bar
+function draw_hud()
+
     local function draw_prog_bar(percentage,x,y)
         local green_pixels=flr(percentage*12)
         local color
@@ -15,8 +15,9 @@ function new_hud()
         end
     end
 
-    -- draw up to three hearts representing player health
-    local function draw_hearts(player,x)
+    for player in all(players) do
+        local x=player.number()==1 and 105 or 202
+
         for i=1,3 do
             if i>player.health() then
                 pal(8,6)
@@ -24,11 +25,7 @@ function new_hud()
             spr(31,x+8*(i-1),180)
             pal()
         end
-    end
 
-    local function draw(player)
-        local x=player.number()==1 and 105 or 202
-        draw_hearts(player,x)
         spr(46,x,190)
         draw_prog_bar(player.ammo()/player.max_ammo(),x+9,192)
         if player.get_role()=="driller" then
@@ -38,10 +35,5 @@ function new_hud()
         spr(62,x,210)
         print(player.points(),x+10,211,7)
     end
-
-    return {
-        draw=draw,
-    }
 end
-
 

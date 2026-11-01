@@ -18,6 +18,7 @@ function _init()
     -- 11 | player 1 last class
     -- 12 | player 2 last class
     -- 13 | last difficulty
+
     cartdata("oatbreadsdrillerdash")
     coop=false
 
@@ -36,17 +37,19 @@ function _init()
     bullets=new_entity_container()
     spits=new_entity_container()
 
+    resources=new_entity_container()
+
     player_1=new_player(1,last_player_1_class)
     player_2=new_player(2,last_player_2_class)
     players={player_1}
-    if coop then add(players,player_2) end
-    resources=new_resources()
+    if coop then
+        add(players,player_2)
+    end
+
     creatures=new_creatures()
-    hud=new_hud()
     props=new_props()
 
-    title_screen=new_title_screen()
-    death_screen=new_death_screen()
+    initialize_title_screen()
     game_logic=new_game_logic()
 
     performance_monitor=new_performance_monitor()
@@ -54,6 +57,56 @@ function _init()
     at_title_screen=true
     playing=false
     at_death_screen=false
+
+    loot_bug_names={
+        "steeve",
+        "steevie",
+        "jimini",
+        "jebediah",
+        "david",
+        "eva",
+        "lloyd",
+        "molly",
+        "randy",
+        "jimothy",
+        "geoff",
+        "thorben",
+        "nil",
+        "lisa",
+        "jeffeory",
+        "zundolf",
+        "morty",
+
+        -- "emilia",
+        -- "olliver",
+        -- "matilda",
+        -- "benjamin",
+        -- "elodie",
+        -- "julien",
+        -- "amelia",
+        -- "sebby",
+        -- "charlie",
+        -- "rosalie",
+        -- "freddie",
+        -- "isabelle",
+        -- "tobias",
+        -- "lucien",
+        -- "henry",
+        -- "maxime",
+        -- "oliver",
+        -- "samuel",
+        -- "august",
+        -- "finnley",
+        --
+        "omega",
+    }
+    killed_loot_bugs = new_entity_container()
+    no_loot_bugs_killed = true
+    no_cave_angels_killed = true
+    no_eggs_killed = true
+    points_total=0
+    highscore=0
+    death_screen_calculated=false
 
     -- initialize walls with random sprite
     for x=102,220,118 do
@@ -77,7 +130,7 @@ function _update()
     performance_monitor.reset_cpu_load()
     if not at_death_screen then
         update_projectiles()
-        resources.update()
+        update_resources()
         update_map()
         player_1.update()
         if coop then player_2.update() end
@@ -86,7 +139,7 @@ function _update()
         props.update()
         game_logic.update()
     else
-        death_screen.calculate_death_screen()
+        calculate_death_screen()
     end
 
     performance_monitor.register_load()
@@ -99,7 +152,7 @@ function _draw()
     draw_walls()
     props.draw_props()
     draw_drilled_ground()
-    resources.draw()
+    draw_resources()
     creatures.draw()
     draw_projectiles()
     if coop then player_2.draw() end
@@ -107,8 +160,7 @@ function _draw()
     props.draw_particles()
     -- if at_title_screen then title_screen.draw() end
     draw_super_wall()
-    hud.draw(player_1)
-    if coop then hud.draw(player_2) end
+    draw_hud()
 
     if at_death_screen then
         cls(1)
@@ -116,7 +168,7 @@ function _draw()
         draw_super_wall()
         if coop then player_2.draw() end
         player_1.draw()
-        death_screen.draw()
+        draw_death_screen()
         performance_monitor.print_summary()
     end
 

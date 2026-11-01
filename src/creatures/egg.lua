@@ -25,7 +25,7 @@ function egg(x,y)
             player.give_resources(.5)
             player.give_health(1)
             player.give_points(50)
-            death_screen.report_killed_egg()
+            no_eggs_killed = false
             alive=false
         end
     end
