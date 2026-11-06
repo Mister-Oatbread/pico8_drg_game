@@ -10,12 +10,12 @@ function initialize_title_screen()
 
     x0=180
     y0=120
-    creatures.spawn_creature(120,150,loot_bug)
-    creatures.spawn_creature(130,150,cave_angel)
-    creatures.spawn_creature(x0,y0,grunt)
-    creatures.spawn_creature(x0+10,y0,slasher)
-    creatures.spawn_creature(x0+18,y0,praetorian)
-    creatures.spawn_creature(x0+34,y0,mactera)
+    spawn_creature(120,150,loot_bug)
+    spawn_creature(130,150,cave_angel)
+    spawn_creature(x0,y0,grunt)
+    spawn_creature(x0+10,y0,slasher)
+    spawn_creature(x0+18,y0,praetorian)
+    spawn_creature(x0+34,y0,mactera)
 
     x0=200
     y0=160

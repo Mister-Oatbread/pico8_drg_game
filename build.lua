@@ -205,49 +205,36 @@ y=function() return y end,
 is_alive=function() return alive end,
 }
 end
-function new_creatures()
-local creatures_list=new_entity_container()
-for x=106,220,9 do
-creatures_list.add(bottom_grunt(x,222))
-end
-local function spawn_creature(x,y,type)
+function spawn_creature(x,y,type)
 local x=x or sample_one(101,220)
 local y=y or 81
-local creature=type or pick_spawn(game_logic.creature_spawn_params())
+local creature=type or pick_spawn(creature_spawn_params)
 if creature==menace then x=coinflip() and 104 or 216 end
-creatures_list.add(creature(x,y))
+creatures.add(creature(x,y))
 end
-local function update()
+function update_creatures()
 local creature
-for i=creatures_list.size(),1,-1 do
-creature=creatures_list.get(i)
+for i=creatures.size(),1,-1 do
+creature=creatures.get(i)
 creature.update()
 if creature.y()>=240 then
-creatures_list.delete(creature)
+creatures.delete(creature)
 elseif not creature.is_alive() then
-creatures_list.delete(creature)
+creatures.delete(creature)
 end
 end
 end
-local function draw()
-for i=1,creatures_list.size() do
-creatures_list.get(i).draw()
+function draw_creatures()
+for i=1,creatures.size() do
+creatures.get(i).draw()
 end
 end
-function get_hitbox(creature)
+function get_creature_hitbox(creature)
 local x1=creature.hitbox.x[1]+creature.x()-1;
 local x2=creature.hitbox.x[2]+creature.x()-1;
 local y1=creature.hitbox.y[1]+creature.y()-1;
 local y2=creature.hitbox.y[2]+creature.y()-1;
 return {x={x1,x2},y={y1,y2}};
-end
-return {
-spawn_creature=spawn_creature,
-update=update,
-draw=draw,
-get_hitbox=get_hitbox,
-creatures_list=creatures_list,
-}
 end
 function mactera(x,y)
 local frame=sample_one(1,60)
@@ -517,12 +504,12 @@ for player in all(players) do
 player.reposition(120+8*player.number()-1,193)
 points_total+=player.points()
 end
-points_total+=game_logic.get_distance()
+points_total+=get_distance()
 if no_loot_bugs_killed then points_total+=100 end
 if no_cave_angels_killed then points_total+=100 end
 if no_eggs_killed then points_total+=100 end
 if at_title_screen then points_total+=500 end
-local highscore_index=game_logic.hazard()
+local highscore_index=hazard
 if coop then highscore_index+=5 end
 highscore=dget(highscore_index)
 if points_total>highscore then
@@ -535,7 +522,7 @@ function draw_death_screen()
 print("awards:", 111,126,7)
 print("",113,126,7)
 print("-distance bonus")
-print(" (+"..game_logic.get_distance()..")")
+print(" (+"..get_distance()..")")
 if no_loot_bugs_killed then
 print("-no loot_bugs")
 print(" killed (+100)")
@@ -566,7 +553,7 @@ print("game over!",108,105,15)
 print("score: "..points_total)
 print("highscore: "..highscore)
 local is_coop=coop and "coop" or ""
-print("at hazard "..game_logic.hazard()..is_coop,158,105)
+print("at hazard "..hazard..is_coop,158,105)
 if points_total>highscore then
 print("new highscore!!!")
 end
@@ -582,26 +569,25 @@ size=function() return #entities end,
 replace=function(i,new_entity) entities[i]=new_entity end,
 }
 end
-function new_game_logic()
-local obstacle_spawn_rate=.2
-local obstacle_growth_rate=.03
-local obstacle_variety=2
-local obstacle_ratios={
+obstacle_spawn_rate=.2
+obstacle_growth_rate=.03
+obstacle_variety=2
+obstacle_ratios={
 {15,1},
 {1,2},
 }
-local resource_spawn_rate=.01
-local resource_growth_rate=0
-local resource_variety=3
-local resource_ratios={
+resource_spawn_rate=.01
+resource_growth_rate=0
+resource_variety=3
+resource_ratios={
 {1,"gold"},
 {1,"nitra"},
 {1,"red_sugar"},
 }
-local creature_spawn_rate=.06
-local creature_growth_rate=.02
-local creature_variety=9
-local creature_ratios={
+creature_spawn_rate=.06
+creature_growth_rate=.02
+creature_variety=9
+creature_ratios={
 {2,loot_bug},
 {.01,egg},
 {1,cave_angel},
@@ -612,11 +598,7 @@ local creature_ratios={
 {.5,menace},
 {1,oppressor},
 }
-local timer=0
-local creature_spawn_params
-local obstacle_spawn_params
-local resource_spawn_params
-local hazard=1
+function get_distance() return (timer/5) end
 local function set_difficulty(difficulty)
 if at_title_screen then
 if difficulty==1 then
@@ -682,11 +664,10 @@ end
 end
 local function damage_creatures()
 local creature_box,bullet_box,melee_box
-local creatures_list=creatures.creatures_list
 local creature,bullet,player_damage
-for i=1,creatures_list.size() do
-creature=creatures_list.get(i)
-creature_box=get_hitbox(creature)
+for i=1,creatures.size() do
+creature=creatures.get(i)
+creature_box=get_creature_hitbox(creature)
 for j=bullets.size(),1,-1 do
 bullet=bullets.get(j)
 bullet_box=get_bullet_hitbox(bullet)
@@ -728,9 +709,9 @@ spits.deletei(i)
 end
 end
 end
-for i=creatures.creatures_list.size(),1,-1 do
-creature=creatures.creatures_list.get(i)
-creature_box=creatures.get_hitbox(creature)
+for i=creatures.size(),1,-1 do
+creature=creatures.get(i)
+creature_box=get_creature_hitbox(creature)
 if are_colliding(player_box,creature_box) then
 if creature.creature_damage>0 then
 player.damage(creature.creature_damage)
@@ -738,7 +719,7 @@ end
 end
 end
 end
-local function update()
+function update_game()
 for player in all(players) do
 mine_resources(player)
 damage_player(player)
@@ -751,7 +732,7 @@ end
 end
 if playing then
 if rnd()<creature_spawn_rate then
-creatures.spawn_creature()
+spawn_creature()
 end
 if rnd()<obstacle_spawn_rate then
 spawn_obstacle()
@@ -772,16 +753,6 @@ playing=false
 at_death_screen=true
 end
 end
-end
-return {
-update=update,
-set_difficulty=set_difficulty,
-get_distance=function() return flr(timer/5) end,
-obstacle_spawn_params=function() return obstacle_spawn_params end,
-resource_spawn_params=function() return resource_spawn_params end,
-creature_spawn_params=function() return creature_spawn_params end,
-hazard=function() return hazard end,
-}
 end
 function draw_hud()
 local function draw_prog_bar(percentage,x,y)
@@ -836,10 +807,17 @@ players={player_1}
 if coop then
 add(players,player_2)
 end
-creatures=new_creatures()
-props=new_props()
+creatures=new_entity_container()
+for x=106,220,9 do
+creatures.add(bottom_grunt(x,222))
+end
+props=new_entity_container()
 initialize_title_screen()
-game_logic=new_game_logic()
+creature_spawn_params = 0
+obstacle_spawn_params = 0
+resource_spawn_params = 0
+timer=0
+hazard=1
 performance_monitor=new_performance_monitor()
 at_title_screen=true
 playing=false
@@ -890,9 +868,9 @@ update_resources()
 update_map()
 player_1.update()
 if coop then player_2.update() end
-creatures.update()
-props.update()
-game_logic.update()
+update_creatures()
+update_props()
+update_game()
 else
 calculate_death_screen()
 end
@@ -903,14 +881,14 @@ cls(1)
 camera(101,101)
 draw_base_map()
 draw_walls()
-props.draw_props()
+draw_props()
 draw_drilled_ground()
 draw_resources()
-creatures.draw()
+draw_creatures()
 draw_projectiles()
 if coop then player_2.draw() end
 player_1.draw()
-props.draw_particles()
+draw_particles()
 draw_super_wall()
 draw_hud()
 if at_death_screen then
@@ -939,7 +917,7 @@ function add_drilled_ground(sprite,x,y)
 drilled_ground.add({sprite=sprite,x=x,y=y})
 end
 function spawn_obstacle(sprite, x, y, size, color_profile, x_flip, y_flip)
-size = size or pick_spawn(game_logic.obstacle_spawn_params())
+size = size or pick_spawn(obstacle_spawn_params)
 if sprite==nil then
 if size==1 then
 sprite=sample_one(80,90)
@@ -1489,25 +1467,20 @@ draw=function() spr(174,x,y,1,1,x_flip,y_flip) end,
 draw_particles=draw_particles,
 }
 end
-function new_props()
-local props=new_entity_container()
+local function spawn_prop()
+local x=sample_one(101,220)
+local y=81
 local props_ratios={
-{1,nectar_rind},
 {1,orchey_shy},
 {.1,p0q},
 {1,void_basket},
 {1,callow_seeder},
+{1,nectar_rind},
 }
-local prop_spawn_params=generate_spawn_params(
-props_ratios,#props_ratios
-)
-local function spawn_prop()
-local x=sample_one(101,220)
-local y=81
-local prop=pick_spawn(prop_spawn_params)
+local prop=pick_spawn(generate_spawn_params(props_ratios,#props_ratios))
 props.add(prop(x,y))
 end
-local function update()
+function update_props()
 if playing then
 local prop
 for i=props.size(),1,-1 do
@@ -1531,12 +1504,6 @@ function draw_particles()
 for i=1,props.size() do
 props.get(i).draw_particles()
 end
-end
-return {
-update=update,
-draw_props=draw_props,
-draw_particles=draw_particles,
-}
 end
 function nectar_rind(x,y)
 local x=x
@@ -1662,7 +1629,7 @@ draw_particles=draw_particles,
 end
 function spawn_resource(x,y,type)
 local sprite,hitbox,start_sprite
-local res_type=type or pick_spawn(game_logic.resource_spawn_params())
+local res_type=type or pick_spawn(resource_spawn_params)
 if res_type=="red_sugar" then
 start_sprite=136
 hitbox={x={3,6},y={3,6}}
@@ -1733,12 +1700,12 @@ spawn_resource(x0-2,y0+20,"gold")
 spawn_resource(x0+14,y0+15,"red_sugar")
 x0=180
 y0=120
-creatures.spawn_creature(120,150,loot_bug)
-creatures.spawn_creature(130,150,cave_angel)
-creatures.spawn_creature(x0,y0,grunt)
-creatures.spawn_creature(x0+10,y0,slasher)
-creatures.spawn_creature(x0+18,y0,praetorian)
-creatures.spawn_creature(x0+34,y0,mactera)
+spawn_creature(120,150,loot_bug)
+spawn_creature(130,150,cave_angel)
+spawn_creature(x0,y0,grunt)
+spawn_creature(x0+10,y0,slasher)
+spawn_creature(x0+18,y0,praetorian)
+spawn_creature(x0+34,y0,mactera)
 x0=200
 y0=160
 spawn_obstacle(nil,x0,y0,2)

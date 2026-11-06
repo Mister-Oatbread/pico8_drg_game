@@ -9,13 +9,13 @@ function calculate_death_screen()
             points_total+=player.points()
         end
 
-        points_total+=game_logic.get_distance()
+        points_total+=get_distance()
         if no_loot_bugs_killed then points_total+=100 end
         if no_cave_angels_killed then points_total+=100 end
         if no_eggs_killed then points_total+=100 end
         if at_title_screen then points_total+=500 end
 
-        local highscore_index=game_logic.hazard()
+        local highscore_index=hazard
         if coop then highscore_index+=5 end
         highscore=dget(highscore_index)
         if points_total>highscore then
@@ -29,7 +29,7 @@ function draw_death_screen()
     print("awards:", 111,126,7)
     print("",113,126,7)
     print("-distance bonus")
-    print(" (+"..game_logic.get_distance()..")")
+    print(" (+"..get_distance()..")")
     if no_loot_bugs_killed then
         print("-no loot_bugs")
         print(" killed (+100)")
@@ -61,7 +61,7 @@ function draw_death_screen()
     print("score: "..points_total)
     print("highscore: "..highscore)
     local is_coop=coop and "coop" or ""
-    print("at hazard "..game_logic.hazard()..is_coop,158,105)
+    print("at hazard "..hazard..is_coop,158,105)
     if points_total>highscore then
         print("new highscore!!!")
     end

@@ -17,7 +17,7 @@ end
 
 function spawn_obstacle(sprite, x, y, size, color_profile, x_flip, y_flip)
     -- check of size has ben set, else pick one at random
-    size = size or pick_spawn(game_logic.obstacle_spawn_params())
+    size = size or pick_spawn(obstacle_spawn_params)
 
     if sprite==nil then
         if size==1 then

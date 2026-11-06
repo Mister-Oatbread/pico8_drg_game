@@ -46,11 +46,20 @@ function _init()
         add(players,player_2)
     end
 
-    creatures=new_creatures()
-    props=new_props()
+    creatures=new_entity_container()
+    for x=106,220,9 do
+        creatures.add(bottom_grunt(x,222))
+    end
+
+    props=new_entity_container()
 
     initialize_title_screen()
-    game_logic=new_game_logic()
+
+    creature_spawn_params = 0
+    obstacle_spawn_params = 0
+    resource_spawn_params = 0
+    timer=0
+    hazard=1
 
     performance_monitor=new_performance_monitor()
 
@@ -100,6 +109,7 @@ function _init()
         --
         "omega",
     }
+
     killed_loot_bugs = new_entity_container()
     no_loot_bugs_killed = true
     no_cave_angels_killed = true
@@ -135,9 +145,9 @@ function _update()
         player_1.update()
         if coop then player_2.update() end
 
-        creatures.update()
-        props.update()
-        game_logic.update()
+        update_creatures()
+        update_props()
+        update_game()
     else
         calculate_death_screen()
     end
@@ -150,14 +160,14 @@ function _draw()
     camera(101,101)
     draw_base_map()
     draw_walls()
-    props.draw_props()
+    draw_props()
     draw_drilled_ground()
     draw_resources()
-    creatures.draw()
+    draw_creatures()
     draw_projectiles()
     if coop then player_2.draw() end
     player_1.draw()
-    props.draw_particles()
+    draw_particles()
     -- if at_title_screen then title_screen.draw() end
     draw_super_wall()
     draw_hud()
