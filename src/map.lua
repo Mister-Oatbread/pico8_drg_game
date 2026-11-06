@@ -62,8 +62,8 @@ function update_map()
         end
         for i=squishy_stuff.size(),1,-1 do
             squishy_piece=squishy_stuff.get(i)
-            squishy_piece.update()
-            if squishy_piece.y()>230 then
+            squishy_piece.y+=1
+            if squishy_piece.y>230 then
                 squishy_stuff.deletei(i)
             end
         end
@@ -85,13 +85,15 @@ function update_map()
                 obstacles.deletei(i)
             end
         end
-        if rnd()<.04 then
-            local cluster_positions = get_cluster_positions({10,20},{110,120})
-            for i=1,cluster_positions.size() do
-                local cluster_pos = cluster_positions.get(i)
-                squishy_stuff.add(bloopy_fruit(cluster_pos[1], cluster_pos[2]))
-            end
-        end
+    if rnd()<.04 then
+        -- local cluster_positions = get_cluster_positions({10,20},{110,120})
+        -- for i=1,cluster_positions.size() do
+        --     local cluster_pos = cluster_positions.get(i)
+        --     squishy_stuff.add(squishy_thingy(cluster_pos[1], cluster_pos[2]))
+        -- end
+
+        spawn_squishy_thing(sample_one(100, 120), 90)
+    end
     end
 end
 

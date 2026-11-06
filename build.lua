@@ -881,6 +881,7 @@ cls(1)
 camera(101,101)
 draw_base_map()
 draw_walls()
+draw_squishy_stuff()
 draw_props()
 draw_drilled_ground()
 draw_resources()
@@ -956,8 +957,8 @@ end
 end
 for i=squishy_stuff.size(),1,-1 do
 squishy_piece=squishy_stuff.get(i)
-squishy_piece.update()
-if squishy_piece.y()>230 then
+squishy_piece.y+=1
+if squishy_piece.y>230 then
 squishy_stuff.deletei(i)
 end
 end
@@ -979,11 +980,7 @@ obstacles.deletei(i)
 end
 end
 if rnd()<.04 then
-local cluster_positions = get_cluster_positions({10,20},{110,120})
-for i=1,cluster_positions.size() do
-local cluster_pos = cluster_positions.get(i)
-squishy_stuff.add(bloopy_fruit(cluster_pos[1], cluster_pos[2]))
-end
+spawn_squishy_thing(sample_one(100, 120), 90)
 end
 end
 end
@@ -1426,19 +1423,44 @@ local y1=spit.hitbox.y[1]+spit.y()-1
 local y2=spit.hitbox.y[2]+spit.y()-1
 return {x={x1,x2}, y={y1,y2}}
 end
-function bloopy_fruit(x, y)
-local x=x
-local y=y
-local x_flip=coinflip()
-local y_flip=coinflip()
-local sprite=sample_one(178,181)
-return {
-x=function() return x end,
-y=function() return y end,
-update=function() y+=1 end,
-draw=function() spr(sprite,x,y,1,1,x_flip,y_flip) end,
-hitbox=function() return {x={3,6},y={3,6}} end,
+function spawn_squishy_thing(x,y)
+squishy_ratios={
+{1,"bloopy"},
+{1,"oripricot"},
+{1,"pulsa_stickpod"},
 }
+squishy_spawn_params=generate_spawn_params(squishy_ratios,#squishy_ratios)
+local choice = pick_spawn(squishy_spawn_params)
+local sprite
+if choice == "bloopy" then
+sprite=sample_one(176,179)
+elseif choice == "oripricot" then
+sprite=sample_one(160,163)
+elseif choice == "pulsa_stickpod" then
+sprite=sample_one(144,147)
+end
+squishy_stuff.add({
+x=x,
+y=y,
+x_flip=coinflip(),
+y_flip=coinflip(),
+sprite=sprite,
+})
+end
+function draw_squishy_stuff()
+local squisher
+for i=1,squishy_stuff.size() do
+squisher=squishy_stuff.get(i)
+spr(
+squisher.sprite,
+squisher.x,
+squisher.y,
+1,
+1,
+squisher.x_flip,
+squisher.y_flip
+)
+end
 end
 function callow_seeder(x, y)
 local x=x
