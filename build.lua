@@ -879,9 +879,9 @@ end
 function _draw()
 cls(1)
 camera(101,101)
+draw_squishy_stuff()
 draw_base_map()
 draw_walls()
-draw_squishy_stuff()
 draw_props()
 draw_drilled_ground()
 draw_resources()
@@ -990,8 +990,20 @@ if obstacles.get(i).y>=230 then
 obstacles.deletei(i)
 end
 end
-if rnd()<.04 then
-spawn_squishy_thing(sample_one(100, 220), 90)
+if rnd()<.01 then
+squishy_ratios={
+{1,"bloopy_fruit"},
+{1,"oripricot"},
+{1,"pulsa_stickpod"},
+}
+squishy_spawn_params=generate_spawn_params(squishy_ratios,#squishy_ratios)
+local choice = pick_spawn(squishy_spawn_params)
+local x_anchor=sample_one(100,200)
+local cluster_positions = get_cluster_positions({x_anchor, x_anchor+20},{20,30})
+for i=1,cluster_positions.size() do
+local cluster_pos = cluster_positions.get(i)
+squishy_stuff.add(spawn_squishy_thing(cluster_pos[1], cluster_pos[2],choice))
+end
 end
 end
 end
@@ -1053,8 +1065,7 @@ cpu_percentage+=stat(1)
 max_cpu_percentage=max(cpu_percentage, max_cpu_percentage)
 end
 local function print_summary()
-local info = flr(max_cpu_percentage*100)/100
-print("cpu spike: "..info, 107, 203)
+print("cpu spike: "..flr(max_cpu_percentage*100)/100, 107, 203)
 print("fps low:   "..min_fps)
 end
 local function print_current()
@@ -1725,16 +1736,9 @@ y_flip=resource.y_flip
 spr(sprite,x,y,1,1,x_flip,y_flip)
 end
 end
-function spawn_squishy_thing(x,y)
-squishy_ratios={
-{1,"bloopy"},
-{1,"oripricot"},
-{1,"pulsa_stickpod"},
-}
-squishy_spawn_params=generate_spawn_params(squishy_ratios,#squishy_ratios)
-local choice = pick_spawn(squishy_spawn_params)
+function spawn_squishy_thing(x,y,choice)
 local sprite
-if choice == "bloopy" then
+if choice == "bloopy_fruit" then
 sprite=sample_one(176,179)
 elseif choice == "oripricot" then
 sprite=sample_one(160,163)

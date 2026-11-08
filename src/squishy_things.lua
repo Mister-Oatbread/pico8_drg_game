@@ -17,18 +17,9 @@
 --     }
 -- end
 
-function spawn_squishy_thing(x,y)
-    squishy_ratios={
-        {1,"bloopy"},
-        {1,"oripricot"},
-        {1,"pulsa_stickpod"},
-    }
-    squishy_spawn_params=generate_spawn_params(squishy_ratios,#squishy_ratios)
-
-    local choice = pick_spawn(squishy_spawn_params)
+function spawn_squishy_thing(x,y,choice)
     local sprite
-
-    if choice == "bloopy" then
+    if choice == "bloopy_fruit" then
         sprite=sample_one(176,179)
     elseif choice == "oripricot" then
         sprite=sample_one(160,163)

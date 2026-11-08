@@ -104,14 +104,21 @@ function update_map()
             end
         end
 
-        if rnd()<.04 then
-            -- local cluster_positions = get_cluster_positions({10,20},{110,120})
-            -- for i=1,cluster_positions.size() do
-            --     local cluster_pos = cluster_positions.get(i)
-            --     squishy_stuff.add(squishy_thingy(cluster_pos[1], cluster_pos[2]))
-            -- end
+        if rnd()<.01 then
+            squishy_ratios={
+                {1,"bloopy_fruit"},
+                {1,"oripricot"},
+                {1,"pulsa_stickpod"},
+            }
+            squishy_spawn_params=generate_spawn_params(squishy_ratios,#squishy_ratios)
+            local choice = pick_spawn(squishy_spawn_params)
 
-            spawn_squishy_thing(sample_one(100, 220), 90)
+            local x_anchor=sample_one(100,200)
+            local cluster_positions = get_cluster_positions({x_anchor, x_anchor+20},{20,30})
+            for i=1,cluster_positions.size() do
+                local cluster_pos = cluster_positions.get(i)
+                squishy_stuff.add(spawn_squishy_thing(cluster_pos[1], cluster_pos[2],choice))
+            end
         end
     end
 end
