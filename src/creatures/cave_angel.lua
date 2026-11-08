@@ -31,7 +31,6 @@ function cave_angel(x,y)
         if health<=0 then
             alive=false
             no_cave_angels_killed=false
-            death_screen.report_killed_cave_angel()
         end
     end
 

@@ -44,7 +44,13 @@ end
 
 -- slides the floor one frame to the bottom, and realigns the floor if needed
 function update_map()
-    local wall,terrain_piece, squishy_piece
+    local wall,terrain_piece,squishy_piece,squishy_box
+    local player_boxes = {}
+
+    for player in all(players) do
+        add(player_boxes, player.get_hitbox())
+    end
+
     if playing then
         for i=1,walls.size() do
             wall=walls.get(i)
@@ -53,6 +59,7 @@ function update_map()
                 walls.replace(i,add_wall(wall.x,91))
             end
         end
+
         for i=terrain.size(),1,-1 do
             terrain_piece=terrain.get(i)
             terrain_piece.y+=1
@@ -60,13 +67,22 @@ function update_map()
                 terrain.deletei(i)
             end
         end
+
         for i=squishy_stuff.size(),1,-1 do
             squishy_piece=squishy_stuff.get(i)
             squishy_piece.y+=1
             if squishy_piece.y>230 then
                 squishy_stuff.deletei(i)
             end
+            squishy_box = get_squishy_hitbox(squishy_piece)
+            for player_box in all(player_boxes) do
+                if are_colliding(player_box, squishy_box) then
+                    sfx(56,3)
+                    squishy_stuff.deletei(i)
+                end
+            end
         end
+
         -- remove_bottom_entities(drilled_ground,y)
         for i=drilled_ground.size(),1,-1 do
             drilled_ground.get(i).y+=1
@@ -74,26 +90,29 @@ function update_map()
                 drilled_ground.deletei(i)
             end
         end
+
         terrain.add({
             x=sample_one(101,227),
             y=94,
             color=coinflip() and 6 or 2,
         })
+
         for i=obstacles.size(),1,-1 do
             obstacles.get(i).y+=1
             if obstacles.get(i).y>=230 then
                 obstacles.deletei(i)
             end
         end
-    if rnd()<.04 then
-        -- local cluster_positions = get_cluster_positions({10,20},{110,120})
-        -- for i=1,cluster_positions.size() do
-        --     local cluster_pos = cluster_positions.get(i)
-        --     squishy_stuff.add(squishy_thingy(cluster_pos[1], cluster_pos[2]))
-        -- end
 
-        spawn_squishy_thing(sample_one(100, 120), 90)
-    end
+        if rnd()<.04 then
+            -- local cluster_positions = get_cluster_positions({10,20},{110,120})
+            -- for i=1,cluster_positions.size() do
+            --     local cluster_pos = cluster_positions.get(i)
+            --     squishy_stuff.add(squishy_thingy(cluster_pos[1], cluster_pos[2]))
+            -- end
+
+            spawn_squishy_thing(sample_one(100, 220), 90)
+        end
     end
 end
 
@@ -110,10 +129,6 @@ function draw_base_map()
         terrain_piece=terrain.get(i)
         pset(terrain_piece.x,terrain_piece.y,terrain_piece.color)
     end
-
-    -- for i=1,squishy_stuff.size() do
-    --     squishy_stuff.get(i).draw()
-    -- end
 
     for i=1,obstacles.size() do
         obstacle=obstacles.get(i)

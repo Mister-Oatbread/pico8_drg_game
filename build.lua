@@ -54,7 +54,6 @@ health-=damage_received
 if health<=0 then
 alive=false
 no_cave_angels_killed=false
-death_screen.report_killed_cave_angel()
 end
 end
 local function draw()
@@ -509,6 +508,7 @@ if no_loot_bugs_killed then points_total+=100 end
 if no_cave_angels_killed then points_total+=100 end
 if no_eggs_killed then points_total+=100 end
 if at_title_screen then points_total+=500 end
+points_total=flr(points_total)
 local highscore_index=hazard
 if coop then highscore_index+=5 end
 highscore=dget(highscore_index)
@@ -939,7 +939,11 @@ color_profile=color_profile or sample_one(1,3),
 })
 end
 function update_map()
-local wall,terrain_piece, squishy_piece
+local wall,terrain_piece,squishy_piece,squishy_box
+local player_boxes = {}
+for player in all(players) do
+add(player_boxes, player.get_hitbox())
+end
 if playing then
 for i=1,walls.size() do
 wall=walls.get(i)
@@ -961,6 +965,13 @@ squishy_piece.y+=1
 if squishy_piece.y>230 then
 squishy_stuff.deletei(i)
 end
+squishy_box = get_squishy_hitbox(squishy_piece)
+for player_box in all(player_boxes) do
+if are_colliding(player_box, squishy_box) then
+sfx(56,3)
+squishy_stuff.deletei(i)
+end
+end
 end
 for i=drilled_ground.size(),1,-1 do
 drilled_ground.get(i).y+=1
@@ -980,7 +991,7 @@ obstacles.deletei(i)
 end
 end
 if rnd()<.04 then
-spawn_squishy_thing(sample_one(100, 120), 90)
+spawn_squishy_thing(sample_one(100, 220), 90)
 end
 end
 end
@@ -1712,6 +1723,51 @@ y=resource.y
 x_flip=resource.x_flip
 y_flip=resource.y_flip
 spr(sprite,x,y,1,1,x_flip,y_flip)
+end
+end
+function spawn_squishy_thing(x,y)
+squishy_ratios={
+{1,"bloopy"},
+{1,"oripricot"},
+{1,"pulsa_stickpod"},
+}
+squishy_spawn_params=generate_spawn_params(squishy_ratios,#squishy_ratios)
+local choice = pick_spawn(squishy_spawn_params)
+local sprite
+if choice == "bloopy" then
+sprite=sample_one(176,179)
+elseif choice == "oripricot" then
+sprite=sample_one(160,163)
+elseif choice == "pulsa_stickpod" then
+sprite=sample_one(144,147)
+end
+squishy_stuff.add({
+x=x,
+y=y,
+x_flip=coinflip(),
+y_flip=coinflip(),
+sprite=sprite,
+})
+end
+function get_squishy_hitbox(squisher)
+return {
+x={squisher.x+1, squisher.x+6},
+y={squisher.y+1, squisher.y+6},
+}
+end
+function draw_squishy_stuff()
+local squisher
+for i=1,squishy_stuff.size() do
+squisher=squishy_stuff.get(i)
+spr(
+squisher.sprite,
+squisher.x,
+squisher.y,
+1,
+1,
+squisher.x_flip,
+squisher.y_flip
+)
 end
 end
 function initialize_title_screen()

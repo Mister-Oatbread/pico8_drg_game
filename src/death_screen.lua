@@ -14,6 +14,7 @@ function calculate_death_screen()
         if no_cave_angels_killed then points_total+=100 end
         if no_eggs_killed then points_total+=100 end
         if at_title_screen then points_total+=500 end
+        points_total=flr(points_total)
 
         local highscore_index=hazard
         if coop then highscore_index+=5 end
